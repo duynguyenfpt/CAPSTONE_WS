@@ -9,6 +9,8 @@
 </template>
 
 <script>
+import { add } from '@/service/script'
+
 export default {
   data: () => ({
     a: 10,
@@ -17,12 +19,12 @@ export default {
   }),
   methods: {
     add () {
-      this.c = this.a + this.b
+      this.c = add(this.a, this.b)
     }
   }
 }
 </script>
 
-<style>
-
+<style scoped>
+@import '@/assets/style.css';
 </style>

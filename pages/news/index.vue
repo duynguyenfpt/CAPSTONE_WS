@@ -21,7 +21,7 @@
             placement="rightTop"
             ok-text="Yes"
             cancel-text="No"
-            @confirm="confirm(record)"
+            @confirm="confirmDelete(record)"
           >
             <template slot="title">
               <p>Do you Want to delete these items</p>
@@ -29,18 +29,12 @@
             <a-button type="link"><a-icon type="delete" />Delete</a-button>
           </a-popconfirm>
         </a-space>
+        <news-detail-modal :data_detail="record" ref="detailModal" />
       </template>
     </a-table>
-    <!-- <div v-if="dataDetail">
-      <div class="modal-detail">
-        <a-modal v-model="visibleDetail" title="Basic Modal" @ok="handleOk">
-          <p>ID: {{ dataDetail.id }}</p>
-          <p>Title: {{ dataDetail.title }}</p>
-          <p>Content: {{ dataDetail.content }}</p>
-        </a-modal>
-      </div>
-    </div> -->
-    <news-detail-modal :data_detail="dataDetail" ref="detailModal" />
+    <!-- Detail modal -->
+    <news-detail-modal ref="detailModal" />
+    <!-- Update create modal -> update next time -->
     <div class="edit">
       <a-modal
         v-model="visibleEdit"
@@ -129,11 +123,14 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import {
+  createNew,
+  deleteNew,
+  getNewDetail,
+  getNews,
+  updateNew
+} from '../../service/news'
 
-const queryData = (params) => {
-  return axios.get('https://e3074465f385.ngrok.io/new', { params })
-}
 const columns = [
   {
     title: 'ID',
@@ -167,7 +164,6 @@ export default {
       },
       loading: false,
       columns,
-      visibleDetail: false,
       visibleEdit: false,
       form: this.$form.createForm(this),
       labelCol: {
@@ -179,7 +175,8 @@ export default {
         sm: { span: 15 }
       },
       dataDetail: null,
-      isCreate: false
+      isCreate: false,
+      currentId: 0
     }
   },
   created () {
@@ -195,53 +192,44 @@ export default {
         page: pagination.current
       })
     },
-    fetch (params = {}) {
+    async fetch (params) {
       this.loading = true
-      queryData({
-        page: 1,
-        limit: this.pagination.defaultPageSize,
-        ...params
-      }).then(({ data }) => {
-        const pagination = { ...this.pagination }
-        pagination.total = data.totalItem
-        this.loading = false
-        this.data = data.listResult
-        this.pagination = pagination
-      })
+      let page = 1
+      let limit = this.pagination.defaultPageSize
+      if (params) {
+        page = params.page
+        limit = params.limit
+      }
+      const info = await getNews(page, limit)
+      const pagination = { ...this.pagination }
+      pagination.total = info.totalItem
+      this.loading = false
+      this.data = info.listResult
+      this.pagination = pagination
     },
     async onDetail (id) {
-      const info = await axios.get(`https://e3074465f385.ngrok.io/new/${id}`)
-      this.dataDetail = info.data
-      this.$refs.detailModal.show()
-      // this.visibleDetail = true
+      this.$refs.detailModal.show(id)
     },
-    handleOk () {
-      this.visibleDetail = false
-    },
-    confirm (id) {
-      axios
-        .delete('https://e3074465f385.ngrok.io/new', {
-          data: [id]
-        })
-        .then((data) => {
-          if (data) {
-            this.fetch()
-          }
-        })
+    async confirmDelete (id) {
+      await deleteNew([id])
+      this.$message.success('Delete successfully', 5)
+      this.fetch()
     },
     async onEditCreate (id) {
+      this.currentId = id
       if (id) {
-        const info = await axios.get(`https://e3074465f385.ngrok.io/new/${id}`)
-        this.dataDetail = info.data
-        this.form.getFieldDecorator('title', { initialValue: info.data.title })
+        const info = await getNewDetail(id)
+        console.log(info)
+        this.dataDetail = info
+        this.form.getFieldDecorator('title', { initialValue: info.title })
         this.form.getFieldDecorator('content', {
-          initialValue: info.data.content
+          initialValue: info.content
         })
         this.form.getFieldDecorator('shortDescription', {
-          initialValue: info.data.shortDescription
+          initialValue: info.shortDescription
         })
         this.form.getFieldDecorator('categoryCode', {
-          initialValue: info.data.categoryCode
+          initialValue: info.categoryCode
         })
       } else {
         this.isCreate = true
@@ -262,7 +250,7 @@ export default {
       const {
         form: { validateFields }
       } = this
-      validateFields((err, values) => {
+      validateFields(async (err, values) => {
         if (!err) {
           const data = {
             title: values.title,
@@ -272,27 +260,21 @@ export default {
             thumnail: ''
           }
           if (!this.isCreate) {
-            axios
-              .put(
-                `https://e3074465f385.ngrok.io/new/${this.dataDetail.id}`,
-                data
-              )
-              .then((data) => {
-                if (data) {
-                  this.visibleEdit = false
-                  this.fetch()
-                }
-              })
+            const resData = await updateNew(this.currentId, data)
+            if (resData) {
+              this.visibleEdit = false
+              this.pagination.current = 1
+              this.fetch()
+              this.$message.success('Data update successfully', 5)
+            }
           } else {
-            axios
-              .post('https://e3074465f385.ngrok.io/new', data)
-              .then((data) => {
-                if (data) {
-                  this.visibleEdit = false
-                  this.fetch()
-                  this.isCreate = false
-                }
-              })
+            const resData = await createNew(data)
+            if (resData) {
+              this.visibleEdit = false
+              this.pagination.current = 1
+              this.fetch()
+              this.$message.success('New created successfully', 5)
+            }
           }
         }
       })

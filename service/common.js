@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const service = axios.create({
-  baseURL: process.env.BASE_URL_APP_API_V1 || 'https://3714f05343c6.ngrok.io'
+  baseURL: process.env.BASE_URL_APP_API_V1 || 'https://e3074465f385.ngrok.io'
 })
 
 // Request interceptors

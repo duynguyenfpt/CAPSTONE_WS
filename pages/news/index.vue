@@ -131,7 +131,7 @@
 import axios from 'axios'
 
 const queryData = (params) => {
-  return axios.get('https://3bdbb7ffe147.ngrok.io/new', { params })
+  return axios.get('https://e3074465f385.ngrok.io/new', { params })
 }
 const columns = [
   {
@@ -209,7 +209,7 @@ export default {
       })
     },
     async onDetail (id) {
-      const info = await axios.get(`https://3bdbb7ffe147.ngrok.io/new/${id}`)
+      const info = await axios.get(`https://e3074465f385.ngrok.io/new/${id}`)
       this.dataDetail = info.data
       this.visibleDetail = true
     },
@@ -218,7 +218,7 @@ export default {
     },
     confirm (id) {
       axios
-        .delete('https://3bdbb7ffe147.ngrok.io/new', {
+        .delete('https://e3074465f385.ngrok.io/new', {
           data: [id]
         })
         .then((data) => {
@@ -229,7 +229,7 @@ export default {
     },
     async onEditCreate (id) {
       if (id) {
-        const info = await axios.get(`https://3bdbb7ffe147.ngrok.io/new/${id}`)
+        const info = await axios.get(`https://e3074465f385.ngrok.io/new/${id}`)
         this.dataDetail = info.data
         this.form.getFieldDecorator('title', { initialValue: info.data.title })
         this.form.getFieldDecorator('content', {
@@ -272,7 +272,7 @@ export default {
           if (!this.isCreate) {
             axios
               .put(
-                `https://3bdbb7ffe147.ngrok.io/new/${this.dataDetail.id}`,
+                `https://e3074465f385.ngrok.io/new/${this.dataDetail.id}`,
                 data
               )
               .then((data) => {
@@ -283,7 +283,7 @@ export default {
               })
           } else {
             axios
-              .post('https://3bdbb7ffe147.ngrok.io/new', data)
+              .post('https://e3074465f385.ngrok.io/new', data)
               .then((data) => {
                 if (data) {
                   this.visibleEdit = false

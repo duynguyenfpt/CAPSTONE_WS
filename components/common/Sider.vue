@@ -1,8 +1,10 @@
 <template>
   <a-menu theme="dark" mode="inline" :default-selected-keys="['1']">
     <a-menu-item key="1">
-      <a-icon type="user" />
-      <span>nav 1</span>
+      <nuxt-link :to="`/news`">
+        <a-icon type="user" />
+        <span>News</span>
+      </nuxt-link>
     </a-menu-item>
     <a-menu-item key="2">
       <a-icon type="video-camera" />

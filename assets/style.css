@@ -1,4 +1,3 @@
-div {
-  font-size: 10px;
-  color: red;
+.vh-max {
+  height: 100vh;
 }

@@ -31,7 +31,7 @@
         </a-space>
       </template>
     </a-table>
-    <div v-if="dataDetail">
+    <!-- <div v-if="dataDetail">
       <div class="modal-detail">
         <a-modal v-model="visibleDetail" title="Basic Modal" @ok="handleOk">
           <p>ID: {{ dataDetail.id }}</p>
@@ -39,7 +39,8 @@
           <p>Content: {{ dataDetail.content }}</p>
         </a-modal>
       </div>
-    </div>
+    </div> -->
+    <news-detail-modal :data_detail="dataDetail" ref="detailModal" />
     <div class="edit">
       <a-modal
         v-model="visibleEdit"
@@ -181,7 +182,7 @@ export default {
       isCreate: false
     }
   },
-  mounted () {
+  created () {
     this.fetch()
   },
   methods: {
@@ -211,7 +212,8 @@ export default {
     async onDetail (id) {
       const info = await axios.get(`https://e3074465f385.ngrok.io/new/${id}`)
       this.dataDetail = info.data
-      this.visibleDetail = true
+      this.$refs.detailModal.show()
+      // this.visibleDetail = true
     },
     handleOk () {
       this.visibleDetail = false

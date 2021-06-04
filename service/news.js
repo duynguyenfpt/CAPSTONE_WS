@@ -1,10 +1,6 @@
 import { service } from './common'
 
-export const getNews = (page, limit) =>
-  service({
-    url: `/new?page=${page}&limit=${limit}`,
-    method: 'get'
-  })
+export const getNews = (page, limit) => service.get('new', { params: { page: page, limit: limit } })
 
 export const getNewDetail = (id) =>
   service({

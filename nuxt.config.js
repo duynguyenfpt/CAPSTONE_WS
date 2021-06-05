@@ -22,7 +22,8 @@ export default {
   css: [
     'ant-design-vue/dist/antd.css',
     'bootstrap/dist/css/bootstrap.css',
-    '@/assets/style.css'
+    '@/assets/style.css',
+    '@/assets/font-awesome/css/all.css'
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
@@ -43,7 +44,8 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    'bootstrap-vue/nuxt'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios

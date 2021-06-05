@@ -43,83 +43,10 @@
         ok-text="Save"
         @ok="handleSubmit"
       >
-        <a-form ref="form" :form="form" :rules="rules">
-          <a-form-item
-            :label-col="labelCol"
-            :wrapper-col="wrapperCol"
-            label="Title"
-          >
-            <a-input
-              v-decorator="[
-                'title',
-                {
-                  rules: [
-                    { required: true, message: 'Please input your title !' },
-                  ],
-                },
-              ]"
-            />
-          </a-form-item>
-          <a-form-item
-            :label-col="labelCol"
-            :wrapper-col="wrapperCol"
-            label="Content"
-          >
-            <a-input
-              v-decorator="[
-                'content',
-                {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please input your content !',
-                    },
-                  ],
-                },
-              ]"
-            />
-          </a-form-item>
-          <a-form-item
-            :label-col="labelCol"
-            :wrapper-col="wrapperCol"
-            label="Description"
-          >
-            <a-input
-              v-decorator="[
-                'shortDescription',
-                {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please input your description !',
-                    },
-                  ],
-                },
-              ]"
-            />
-          </a-form-item>
-          <a-form-item
-            :label-col="labelCol"
-            :wrapper-col="wrapperCol"
-            label="Category"
-          >
-            <a-input
-              v-decorator="[
-                'categoryCode',
-                {
-                  rules: [
-                    {
-                      required: false,
-                      message: 'Please input your category !',
-                    },
-                  ],
-                },
-              ]"
-            />
-          </a-form-item>
-        </a-form>
+        <Config/>
       </a-modal>
     </div>
+
   </div>
 </template>
 <script>
@@ -130,6 +57,8 @@ import {
   getNews,
   updateNew
 } from '../../service/news'
+
+import Config from '@/components/db/config.vue'
 
 const columns = [
   {
@@ -155,6 +84,7 @@ const columns = [
 ]
 
 export default {
+  components: { Config },
   data () {
     return {
       data: [],

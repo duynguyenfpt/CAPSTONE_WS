@@ -2,7 +2,18 @@
   <div>
     <section name="action">
       <b-row>
-        <b-col>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input size="sm" placeholder="Search" />
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+
+        <b-col class="text-right">
           <b-btn v-b-modal.new-db size="sm" variant="primary">
             <i class="fa fa-database pr-1" />
             Create Database Connection
@@ -17,15 +28,19 @@
         striped
         :items="dbs"
         :fields="fields"
-        :per-page="pagination.limit"
-        :current-page="pagination.page"
+        :busy="loading"
       >
         <template #cell(no)="item">
           {{ item.index + 1 }}
         </template>
 
-        <template #cell(action)>
-          <b-btn v-b-tooltip="`Detail database config`" :to="{ path: 'db/view'}" size="sm" variant="success">
+        <template #cell(action)="item">
+          <b-btn
+            v-b-tooltip="`Detail database config`"
+            :to="{ name: 'db-id', params: { id: item.item.id } }"
+            size="sm"
+            variant="success"
+          >
             <i class="fa fa-eye" />
           </b-btn>
           <b-btn v-b-tooltip="`Edit database config`" size="sm" variant="info">
@@ -39,18 +54,24 @@
             <i class="fa fa-trash" />
           </b-btn>
         </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+        </template>
       </b-table>
       <b-pagination
-
-      size="sm"
+        size="sm"
         v-model="pagination.page"
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
+        @input="getList"
       />
     </section>
     <section name="popup">
-      <b-modal id="new-db" title="Create Database Connection">
+      <b-modal id="new-db" title="Create Database Connection" hide-footer>
         <Config />
       </b-modal>
     </section>
@@ -66,31 +87,28 @@
 import Config from '@/components/db/config.vue'
 import DatabaseDetail from '@/components/db/dbDetail.vue'
 
-import {} from '@/service/db'
+import { getListDatabase } from '@/service/db'
+
+import moment from 'moment'
 
 const TableFields = [
   {
     key: 'no'
   },
   {
-    key: 'host',
-    label: 'Databse url'
+    key: 'database_name'
   },
   {
     key: 'port'
   },
   {
-    key: 'db',
-    sortable: true
+    key: 'username'
   },
   {
-    key: 'user'
+    key: 'database_type'
   },
   {
-    key: 'password'
-  },
-  {
-    key: 'dataType'
+    key: 'created_date'
   },
   {
     key: 'action'
@@ -104,57 +122,39 @@ export default {
     fields: TableFields,
     pagination: {
       page: 1,
-      limit: 3,
-      total: 4
+      limit: 4,
+      total: 0
     },
+    loading: false,
+    dbs: []
+  }),
 
-    //   methods: {
-    //   async getListDBInfor () {
-    //     try {
-    //       const res = await this.getListDBInfor()
+  created () {
+    this.getList()
+  },
 
-    //       this.list = res.data.map(e => ({ host: e.code, port: e.port }))
-    //     } catch (e) {
-    //       console.error(e)
-    //     }
-    //   }
-    // }
+  methods: {
+    async getList () {
+      this.loading = true
+      try {
+        const res = await getListDatabase(
+          this.pagination.page,
+          this.pagination.limit
+        )
+        this.dbs = res.data
 
-    dbs: [
-      {
-        host: 'localhost',
-        port: 3306,
-        db: 'db1',
-        user: 'root',
-        password: '123',
-        dataType: 'MySQL'
-      },
-      {
-        host: 'localhost',
-        port: 1663,
-        db: 'db2',
-        user: 'root',
-        password: '123',
-        dataType: 'MongoDB'
-      },
-      {
-        host: 'localhost',
-        port: 3306,
-        db: 'db3',
-        user: 'root',
-        password: '123',
-        dataType: 'MySQL'
-      },
-      {
-        host: 'localhost',
-        port: 1663,
-        db: 'db4',
-        user: 'root',
-        password: '123',
-        dataType: 'MongoDB'
+        this.dbs.forEach((e) => {
+          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
+        })
+
+        this.pagination.total = res.meta.total_item
+      } catch (e) {
+        this.$message.error(e)
+      } finally {
+        this.loading = false
       }
-    ]
-  })
+    }
+  }
 }
 </script>
 

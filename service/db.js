@@ -9,3 +9,8 @@ export const getAllDbType =
     })
 
 export const getDatabaseDetail = (id) => http.get(`api/database_infors/${id}`)
+
+export const getListDatabase =
+  (page, limit) => http.get('api/database_infors', { params: { page, limit } })
+
+export const createDatabase = (db) => http.post('api/database_infors', db)

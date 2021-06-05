@@ -1,12 +1,12 @@
 import axios from 'axios'
 
-export const service = axios.create({
+export const http = axios.create({
   baseURL: process.env.BASE_URL_APP_API_V1
 })
 console.log(process.env)
 
 // Request interceptors
-service.interceptors.request.use(
+http.interceptors.request.use(
   (config) => {
     return config
   },
@@ -16,7 +16,7 @@ service.interceptors.request.use(
 )
 
 // Response interceptors
-service.interceptors.response.use(
+http.interceptors.response.use(
   (response) => {
     return response.data
   },

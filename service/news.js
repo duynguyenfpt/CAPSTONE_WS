@@ -1,29 +1,29 @@
-import { service } from './common'
+import { http } from './common'
 
-export const getNews = (page, limit) => service.get('new', { params: { page: page, limit: limit } })
+export const getNews = (page, limit) => http.get('new', { params: { page: page, limit: limit } })
 
 export const getNewDetail = (id) =>
-  service({
+  http({
     url: `/new/${id}`,
     method: 'get'
   })
 
 export const createNew = (data) =>
-  service({
+  http({
     url: '/new',
     data: data,
     method: 'post'
   })
 
 export const updateNew = (id, data) =>
-  service({
+  http({
     url: `/new/${id}`,
     data: data,
     method: 'put'
   })
 
 export const deleteNew = (data) =>
-  service({
+  http({
     url: '/new',
     data: data,
     method: 'delete'

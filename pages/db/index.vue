@@ -50,6 +50,7 @@
             v-b-tooltip="`Delete database config`"
             size="sm"
             variant="danger"
+            @click='deleteDatabaseDetail(item.item.id)'
           >
             <i class="fa fa-trash" />
           </b-btn>
@@ -87,13 +88,14 @@
 import Config from '@/components/db/config.vue'
 import DatabaseDetail from '@/components/db/dbDetail.vue'
 
-import { getListDatabase } from '@/service/db'
+import { deleteDatabaseDetail, getListDatabase } from '@/service/db'
 
 import moment from 'moment'
 
 const TableFields = [
   {
-    key: 'no'
+    key: 'no',
+    sortable: true
   },
   {
     key: 'database_name'
@@ -117,7 +119,9 @@ const TableFields = [
 
 export default {
   components: { Config, DatabaseDetail },
-
+  props: {
+    id: {}
+  },
   data: () => ({
     fields: TableFields,
     pagination: {
@@ -152,6 +156,19 @@ export default {
         this.$message.error(e)
       } finally {
         this.loading = false
+      }
+    },
+    async deleteDatabaseDetail (id) {
+      try {
+        const res = await deleteDatabaseDetail(id)
+        if (res.id) {
+          this.$message.error('Update unsuccessfully!')
+        } else {
+          this.$message.success('Success!')
+        }
+        this.getList()
+      } catch (e) {
+        this.$message.error(e)
       }
     }
   }

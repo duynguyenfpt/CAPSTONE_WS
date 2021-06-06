@@ -9,7 +9,7 @@ export const getAllDbType =
     })
 
 export const getDatabaseDetail = (id) => http.get(`api/database_infors/${id}`)
-
+export const deleteDatabaseDetail = (id) => http.delete(`api/database_infors/${id}`)
 export const getListDatabase =
   (page, limit) => http.get('api/database_infors', { params: { page, limit } })
 

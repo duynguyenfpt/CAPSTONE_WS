@@ -14,7 +14,7 @@
         </b-col>
 
         <b-col class="text-right">
-          <b-btn v-b-modal.new-db size="sm" variant="primary">
+          <b-btn size="sm" variant="primary">
             <i class="fa fa-database pr-1" />
             Create Database Connection
           </b-btn>
@@ -43,14 +43,19 @@
           >
             <i class="fa fa-eye" />
           </b-btn>
-          <b-btn v-b-tooltip="`Edit database config`" size="sm" variant="info">
+          <b-btn
+            @click="editDb(item.item.id)"
+            v-b-tooltip="`Edit database config`"
+            size="sm"
+            variant="info"
+          >
             <i class="fa fa-pen" />
           </b-btn>
           <b-btn
             v-b-tooltip="`Delete database config`"
             size="sm"
             variant="danger"
-            @click='deleteDatabaseDetail(item.item.id)'
+            @click="deleteDatabaseDetail(item.item.id)"
           >
             <i class="fa fa-trash" />
           </b-btn>
@@ -75,6 +80,9 @@
       <b-modal id="new-db" title="Create Database Connection" hide-footer>
         <Config />
       </b-modal>
+    </section>
+    <section name="popup">
+      <db-edit ref="demo" @onUpdated="refreshData" />
     </section>
     <section name="detailDb">
       <b-modal id="detailDb">
@@ -169,6 +177,14 @@ export default {
         this.getList()
       } catch (e) {
         this.$message.error(e)
+      }
+    },
+    editDb (id) {
+      this.$refs.demo.show(id)
+    },
+    refreshData (data) {
+      if (data) {
+        this.getList()
       }
     }
   }

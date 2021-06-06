@@ -14,3 +14,5 @@ export const getListDatabase =
   (page, limit) => http.get('api/database_infors', { params: { page, limit } })
 
 export const createDatabase = (db) => http.post('api/database_infors', db)
+
+export const updateDatabase = (id, data) => http.put(`api/database_infors/${id}`, data)

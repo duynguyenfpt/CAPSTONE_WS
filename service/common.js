@@ -3,7 +3,6 @@ import axios from 'axios'
 export const http = axios.create({
   baseURL: process.env.BASE_URL_APP_API_V1
 })
-console.log(process.env)
 
 // Request interceptors
 http.interceptors.request.use(

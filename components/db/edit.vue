@@ -1,0 +1,112 @@
+<template>
+  <b-modal v-model="isVisible" title="Edit database connection" hide-footer>
+    <div v-if="isLoading" class="text-center">
+      <b-spinner variant="primary" label="Text Centered"></b-spinner>
+    </div>
+    <div v-else>
+      <b-row>
+        <b-col>
+          <label class="form-label">Host</label>
+          <b-form-select
+            v-model="selected"
+            :options="options"
+            size="sm"
+          ></b-form-select>
+        </b-col>
+        <b-col>
+          <label class="form-label">Port</label>
+          <b-input size="sm" v-model="config.port" />
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+          <label class="form-label">Database</label>
+          <b-input size="sm" v-model="config.database_name" />
+          <label class="form-label">User</label>
+          <b-input size="sm" v-model="config.username" />
+          <label class="form-label">Password</label>
+          <b-input size="sm" v-model="config.password" type="password" />
+          <label class="form-label">Database Type</label>
+          <b-form-select
+            v-model="config.database_type"
+            :options="dbTypes"
+            size="sm"
+          ></b-form-select>
+        </b-col>
+      </b-row>
+      <b-row class="pt-3">
+        <b-col>
+          <b-button size="sm" variant="outline-primary"
+            >Check connection</b-button
+          >
+        </b-col>
+        <b-col class="text-right">
+          <b-button size="sm" variant="primary" @click="onUpdateDB">
+            <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
+          <b-button size="sm" variant="light" @click="onClose">
+            Cancel
+          </b-button>
+        </b-col>
+      </b-row>
+    </div>
+  </b-modal>
+</template>
+
+<script>
+import { getDatabaseDetail, updateDatabase } from '@/service/db'
+export default {
+  data: () => ({
+    selected: 'localhost',
+    options: [
+      { value: 'localhost', text: 'localhost' },
+      { value: '10.12.16.19', text: '10.12.16.19' },
+      { value: '10.12.16.20', text: '10.12.16.20' }
+    ],
+    databaseTypeSelect: 'mysql',
+    dbTypes: [
+      { value: 'mysql', text: 'My Sql' },
+      { value: 'mongoDB', text: 'Mongo DB' },
+      { value: 'PostgreSQL', text: 'PostgreSQL' },
+      { value: 'SQL-Sever', text: 'SQL-Sever' }
+    ],
+    config: {
+      port: 3306,
+      database_name: 'example',
+      username: 'root',
+      password: 'root',
+      database_type: null
+    },
+    isVisible: false,
+    idItem: 0,
+    isLoading: false,
+    isLoadingUpdate: false
+  }),
+
+  methods: {
+    async show (id) {
+      this.idItem = id
+      this.isVisible = true
+      this.isLoading = true
+      const data = await getDatabaseDetail(id)
+      this.config.port = data.port
+      this.config.database_name = data.database_name
+      this.config.username = data.username
+      this.config.password = data.password
+      this.config.database_type = data.database_type
+      this.isLoading = false
+    },
+    onClose () {
+      this.isVisible = false
+    },
+    async onUpdateDB () {
+      this.isLoadingUpdate = true
+      const data = await updateDatabase(this.idItem, this.config)
+      this.isLoadingUpdate = false
+      this.isVisible = false
+      this.$emit('onUpdated', data)
+    }
+  }
+}
+</script>
+
+<style></style>

@@ -14,7 +14,7 @@
         </b-col>
 
         <b-col class="text-right">
-          <b-btn size="sm" variant="primary">
+          <b-btn v-b-modal.new-db size="sm" variant="primary">
             <i class="fa fa-database pr-1" />
             Create Database Connection
           </b-btn>

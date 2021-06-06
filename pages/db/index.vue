@@ -31,7 +31,7 @@
         :busy="loading"
       >
         <template #cell(no)="item">
-          {{ item.index + 1 }}
+          {{ countRecord(item.index)}}
         </template>
 
         <template #cell(action)="item">
@@ -186,6 +186,9 @@ export default {
       if (data) {
         this.getList()
       }
+    },
+    countRecord (index) {
+      return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }
 }

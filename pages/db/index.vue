@@ -162,9 +162,9 @@ export default {
       try {
         const res = await deleteDatabaseDetail(id)
         if (res.id) {
-          this.$message.error('Dont delete success')
+          this.$message.error('Update unsuccessfully!')
         } else {
-          this.$message.success('Success')
+          this.$message.success('Success!')
         }
         this.getList()
       } catch (e) {

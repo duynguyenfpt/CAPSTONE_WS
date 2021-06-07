@@ -3,6 +3,7 @@
     <h4>Database detail</h4>
     <b-table :fields="dbFields" :items="[detail]"></b-table>
     <h4>Tables</h4>
+    <b-button v-b-modal.new-db size="sm">Create</b-button>
     <b-table :fields="dbTable" :items="detail.tables">
     <template #cell(action)="item">
           <b-btn
@@ -12,14 +13,6 @@
             variant="success"
           >
             <i class="fa fa-eye" />
-          </b-btn>
-          <b-btn
-            @click="editDb(item.item.id)"
-            v-b-tooltip="`Edit table config`"
-            size="sm"
-            variant="info"
-          >
-            <i class="fa fa-pen" />
           </b-btn>
           <b-btn
             v-b-tooltip="`Delete table config`"

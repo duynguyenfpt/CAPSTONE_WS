@@ -58,7 +58,7 @@ import {
   updateNew
 } from '../../service/news'
 
-import Config from '@/components/db/config.vue'
+import Config from '~/components/db/add.vue'
 
 const columns = [
   {

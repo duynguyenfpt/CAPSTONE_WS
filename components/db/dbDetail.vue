@@ -143,8 +143,6 @@ export default {
       detail: null
     }
   },
-  // code mẫu ở màn DB info
-  // Thay sang api table
   methods: {
     async getDetail () {
       try {

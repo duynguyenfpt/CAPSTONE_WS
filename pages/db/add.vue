@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Config from '@/components/db/config.vue'
+import Config from '~/components/db/add.vue'
 
 export default {
   components: { Config }

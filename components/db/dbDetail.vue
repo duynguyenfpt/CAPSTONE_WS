@@ -3,7 +3,27 @@
     <h4>Database detail</h4>
     <b-table :fields="dbFields" :items="[detail]"></b-table>
     <h4>Tables</h4>
-    <b-table :fields="dbTable" :items="detail.tables" />
+    <b-button v-b-modal.new-db size="sm">Create</b-button>
+    <b-table :fields="dbTable" :items="detail.tables">
+    <template #cell(action)="item">
+          <b-btn
+            v-b-tooltip="`Detail table config`"
+            :to="{ name: 'table-id', params: { id: item.item.id } }"
+            size="sm"
+            variant="success"
+          >
+            <i class="fa fa-eye" />
+          </b-btn>
+          <b-btn
+            v-b-tooltip="`Delete table config`"
+            size="sm"
+            variant="danger"
+            @click="deleteDatabaseDetail(item.item.id)"
+          >
+            <i class="fa fa-trash" />
+          </b-btn>
+        </template>
+</b-table>
     <b-pagination
       :per-page="pagination.limit"
       v-model="pagination.page"
@@ -102,7 +122,8 @@ export default {
       detail: null
     }
   },
-
+  // code mẫu ở màn DB info
+  // Thay sang api table
   methods: {
     async getDetail () {
       try {

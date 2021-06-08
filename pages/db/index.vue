@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import Config from '@/components/db/config.vue'
+import Config from '~/components/db/add.vue'
 import DatabaseDetail from '@/components/db/dbDetail.vue'
 
 import { deleteDatabaseDetail, getListDatabase } from '@/service/db'

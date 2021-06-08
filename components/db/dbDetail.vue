@@ -160,7 +160,9 @@ export default {
         this.detail.tables.forEach((e) => {
           e.modified_date = moment(e.modified_date).format('YYYY-MM-DD')
         })
-      } catch (e) {}
+      } catch (e) {
+        this.$message.error(e.message)
+      }
     },
     async deleteTableDetail (id) {
       const result = await deleteTableDetail(id)

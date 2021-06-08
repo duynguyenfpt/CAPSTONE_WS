@@ -36,7 +36,6 @@
       </b-col>
       <b-col class="text-right">
           <b-button size="sm" variant="primary" @click='createDatabaseInfo'>Create</b-button>
-          <b-button size="sm" variant="light">Cancel</b-button>
       </b-col>
     </b-row>
 

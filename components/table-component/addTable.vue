@@ -52,6 +52,11 @@ export default {
           table_name: this.table.table_name,
           database_infor_id: this.database.id
         }
+
+        /// fake data loi
+        if (body.table_name === 'fail_us') { throw new Error('Trung ten table') }
+
+        ///
         const res = await addTable(body)
         const tableID = res.id
         if (tableID) {

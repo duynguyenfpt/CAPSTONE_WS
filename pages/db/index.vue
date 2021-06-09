@@ -18,6 +18,9 @@
             <i class="fa fa-database pr-1" />
             Create Database Connection
           </b-btn>
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload</b-btn>
         </b-col>
       </b-row>
     </section>
@@ -55,7 +58,7 @@
             v-b-tooltip="`Delete database config`"
             size="sm"
             variant="danger"
-            @click="deleteDatabaseDetail(item.item.id)"
+            @click="deleteDb(item.item.id)"
           >
             <i class="fa fa-trash" />
           </b-btn>
@@ -82,12 +85,15 @@
       </b-modal>
     </section>
     <section name="popup">
-      <db-edit ref="demo" @onUpdated="refreshData" />
+      <db-edit ref="edit" @onUpdated="refreshData" />
     </section>
     <section name="detailDb">
       <b-modal id="detailDb">
         <DatabaseDetail />
       </b-modal>
+    </section>
+    <section name="popup">
+      <db-delete ref="delete"/>
     </section>
   </div>
 </template>
@@ -95,9 +101,7 @@
 <script>
 import Config from '~/components/db/add.vue'
 import DatabaseDetail from '@/components/db/dbDetail.vue'
-
-import { deleteDatabaseDetail, getListDatabase } from '@/service/db'
-
+import { getListDatabase } from '@/service/db'
 import moment from 'moment'
 
 const TableFields = [
@@ -166,21 +170,11 @@ export default {
         this.loading = false
       }
     },
-    async deleteDatabaseDetail (id) {
-      try {
-        const res = await deleteDatabaseDetail(id)
-        if (res.id) {
-          this.$message.error('Update unsuccessfully!')
-        } else {
-          this.$message.success('Success!')
-        }
-        this.getList()
-      } catch (e) {
-        this.$message.error(e)
-      }
-    },
     editDb (id) {
-      this.$refs.demo.show(id)
+      this.$refs.edit.show(id)
+    },
+    deleteDb (id) {
+      this.$refs.delete.show(id)
     },
     refreshData (data) {
       if (data) {
@@ -189,6 +183,9 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    onReload () {
+      this.getList()
     }
   }
 }

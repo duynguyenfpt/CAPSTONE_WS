@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { addTable } from '@/service/table.service'
+import { addTable } from '~/service/table'
 
 export default {
   data: () => ({

@@ -93,14 +93,14 @@
       </b-modal>
     </section>
     <section name="popup">
-      <db-delete ref="delete"/>
+      <db-delete ref="delete" @onDeleted="onReload"/>
     </section>
   </div>
 </template>
 
 <script>
-import Config from '~/components/db/add.vue'
-import DatabaseDetail from '@/components/db/dbDetail.vue'
+import Config from '~/components/db-component/addDB.vue'
+import DatabaseDetail from '~/components/db-component/detailDB.vue'
 import { getListDatabase } from '@/service/db'
 import moment from 'moment'
 

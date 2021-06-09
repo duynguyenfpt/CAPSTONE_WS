@@ -19,6 +19,7 @@
 
 <script>
 import { deleteDatabaseDetail } from '@/service/db'
+
 export default {
   data: () => ({
     isVisible: false,
@@ -37,16 +38,16 @@ export default {
       try {
         this.isLoading = true
         const res = await deleteDatabaseDetail(this.idItem)
+        this.isLoading = false
+        this.isVisible = false
         if (res.id) {
           this.$message.error('Update unsuccessfully!')
         } else {
           this.$message.success('Success!')
+          this.$emit('onDeleted')
         }
-        this.getList()
       } catch (e) {
         this.$message.error(e)
-      } finally {
-        this.isLoading = false
       }
     }
   }

@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import DatabaseDetail from '@/components/db/dbDetail'
+import DatabaseDetail from '@/components/db/detail'
 export default {
   components: { DatabaseDetail },
   data: () => ({

@@ -15,9 +15,11 @@
     <b-row class="pt-2">
       <b-col cols="4">
         <label class="text-center">Table Name</label>
+
       </b-col>
       <b-col>
         <b-form-input size="sm" v-model="table.table_name"></b-form-input>
+         <div>{{message}}</div>
       </b-col>
     </b-row>
     <b-row class="text-center pt-3">
@@ -41,7 +43,8 @@ export default {
     loading: false,
     table: {
       table_name: null
-    }
+    },
+    message: null
   }),
 
   methods: {
@@ -52,21 +55,22 @@ export default {
           table_name: this.table.table_name,
           database_infor_id: this.database.id
         }
-
         /// fake data loi
-        if (body.table_name === 'fail_us') { throw new Error('Trung ten table') }
-
-        ///
-        const res = await addTable(body)
-        const tableID = res.id
-        if (tableID) {
-          this.$message.success('Success!')
+        if (body.table_name === 'Huong test' || body.table_name === 'table name') {
+          this.message = 'Table is existed'
         } else {
-          this.$message.error('Add table unsuccessfully')
+          ///
+          const res = await addTable(body)
+          const tableID = res.id
+          if (tableID) {
+            this.$message.success('Success!')
+          } else {
+            this.$message.error('Add table unsuccessfully')
+          }
+          this.$router.go()
         }
-        this.$router.go()
       } catch (e) {
-        this.$message.error(e)
+        this.$message.error(e.message)
       } finally {
         this.loading = false
       }

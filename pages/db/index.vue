@@ -88,20 +88,20 @@
     <section name="popup">
       <db-edit ref="edit" @onUpdated="refreshData" />
     </section>
-    <section name="detailDb">
-      <b-modal id="detailDb">
+    <section name="detail">
+      <b-modal id="detail">
         <DatabaseDetail />
       </b-modal>
     </section>
     <section name="popup">
-      <db-delete ref="delete" />
+      <db-delete ref="delete" @onDeleted="onReload"/>
     </section>
   </div>
 </template>
 
 <script>
 import Config from '~/components/db/add.vue'
-import DatabaseDetail from '@/components/db/dbDetail.vue'
+import DatabaseDetail from '~/components/db/detail.vue'
 import { getListDatabase } from '@/service/db'
 import moment from 'moment'
 import { searchDB } from '@/service/shemaChangeHistory'

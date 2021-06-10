@@ -37,16 +37,16 @@ export default {
       try {
         this.isLoading = true
         const res = await deleteDatabaseDetail(this.idItem)
+        this.isLoading = false
+        this.isVisible = false
+        this.$emit('onDeleted')
         if (res.id) {
-          this.$message.error('Update unsuccessfully!')
+          this.$message.error('Unsuccessfully!')
         } else {
           this.$message.success('Success!')
         }
-        this.getList()
       } catch (e) {
         this.$message.error(e)
-      } finally {
-        this.isLoading = false
       }
     }
   }

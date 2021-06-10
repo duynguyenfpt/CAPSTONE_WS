@@ -4,9 +4,9 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" />
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchDB(textSearch)"/>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary">
+              <b-btn size="sm" variant="primary" @click="searchDB(textSearch)">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -20,7 +20,8 @@
           </b-btn>
           <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
             <i class="fa fa-sync pr-1" />
-            Reload</b-btn>
+            Reload</b-btn
+          >
         </b-col>
       </b-row>
     </section>
@@ -34,7 +35,7 @@
         :busy="loading"
       >
         <template #cell(no)="item">
-          {{ countRecord(item.index)}}
+          {{ countRecord(item.index) }}
         </template>
 
         <template #cell(action)="item">
@@ -103,6 +104,7 @@ import Config from '~/components/db/add.vue'
 import DatabaseDetail from '~/components/db/detail.vue'
 import { getListDatabase } from '@/service/db'
 import moment from 'moment'
+import { searchDB } from '@/service/shemaChangeHistory'
 
 const TableFields = [
   {
@@ -136,6 +138,7 @@ export default {
   },
   data: () => ({
     fields: TableFields,
+    textSearch: null,
     pagination: {
       page: 1,
       limit: 4,
@@ -186,6 +189,26 @@ export default {
     },
     onReload () {
       this.getList()
+    },
+    async searchDB (page, limit, textSearch) {
+      this.loading = true
+      try {
+        const result = await searchDB(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.dbs = result.data
+
+        this.dbs.forEach((e) => {
+          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
+        })
+        this.pagination.total = result.meta.total_item
+      } catch (e) {
+        this.$message.error(e.$message)
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

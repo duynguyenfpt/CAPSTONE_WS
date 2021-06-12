@@ -108,9 +108,9 @@ export default {
         this.isVisible = false
         this.$emit('onUpdated', data)
         if (data.id) {
-          this.$message.error('Unsuccessfully!')
-        } else {
           this.$message.success('Success!')
+        } else {
+          this.$message.error('Unsuccessfully!')
         }
       } catch (e) {
         this.$message.error(e)

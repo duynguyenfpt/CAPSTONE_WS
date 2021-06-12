@@ -8,7 +8,7 @@
         <b-col>
           <label class="form-label">Host</label>
           <b-form-select
-            v-model="selected"
+            v-model="config.server_infor_id"
             :options="options"
             size="sm"
           ></b-form-select>
@@ -35,11 +35,6 @@
         </b-col>
       </b-row>
       <b-row class="pt-3">
-        <b-col>
-          <b-button size="sm" variant="outline-primary"
-            >Check connection</b-button
-          >
-        </b-col>
         <b-col class="text-right">
           <b-button size="sm" variant="primary" @click="onUpdateDB">
             <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
@@ -54,15 +49,11 @@
 
 <script>
 import { getDatabaseDetail, updateDatabase } from '@/service/db'
+import { getAllServers } from '@/service/server'
+
 export default {
   data: () => ({
-    selected: 'localhost',
-    options: [
-      { value: 'localhost', text: 'localhost' },
-      { value: '10.12.16.19', text: '10.12.16.19' },
-      { value: '10.12.16.20', text: '10.12.16.20' }
-    ],
-    databaseTypeSelect: 'mysql',
+    options: [],
     dbTypes: [
       { value: 'mysql', text: 'My Sql' },
       { value: 'mongoDB', text: 'Mongo DB' },
@@ -70,6 +61,7 @@ export default {
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
     config: {
+      server_infor_id: 0,
       port: 3306,
       database_name: 'example',
       username: 'root',
@@ -82,12 +74,22 @@ export default {
     isLoadingUpdate: false
   }),
 
+  async mounted () {
+    this.isLoading = true
+    const hosts = await getAllServers()
+    this.options = hosts.data.map(item => {
+      return { value: item.id, text: item.server_host }
+    })
+    this.isLoading = false
+  },
+
   methods: {
     async show (id) {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
       const data = await getDatabaseDetail(id)
+      this.config.server_infor_id = data.server_infor.id
       this.config.port = data.port
       this.config.database_name = data.database_name
       this.config.username = data.username
@@ -99,11 +101,20 @@ export default {
       this.isVisible = false
     },
     async onUpdateDB () {
-      this.isLoadingUpdate = true
-      const data = await updateDatabase(this.idItem, this.config)
-      this.isLoadingUpdate = false
-      this.isVisible = false
-      this.$emit('onUpdated', data)
+      try {
+        this.isLoadingUpdate = true
+        const data = await updateDatabase(this.idItem, this.config)
+        this.isLoadingUpdate = false
+        this.isVisible = false
+        this.$emit('onUpdated', data)
+        if (data.id) {
+          this.$message.error('Unsuccessfully!')
+        } else {
+          this.$message.success('Success!')
+        }
+      } catch (e) {
+        this.$message.error(e)
+      }
     }
   }
 }

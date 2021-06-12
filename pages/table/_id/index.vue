@@ -1,13 +1,15 @@
 <template>
   <div>
-    <DatabaseDetail v-if="id" :id="id"/>
+    <TableDetail v-if="id" :id="id" />
   </div>
 </template>
 
 <script>
-import DatabaseDetail from '@/components/db/dbDetail'
+import TableDetail from '@/components/table-component/tableDetail.vue'
 export default {
-  components: { DatabaseDetail },
+  components: {
+    TableDetail
+  },
   data: () => ({
     id: null
   }),
@@ -17,6 +19,4 @@ export default {
 }
 </script>
 
-<style>
-
-</style>
+<style></style>

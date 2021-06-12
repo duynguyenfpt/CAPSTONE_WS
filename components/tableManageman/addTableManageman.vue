@@ -4,9 +4,18 @@
     <!-- <b-dropdown text="Select Database" variant="outline-primary">
             <b-dropdown-item>Db 1</b-dropdown-item>
       </b-dropdown> -->
-    <label>Database</label>
+
+     <b-row>
+      <b-col>
+        <label>Select Database</label>
     <b-form-select v-model="dbInfoList" :options="dbInfoOption" size="sm">
     </b-form-select>
+      </b-col>
+      <b-col>
+        <label>Database Name</label>
+        <b-input size="sm"></b-input>
+      </b-col>
+    </b-row>
     <b-row>
       <b-col>
         <label>Host</label>
@@ -33,7 +42,7 @@
         <b-input size="sm"></b-input>
       </b-col>
       <b-col>
-        <label>Host</label>
+        <label>Database Type</label>
         <b-form-select v-model="selected" :options="dbTypes" size="sm">
         </b-form-select>
       </b-col>

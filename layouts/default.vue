@@ -6,7 +6,7 @@
           <h4 href="/">Capstone</h4>
           <hr />
           <b-nav-item v-b-toggle.db>
-            <i class="fa fa-server mr-1" /> Databases
+            <i class="fa fa-server mr-1" /> Databases config
             <b-collapse id="db">
               <b-nav-item :to="{ name: 'db' }">
                 <i class="fa fa-list-ol" />
@@ -20,7 +20,7 @@
           </b-nav-item>
 
           <b-nav-item v-b-toggle.table>
-            <i class="fa fa-server mr-1" /> Tables
+            <i class="fa fa-table mr-1"></i> Tables config
             <b-collapse id="table">
               <b-nav-item :to="{ name: 'table' }">
                 <i class="fa fa-list-ol" />
@@ -32,9 +32,15 @@
               </b-nav-item>
             </b-collapse>
           </b-nav-item>
-          <!-- <b-nav-item :to="{ name: 'table' }">
-            <i class="fa fa-table mr-1" />Tables
-          </b-nav-item> -->
+          <b-nav-item>
+            <i class="fa fa-server mr-1"/>Sever config
+          </b-nav-item>
+           <b-nav-item>
+            <i class="fa fa-user mr-1"/>Job
+          </b-nav-item>
+           <b-nav-item>
+            <i class="fa fa-check mr-1" />Request
+          </b-nav-item>
           <hr />
         </b-nav>
       </b-col>

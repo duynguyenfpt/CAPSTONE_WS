@@ -41,6 +41,7 @@
       align="right"
       pills
       size="sm"
+       @input="detail.tables"
     />
 
     <section name="popup">
@@ -134,8 +135,8 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 10,
-        total: 10
+        limit: 4,
+        total: 0
       },
       fields: fields,
       dbFields: dbFields,

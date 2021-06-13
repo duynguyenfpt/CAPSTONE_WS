@@ -128,8 +128,6 @@ export default {
         })
       } catch (error) {
         this.$message.error(error.message)
-      } finally {
-        this.$notify({ text: 'Heyy !!!' })
       }
     }
   }

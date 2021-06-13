@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-model="isVisible" title="Edit database connection" hide-footer>
+  <b-modal v-model="isVisible" title="Edit Database" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -78,7 +78,7 @@ export default {
     this.isLoading = true
     const hosts = await getAllServers()
     this.options = hosts.data.map(item => {
-      return { value: item.id, text: item.server_host }
+      return { value: item.id, text: item.serverHost }
     })
     this.isLoading = false
   },
@@ -88,13 +88,13 @@ export default {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
-      const data = await getDatabaseDetail(id)
-      this.config.server_infor_id = data.server_infor.id
-      this.config.port = data.port
-      this.config.database_name = data.database_name
-      this.config.username = data.username
-      this.config.password = data.password
-      this.config.database_type = data.database_type
+      const res = await getDatabaseDetail(id)
+      this.config.server_infor_id = res.data.serverInfor.id
+      this.config.port = res.data.port
+      this.config.database_name = res.data.databaseName
+      this.config.username = res.data.username
+      this.config.password = res.data.password
+      this.config.database_type = res.data.databaseType
       this.isLoading = false
     },
     onClose () {
@@ -108,12 +108,12 @@ export default {
         this.isVisible = false
         this.$emit('onUpdated', data)
         if (data.id) {
-          this.$message.success('Success!')
+          this.$notify({ type: 'success', text: 'Update successful' })
         } else {
-          this.$message.error('Unsuccessfully!')
+          this.$notify({ type: 'error', text: 'Update failed' })
         }
       } catch (e) {
-        this.$message.error(e)
+        this.$notify({ type: 'error', text: e.message })
       }
     }
   }

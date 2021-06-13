@@ -1,4 +1,5 @@
 <template>
+<div>
   <b-modal v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
@@ -15,6 +16,7 @@
         </b-col>
       </b-row>
   </b-modal>
+</div>
 </template>
 
 <script>
@@ -40,13 +42,13 @@ export default {
         this.isLoading = false
         this.isVisible = false
         this.$emit('onDeleted')
-        if (res.id) {
-          this.$message.error('Unsuccessfully!')
+        if (res.code) {
+          this.$notify({ type: 'success', text: 'Delete successful' })
         } else {
-          this.$message.success('Success!')
+          this.$notify({ type: 'error', text: 'Delete failed' })
         }
       } catch (e) {
-        this.$message.error(e)
+        this.$notify({ type: 'error', text: e.message })
       }
     }
   }

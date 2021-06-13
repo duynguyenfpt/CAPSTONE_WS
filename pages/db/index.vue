@@ -12,16 +12,15 @@
             </b-input-group-append>
           </b-input-group>
         </b-col>
-
         <b-col class="text-right">
-          <b-btn v-b-modal.new-db size="sm" variant="primary">
+          <b-btn @click="addDb()" size="sm" variant="primary">
             <i class="fa fa-database pr-1" />
-            Create Database Connection
+            Create Database
           </b-btn>
           <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
             <i class="fa fa-sync pr-1" />
-            Reload</b-btn
-          >
+            Reload
+          </b-btn>
         </b-col>
       </b-row>
     </section>
@@ -81,9 +80,7 @@
       />
     </section>
     <section name="popup">
-      <b-modal id="new-db" title="Create Database Connection" hide-footer>
-        <Config />
-      </b-modal>
+      <db-add ref="add" @onAdded="onReload"/>
     </section>
     <section name="popup">
       <db-edit ref="edit" @onUpdated="refreshData" />
@@ -100,7 +97,6 @@
 </template>
 
 <script>
-import Config from '~/components/db/add.vue'
 import DatabaseDetail from '~/components/db/detail.vue'
 import { getListDatabase } from '@/service/db'
 import moment from 'moment'
@@ -108,11 +104,10 @@ import { searchDB } from '@/service/shemaChangeHistory'
 
 const TableFields = [
   {
-    key: 'no',
-    sortable: true
+    key: 'no'
   },
   {
-    key: 'database_name'
+    key: 'databaseName'
   },
   {
     key: 'port'
@@ -121,10 +116,10 @@ const TableFields = [
     key: 'username'
   },
   {
-    key: 'database_type'
+    key: 'databaseType'
   },
   {
-    key: 'created_date'
+    key: 'createdDate'
   },
   {
     key: 'action'
@@ -132,7 +127,7 @@ const TableFields = [
 ]
 
 export default {
-  components: { Config, DatabaseDetail },
+  components: { DatabaseDetail },
   props: {
     id: {}
   },
@@ -141,7 +136,7 @@ export default {
     textSearch: null,
     pagination: {
       page: 1,
-      limit: 4,
+      limit: 5,
       total: 0
     },
     loading: false,
@@ -163,14 +158,17 @@ export default {
         this.dbs = res.data
 
         this.dbs.forEach((e) => {
-          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
+          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
         })
-        this.pagination.total = res.meta.total_item
+        this.pagination.total = res.metaData.totalItem
       } catch (e) {
 
       } finally {
         this.loading = false
       }
+    },
+    addDb () {
+      this.$refs.add.show()
     },
     editDb (id) {
       this.$refs.edit.show(id)
@@ -200,9 +198,9 @@ export default {
         this.dbs = result.data
 
         this.dbs.forEach((e) => {
-          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
+          e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
         })
-        this.pagination.total = result.meta.total_item
+        this.pagination.total = result.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

@@ -1,7 +1,7 @@
 import { http } from './common'
 
 export const getAllDbType =
-    () => http.get('category', {
+    () => http.get('api/database_infors', {
       params: {
         page: 1,
         limit: 1000

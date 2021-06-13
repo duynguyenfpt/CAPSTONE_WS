@@ -4,11 +4,12 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
+      <b-modal v-model="isVisible" title="Create Database" hide-footer>
     <b-row>
       <b-col>
         <label class="form-label">Host</label>
         <b-form-select
-          v-model="config.server_infor_id"
+          v-model="config.serverInforId"
           :options="options"
           size="sm"
         ></b-form-select>
@@ -21,14 +22,14 @@
     <b-row>
       <b-col>
         <label class="form-label">Database</label>
-        <b-input size="sm" v-model="config.database_name" />
+        <b-input size="sm" v-model="config.databaseName" />
         <label class="form-label">User</label>
         <b-input size="sm" v-model="config.username" />
         <label class="form-label">Password</label>
         <b-input size="sm" v-model="config.password" type="password" />
         <label class="form-label">Database Type</label>
         <b-form-select
-          v-model="config.database_type"
+          v-model="config.databaseType"
           :options="dbTypes"
           size="sm"
         ></b-form-select>
@@ -49,6 +50,7 @@
           </b-button>
       </b-col>
     </b-row>
+    </b-modal>
     </div>
   </div>
 </template>
@@ -61,44 +63,56 @@ export default {
   data: () => ({
     options: [],
     dbTypes: [
+      { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
       { value: 'mongoDB', text: 'Mongo DB' },
       { value: 'PostgreSQL', text: 'PostgreSQL' },
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
     config: {
-      server_infor_id: 0,
+      serverInforId: 0,
       port: 3306,
-      database_name: 'example',
+      databaseName: 'example',
       username: 'root',
       password: 'root',
-      database_type: null
+      databaseType: null
     },
     isLoading: false,
     isLoadingCreate: false,
     isLoadingCheck: false,
-    isConnected: false
+    isConnected: false,
+    isVisible: false
   }),
 
   async mounted () {
     this.isLoading = true
     const hosts = await getAllServers()
     this.options = hosts.data.map(item => {
-      return { value: item.id, text: item.server_host }
+      return { value: item.id, text: item.serverHost }
     })
     this.isLoading = false
   },
 
   methods: {
+    async show () {
+      this.isVisible = true
+    },
     async createDatabaseInfo () {
       try {
         this.isLoadingCreate = true
         const res = await createDatabase(this.config)
         this.isLoadingCreate = false
-        if (res.id) {
-          this.$router.push({ name: 'db-id', params: { id: res.id } })
+        this.isVisible = false
+        this.$emit('onAdded')
+        if (res.code) {
+          this.$notify({ type: 'success', text: 'Add successful' })
+          // this.$router.push({ name: 'db-id', params: { id: res.id } })
+        } else {
+          this.$notify({ type: 'error', text: 'Add failed' })
         }
-      } catch (e) {}
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      }
     },
     async checkConnectionStatus () {
       try {

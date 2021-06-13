@@ -165,10 +165,9 @@ export default {
         this.dbs.forEach((e) => {
           e.created_date = moment(e.created_date).format('YYYY-MM-DD')
         })
-
         this.pagination.total = res.meta.total_item
       } catch (e) {
-        this.$message.error(e)
+
       } finally {
         this.loading = false
       }
@@ -205,7 +204,7 @@ export default {
         })
         this.pagination.total = result.meta.total_item
       } catch (e) {
-        this.$message.error(e.$message)
+        this.$notify({ type: 'error', text: e.message })
       } finally {
         this.loading = false
       }

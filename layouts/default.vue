@@ -1,22 +1,76 @@
 <template>
-  <a-layout id="components-layout-demo-custom-trigger" class="heigh-100">
-    <a-layout-sider v-model="collapsed" :trigger="null" collapsible>
-      <div class="logo" />
-      <common-sider />
-    </a-layout-sider>
-    <a-layout>
-      <a-layout-header style="background: #fff; padding: 0">
-        <a-icon
-          class="trigger"
-          :type="collapsed ? 'menu-unfold' : 'menu-fold'"
-          @click="() => (collapsed = !collapsed)"
-        />
-      </a-layout-header>
-      <a-layout-content class="main-content">
-        <nuxt />
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+  <div>
+    <b-row no-gutters>
+      <b-col cols="2" class="w-100 side-nav-container">
+        <b-nav vertical class="side-nav w-100 p-3">
+          <h4 href="/">Capstone</h4>
+          <hr />
+          <b-nav-item v-b-toggle.db>
+            <i class="fa fa-server mr-1" /> Databases config
+            <b-collapse id="db">
+              <b-nav-item :to="{ name: 'db' }">
+                <i class="fa fa-list-ol" />
+                List Databases
+              </b-nav-item>
+              <b-nav-item :to="{ name: 'db-add' }">
+                <i class="fa fa-plus" />
+                Add Database
+              </b-nav-item>
+            </b-collapse>
+          </b-nav-item>
+
+          <b-nav-item v-b-toggle.table>
+            <i class="fa fa-table mr-1"></i> Tables config
+            <b-collapse id="table">
+              <b-nav-item :to="{ name: 'table' }">
+                <i class="fa fa-list-ol" />
+                List Tables
+              </b-nav-item>
+              <b-nav-item :to="{ name: 'table-add' }">
+                <i class="fa fa-plus" />
+                Add Tables
+              </b-nav-item>
+            </b-collapse>
+          </b-nav-item>
+          <b-nav-item>
+            <i class="fa fa-server mr-1"/>Sever config
+          </b-nav-item>
+           <b-nav-item>
+            <i class="fa fa-user mr-1"/>Job
+          </b-nav-item>
+           <b-nav-item>
+            <i class="fa fa-check mr-1" />Request
+          </b-nav-item>
+          <hr />
+        </b-nav>
+      </b-col>
+      <b-col>
+        <b-navbar toggleable="lg" type="dark" variant="light" sticky>
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item-dropdown text="Lang" right>
+              <b-dropdown-item href="#">EN</b-dropdown-item>
+              <b-dropdown-item href="#">ES</b-dropdown-item>
+              <b-dropdown-item href="#">RU</b-dropdown-item>
+              <b-dropdown-item href="#">FA</b-dropdown-item>
+            </b-nav-item-dropdown>
+
+            <b-nav-item-dropdown right>
+              <!-- Using 'button-content' slot -->
+              <template #button-content>
+                <em>User</em>
+              </template>
+              <b-dropdown-item href="#">Profile</b-dropdown-item>
+              <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+            </b-nav-item-dropdown>
+          </b-navbar-nav>
+        </b-navbar>
+        <div id="__root" class="content-container">
+          <nuxt class="content" />
+          <notifications :duration="5000" />
+        </div>
+      </b-col>
+    </b-row>
+  </div>
 </template>
 <script>
 export default {
@@ -27,30 +81,38 @@ export default {
   }
 }
 </script>
-<style>
-#components-layout-demo-custom-trigger .trigger {
-  font-size: 18px;
-  line-height: 64px;
-  padding: 0 24px;
-  cursor: pointer;
-  transition: color 0.3s;
+<style scoped>
+.side-nav-container {
+  position: relative;
+  border-right: 1px solid black;
 }
 
-#components-layout-demo-custom-trigger .trigger:hover {
-  color: #1890ff;
+.side-nav {
+  position: fixed;
+  background: #2c2e5f;
+  color: white;
+  height: 100vh;
+}
+.content-container {
+  padding: 20px;
+  background: rgb(240, 242, 245);
 }
 
-#components-layout-demo-custom-trigger .logo {
-  height: 32px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 16px;
-}
-.heigh-100 {
+.content {
+  padding: 10px;
+  background: white;
   min-height: 100vh;
 }
-.main-content {
-  margin: 24px 16px;
-  padding: 24px;
-  background: #fff;
+
+.side-nav >>> a {
+  color: white !important;
+}
+
+.side-nav >>> .disabled {
+  color: rgb(153, 153, 153) !important;
+}
+
+.side-nav >>> a:hover {
+  color: rgb(124, 137, 255) !important;
 }
 </style>

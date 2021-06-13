@@ -1,6 +1,13 @@
 <template>
   <div>
     <b-row>
+      <b-col>
+        <b-alert variant="danger" v-show="message" show>
+          {{message}}
+        </b-alert>
+      </b-col>
+    </b-row>
+    <b-row>
       <b-col cols="4">
         <label class="form-lab">Database Name</label>
       </b-col>
@@ -18,8 +25,7 @@
 
       </b-col>
       <b-col>
-        <b-form-input size="sm" v-model="table.table_name"></b-form-input>
-         <div>{{message}}</div>
+        <b-form-input id="input-live" :state="validateTable" size="sm" v-model="table.table_name"></b-form-input>
       </b-col>
     </b-row>
     <b-row class="text-center pt-3">
@@ -39,6 +45,11 @@ export default {
   props: {
     database: {}
   },
+  computed: {
+    validateTable () {
+      return /^(\d|\w|_)+$/.test(this.table.table_name || '')
+    }
+  },
   data: () => ({
     loading: false,
     table: {
@@ -50,14 +61,18 @@ export default {
   methods: {
     async addTable () {
       this.loading = true
+      this.message = null
       try {
         const body = {
           table_name: this.table.table_name,
           database_infor_id: this.database.id
         }
+        if (!this.validateTable) {
+          throw new Error('Invalid table name')
+        }
         /// fake data loi
-        if (body.table_name === 'Huong test' || body.table_name === 'table name') {
-          this.message = 'Table is existed'
+        if (body.table_name === 'Huong_test' || body.table_name === 'table name') {
+          throw new Error('Table is existed')
         } else {
           ///
           const res = await addTable(body)
@@ -70,6 +85,7 @@ export default {
           this.$router.go()
         }
       } catch (e) {
+        this.message = e.message
         this.$message.error(e.message)
       } finally {
         this.loading = false

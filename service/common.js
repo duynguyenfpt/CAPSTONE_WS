@@ -20,6 +20,7 @@ http.interceptors.response.use(
     return response.data
   },
   (error) => {
-    console.log(error)
+    Promise.reject(error)
+    throw error
   }
 )

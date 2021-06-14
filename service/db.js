@@ -1,7 +1,7 @@
 import { http } from './common'
 
 export const getAllDbType =
-    () => http.get('category', {
+    () => http.get('api/database_infors', {
       params: {
         page: 1,
         limit: 1000
@@ -16,3 +16,4 @@ export const getListDatabase =
 export const createDatabase = (db) => http.post('api/database_infors', db)
 
 export const updateDatabase = (id, data) => http.put(`api/database_infors/${id}`, data)
+export const checkConnection = (db) => http.post('api/database_infors/test_connection', db)

@@ -4,19 +4,22 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" />
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchDB(textSearch)"/>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary">
+              <b-btn size="sm" variant="primary" @click="searchDB(textSearch)">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
           </b-input-group>
         </b-col>
-
         <b-col class="text-right">
-          <b-btn v-b-modal.new-db size="sm" variant="primary">
+          <b-btn @click="addDb()" size="sm" variant="primary">
             <i class="fa fa-database pr-1" />
-            Create Database Connection
+            Create Database
+          </b-btn>
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload
           </b-btn>
         </b-col>
       </b-row>
@@ -31,7 +34,7 @@
         :busy="loading"
       >
         <template #cell(no)="item">
-          {{ countRecord(item.index)}}
+          {{ countRecord(item.index) }}
         </template>
 
         <template #cell(action)="item">
@@ -55,7 +58,7 @@
             v-b-tooltip="`Delete database config`"
             size="sm"
             variant="danger"
-            @click="deleteDatabaseDetail(item.item.id)"
+            @click="deleteDb(item.item.id)"
           >
             <i class="fa fa-trash" />
           </b-btn>
@@ -77,36 +80,34 @@
       />
     </section>
     <section name="popup">
-      <b-modal id="new-db" title="Create Database Connection" hide-footer>
-        <Config />
+      <db-add ref="add" @onAdded="onReload"/>
+    </section>
+    <section name="popup">
+      <db-edit ref="edit" @onUpdated="refreshData" />
+    </section>
+    <section name="detail">
+      <b-modal id="detail">
+        <DatabaseDetail />
       </b-modal>
     </section>
     <section name="popup">
-      <db-edit ref="demo" @onUpdated="refreshData" />
-    </section>
-    <section name="detailDb">
-      <b-modal id="detailDb">
-        <DatabaseDetail />
-      </b-modal>
+      <db-delete ref="delete" @onDeleted="onReload"/>
     </section>
   </div>
 </template>
 
 <script>
-import Config from '@/components/db/config.vue'
-import DatabaseDetail from '@/components/db/dbDetail.vue'
-
-import { deleteDatabaseDetail, getListDatabase } from '@/service/db'
-
+import DatabaseDetail from '~/components/db/detail.vue'
+import { getListDatabase } from '@/service/db'
 import moment from 'moment'
+import { searchDB } from '@/service/shemaChangeHistory'
 
 const TableFields = [
   {
-    key: 'no',
-    sortable: true
+    key: 'no'
   },
   {
-    key: 'database_name'
+    key: 'databaseName'
   },
   {
     key: 'port'
@@ -115,10 +116,10 @@ const TableFields = [
     key: 'username'
   },
   {
-    key: 'database_type'
+    key: 'databaseType'
   },
   {
-    key: 'created_date'
+    key: 'createdDate'
   },
   {
     key: 'action'
@@ -126,15 +127,16 @@ const TableFields = [
 ]
 
 export default {
-  components: { Config, DatabaseDetail },
+  components: { DatabaseDetail },
   props: {
     id: {}
   },
   data: () => ({
     fields: TableFields,
+    textSearch: null,
     pagination: {
       page: 1,
-      limit: 4,
+      limit: 5,
       total: 0
     },
     loading: false,
@@ -156,31 +158,23 @@ export default {
         this.dbs = res.data
 
         this.dbs.forEach((e) => {
-          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
+          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
         })
-
-        this.pagination.total = res.meta.total_item
+        this.pagination.total = res.metaData.totalItem
       } catch (e) {
-        this.$message.error(e)
+
       } finally {
         this.loading = false
       }
     },
-    async deleteDatabaseDetail (id) {
-      try {
-        const res = await deleteDatabaseDetail(id)
-        if (res.id) {
-          this.$message.error('Update unsuccessfully!')
-        } else {
-          this.$message.success('Success!')
-        }
-        this.getList()
-      } catch (e) {
-        this.$message.error(e)
-      }
+    addDb () {
+      this.$refs.add.show()
     },
     editDb (id) {
-      this.$refs.demo.show(id)
+      this.$refs.edit.show(id)
+    },
+    deleteDb (id) {
+      this.$refs.delete.show(id)
     },
     refreshData (data) {
       if (data) {
@@ -189,6 +183,29 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    onReload () {
+      this.getList()
+    },
+    async searchDB (page, limit, textSearch) {
+      this.loading = true
+      try {
+        const result = await searchDB(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.dbs = result.data
+
+        this.dbs.forEach((e) => {
+          e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
+        })
+        this.pagination.total = result.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

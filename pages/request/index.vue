@@ -9,12 +9,12 @@
     <b-table :fields="tableFields" :items="request">
       <template #cell(action)="item">
           <b-btn
-            v-b-tooltip="`Detail database config`"
-            :to="{ name: 'db-id', params: { id: item.item.id } }"
+            @click="edit(item.item.id)"
+            v-b-tooltip="`Edit request config`"
             size="sm"
-            variant="success"
+            variant="info"
           >
-            <i class="fa fa-eye" />
+            <i class="fa fa-pen" />
           </b-btn>
         <b-btn
           v-b-tooltip="`Delete`"
@@ -34,6 +34,9 @@
         align="right"
         @input="getList"
       />
+      <section name="popup">
+      <request-edit ref="edit"/>
+      </section>
   </div>
 </template>
 
@@ -116,6 +119,9 @@ export default {
       } catch (error) {
         this.$message.error(error.message)
       }
+    },
+    edit (id) {
+      this.$refs.edit.show(id)
     }
   }
 }

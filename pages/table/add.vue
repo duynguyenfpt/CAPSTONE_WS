@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import TableManageman from '@/components/tableManageman/addTableManageman.vue'
+import TableManageman from '@/components/tableManagement/addTableManagement.vue'
 export default {
   components: {
     TableManageman

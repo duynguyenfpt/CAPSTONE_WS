@@ -38,8 +38,18 @@
            <b-nav-item>
             <i class="fa fa-user mr-1"/>Job
           </b-nav-item>
-           <b-nav-item>
-            <i class="fa fa-check mr-1" />Request
+            <b-nav-item v-b-toggle.request>
+            <i class="fa fa-check mr-1"></i> Request
+            <b-collapse id="request">
+              <b-nav-item :to="{ name: 'request' }">
+                <i class="fa fa-list-ol" />
+                List Request
+              </b-nav-item>
+              <b-nav-item :to="{ name: 'request-add' }">
+                <i class="fa fa-plus" />
+                Add Request
+              </b-nav-item>
+            </b-collapse>
           </b-nav-item>
           <hr />
         </b-nav>

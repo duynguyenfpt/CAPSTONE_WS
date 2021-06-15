@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-model="isVisible" title="Edit Request" hide-footer>
+  <b-modal title="Edit Request" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>

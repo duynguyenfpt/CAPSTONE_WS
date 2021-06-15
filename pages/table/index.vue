@@ -3,7 +3,7 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-    <b-table :fields="tableFields" :items="tableList" :busy="loading">
+    <b-table :fields="tableFields" :items="tableList">
       <template #cell(action)="item">
         <b-btn
           v-b-tooltip="`Detail table config`"
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { getListTable } from '@/service/table.service'
+import { getListTable, deleteTableDetail } from '@/service/table.service'
 import moment from 'moment'
 const tableFields = [
   {
@@ -99,6 +99,15 @@ export default {
         this.$notify({ type: 'error', text: e.message })
       } finally {
         this.loading = false
+      }
+    },
+    async deleteTableDetail (id) {
+      const result = await deleteTableDetail(id)
+      if (result) {
+        this.$notify({ type: 'success', text: 'Delete Success!' })
+        this.$router.go()
+      } else {
+        this.$notify({ type: 'error', text: 'Delete unsuccessfully!' })
       }
     }
   }

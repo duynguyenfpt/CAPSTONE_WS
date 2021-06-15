@@ -8,7 +8,7 @@
         <b-col>
           <label class="form-label">Host</label>
           <b-form-select
-            v-model="config.server_infor_id"
+            v-model="config.serverInforId"
             :options="options"
             size="sm"
           ></b-form-select>
@@ -21,14 +21,14 @@
       <b-row>
         <b-col>
           <label class="form-label">Database</label>
-          <b-input size="sm" v-model="config.database_name" />
+          <b-input size="sm" v-model="config.databaseName" />
           <label class="form-label">User</label>
           <b-input size="sm" v-model="config.username" />
           <label class="form-label">Password</label>
           <b-input size="sm" v-model="config.password" type="password" />
           <label class="form-label">Database Type</label>
           <b-form-select
-            v-model="config.database_type"
+            v-model="config.databaseType"
             :options="dbTypes"
             size="sm"
           ></b-form-select>
@@ -61,12 +61,12 @@ export default {
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
     config: {
-      server_infor_id: 0,
+      serverInforId: 0,
       port: 3306,
-      database_name: 'example',
+      databaseName: 'example',
       username: 'root',
       password: 'root',
-      database_type: null
+      databaseType: null
     },
     isVisible: false,
     idItem: 0,
@@ -89,12 +89,12 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getDatabaseDetail(id)
-      this.config.server_infor_id = res.data.serverInfor.id
+      this.config.serverInforId = res.data.serverInfor.id
       this.config.port = res.data.port
-      this.config.database_name = res.data.databaseName
+      this.config.databaseName = res.data.databaseName
       this.config.username = res.data.username
       this.config.password = res.data.password
-      this.config.database_type = res.data.databaseType
+      this.config.databaseType = res.data.databaseType
       this.isLoading = false
     },
     onClose () {
@@ -108,9 +108,9 @@ export default {
         this.isVisible = false
         this.$emit('onUpdated', data)
         if (data.id) {
-          this.$notify({ type: 'success', text: 'Update successful' })
-        } else {
           this.$notify({ type: 'error', text: 'Update failed' })
+        } else {
+          this.$notify({ type: 'success', text: 'Update successful' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

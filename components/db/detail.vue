@@ -60,7 +60,7 @@ import moment from 'moment'
 
 const dbFields = [
   {
-    key: 'database_name'
+    key: 'databaseName'
   },
   {
     key: 'port'
@@ -69,19 +69,19 @@ const dbFields = [
     key: 'username'
   },
   {
-    key: 'database_type'
+    key: 'databaseType'
   },
   {
-    key: 'created_by'
+    key: 'createdBy'
   },
   {
-    key: 'created_date'
+    key: 'createdDate'
   },
   {
-    key: 'modified_by'
+    key: 'modifiedBy'
   },
   {
-    key: 'modified_date'
+    key: 'modifiedDate'
   },
   {
     key: 'action'
@@ -93,16 +93,16 @@ const dbTable = [
     key: 'tableName'
   },
   {
-    key: 'created_by'
+    key: 'createdBy'
   },
   {
-    key: 'created_date'
+    key: 'createDate'
   },
   {
-    key: 'modified_by'
+    key: 'modifiedBy'
   },
   {
-    key: 'modified_date'
+    key: 'modifiedDate'
   },
   {
     key: 'action'
@@ -148,29 +148,32 @@ export default {
     async getDetail () {
       try {
         const res = await getDatabaseDetail(this.id)
-        this.detail = res
-        this.detail.created_date = moment(this.detail.created_date).format(
+        this.detail = res.data
+        this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
         )
-        this.detail.modified_date = moment(this.detail.modified_date).format(
+        this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
           'YYYY-MM-DD'
         )
-        this.detail.tables.forEach((e) => {
-          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
-        })
-        this.detail.tables.forEach((e) => {
-          e.modified_date = moment(e.modified_date).format('YYYY-MM-DD')
-        })
+        if (this.detail.tables) {
+          this.detail.tables.forEach((e) => {
+            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+          })
+          this.detail.tables.forEach((e) => {
+            e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+          })
+        }
       } catch (e) {
-        this.$message.error(e.message)
+        this.$notify({ type: 'error', text: e.message })
       }
     },
     async deleteTableDetail (id) {
       const result = await deleteTableDetail(id)
       if (result) {
-        this.$message.error('Delete unsuccessfully!')
+        this.$notify({ type: 'success', text: 'Delete Success!' })
+        this.$router.go()
       } else {
-        this.$message.success('Delete Success!')
+        this.$notify({ type: 'error', text: 'Delete unsuccessfully!' })
         this.$router.go()
       }
     }

@@ -116,8 +116,8 @@ export default {
             'YYYY-MM-DD'
           )
         })
-      } catch (error) {
-        this.$message.error(error.message)
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
       }
     },
     edit (id) {

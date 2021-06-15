@@ -1,6 +1,9 @@
 <template>
-  <div v-if="tableList">
-    <b-table :fields="tableFields" :items="tableList">
+ <div v-if="loading" class="text-center">
+      <b-spinner variant="primary" label="Text Centered"></b-spinner>
+    </div>
+    <div v-else>
+    <b-table :fields="tableFields" :items="tableList" :busy="loading">
       <template #cell(action)="item">
         <b-btn
           v-b-tooltip="`Detail table config`"
@@ -19,6 +22,12 @@
           <i class="fa fa-trash" />
         </b-btn>
       </template>
+      <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+        </template>
     </b-table>
      <b-pagination
         size="sm"
@@ -32,6 +41,7 @@
 </template>
 
 <script>
+import { getListTable } from '@/service/table.service'
 import moment from 'moment'
 const tableFields = [
   {
@@ -63,7 +73,8 @@ export default {
         total: 0
       },
       tableFields: tableFields,
-      tableList: null
+      tableList: null,
+      loading: false
     }
   },
   created () {
@@ -71,53 +82,11 @@ export default {
   },
   methods: {
     async getListTable () {
-      console.log('ngpao function')
+      this.loading = true
       try {
-        const res = {
-          data: [
-            {
-              id: 1,
-              createdBy: 'huong',
-              createdDate: 1623558048000,
-              modifiedBy: 'linh',
-              modifiedDate: 1623558048000,
-              tableName: 'sadsdassd',
-              databaseInforId: 1,
-              currentTableSchemas: [
-                {
-                  tableRowId: 1,
-                  rowName: 'rowName',
-                  rowType: 'rowType',
-                  typeSize: 'typeSize',
-                  defaultValue: 'defaultValue',
-                  possibleValue: 'possibleVale',
-                  table_id: '1'
-                }
-              ]
-            },
-            {
-              id: 2,
-              createdBy: 'duy',
-              createdDate: 1623558048000,
-              modifiedBy: 'long',
-              modifiedDate: 1623558048000,
-              tableName: 'tablename',
-              databaseInforId: 1,
-              currentTableSchemas: [
-                {
-                  tableRowId: 2,
-                  rowName: 'rowName',
-                  rowType: 'rowType',
-                  typeSize: 'typeSize',
-                  defaultValue: 'defaultValue',
-                  possibleValue: 'possibleVale',
-                  table_id: '1'
-                }
-              ]
-            }
-          ]
-        }
+        const res = await getListTable(this.pagination.page, this.pagination.limit)
         this.tableList = res.data
+        this.pagination.total = res.metaData.totalItem
         this.tableList.forEach((e) => {
           e.createdDate = moment(this.tableList.createdDate).format(
             'YYYY-MM-DD'
@@ -126,8 +95,10 @@ export default {
             'YYYY-MM-DD'
           )
         })
-      } catch (error) {
-        this.$message.error(error.message)
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
       }
     }
   }

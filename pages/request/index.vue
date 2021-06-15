@@ -10,14 +10,12 @@
       <template #cell(action)="item">
           <b-btn
             @click="edit(item.item.id)"
-            v-b-tooltip="`Edit request config`"
             size="sm"
             variant="info"
           >
             <i class="fa fa-pen" />
           </b-btn>
         <b-btn
-          v-b-tooltip="`Delete`"
           size="sm"
           variant="danger"
           @click="deleteRequest(item.item.id)"
@@ -25,6 +23,9 @@
           <i class="fa fa-trash" />
         </b-btn>
       </template>
+       <template #cell(no)="item">
+          {{ countRecord(item.index) }}
+        </template>
     </b-table>
      <b-pagination
         size="sm"
@@ -44,22 +45,28 @@
 import moment from 'moment'
 const tableFields = [
   {
-    key: 'id'
+    key: 'no'
   },
   {
     key: 'requestType'
   },
   {
-    key: 'creatorId'
+    key: 'creator.userName',
+    label: 'Creator'
   },
   {
-    key: 'timeCreated'
+    key: 'approvedBy.userName',
+    label: 'Approver'
   },
   {
-    key: 'approvedBy'
+    key: 'status',
+    variant: 'denger'
   },
   {
-    key: 'status'
+    key: 'createdDate'
+  },
+  {
+    key: 'modifiedDate'
   },
   {
     key: 'action'
@@ -86,28 +93,47 @@ export default {
       console.log('ngpao function')
       try {
         const res = {
+          code: '200',
           data: [
             {
               id: 1,
-              requestType: 'huonglinh',
-              timeCreated: 1623558048000,
-              creatorId: '1',
-              approvedBy: 1623558048000,
-              tableName: 'sadsdassd',
-              status: 'pending'
-            },
-            {
-              id: 2,
-              requestType: 'huong',
-              timeCreated: 1623558048000,
-              creatorId: '1',
-              approvedBy: 1623558048000,
-              tableName: 'sadsdassd',
-              status: 'approve'
+              createdBy: null,
+              createdDate: null,
+              modifiedBy: null,
+              modifiedDate: null,
+              status: 'pending',
+              creator: {
+                id: 1,
+                createdBy: null,
+                createdDate: null,
+                modifiedBy: null,
+                modifiedDate: null,
+                userName: 'vulong',
+                email: 'vulong22121999@gmail.com',
+                role: 'viewer',
+                phone: '0898266025'
+              },
+              approvedBy: {
+                id: 1,
+                createdBy: null,
+                createdDate: null,
+                modifiedBy: null,
+                modifiedDate: null,
+                userName: 'vulong',
+                email: 'vulong22121999@gmail.com',
+                role: 'viewer',
+                phone: '0898266025'
+              },
+              requestType: 'DONG_BO'
             }
-          ]
+          ],
+          metaData: {
+            totalPage: 1,
+            totalItem: 1
+          }
         }
         this.request = res.data
+        this.pagination.total = res.metaData.totalItem
         this.request.forEach((e) => {
           e.createdDate = moment(this.request.createdDate).format(
             'YYYY-MM-DD'
@@ -121,7 +147,11 @@ export default {
       }
     },
     edit (id) {
+      console.log(id)
       this.$refs.edit.show(id)
+    },
+    countRecord (index) {
+      return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }
 }

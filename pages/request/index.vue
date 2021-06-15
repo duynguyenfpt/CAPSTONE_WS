@@ -36,12 +36,13 @@
         @input="getList"
       />
       <section name="popup">
-      <request-edit ref="edit"/>
+      <request-edit ref="edit" @onUpdated="refreshData" />
       </section>
   </div>
 </template>
 
 <script>
+import { getRequest } from '@/service/request'
 import moment from 'moment'
 const tableFields = [
   {
@@ -90,48 +91,8 @@ export default {
   },
   methods: {
     async getList () {
-      console.log('ngpao function')
       try {
-        const res = {
-          code: '200',
-          data: [
-            {
-              id: 1,
-              createdBy: null,
-              createdDate: null,
-              modifiedBy: null,
-              modifiedDate: null,
-              status: 'pending',
-              creator: {
-                id: 1,
-                createdBy: null,
-                createdDate: null,
-                modifiedBy: null,
-                modifiedDate: null,
-                userName: 'vulong',
-                email: 'vulong22121999@gmail.com',
-                role: 'viewer',
-                phone: '0898266025'
-              },
-              approvedBy: {
-                id: 1,
-                createdBy: null,
-                createdDate: null,
-                modifiedBy: null,
-                modifiedDate: null,
-                userName: 'vulong',
-                email: 'vulong22121999@gmail.com',
-                role: 'viewer',
-                phone: '0898266025'
-              },
-              requestType: 'DONG_BO'
-            }
-          ],
-          metaData: {
-            totalPage: 1,
-            totalItem: 1
-          }
-        }
+        const res = await getRequest(this.pagination.page, this.pagination.limit)
         this.request = res.data
         this.pagination.total = res.metaData.totalItem
         this.request.forEach((e) => {
@@ -152,6 +113,11 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    refreshData (data) {
+      if (data) {
+        this.getList()
+      }
     }
   }
 }

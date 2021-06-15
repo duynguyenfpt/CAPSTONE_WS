@@ -8,3 +8,4 @@ export function addTable (request) {
 }
 
 export const createTable = (tb) => http.post('api/tables', tb)
+export const getTableByDb = (db) => http.get(`api/database_infors/${db}/tables`, { params: { page: 1, limit: 100 } })

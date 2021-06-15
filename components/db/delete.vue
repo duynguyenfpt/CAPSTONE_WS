@@ -46,9 +46,12 @@ export default {
           this.$notify({ type: 'success', text: 'Delete successful' })
         } else {
           this.$notify({ type: 'error', text: 'Delete failed' })
+          this.$router.go()
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
+        this.isLoading = false
+        this.isVisible = false
       }
     }
   }

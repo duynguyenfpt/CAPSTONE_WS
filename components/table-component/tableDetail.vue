@@ -3,14 +3,14 @@
      <h4 class="text-center">Table Detail</h4>
      <b-table :fields="fields" :items="[table]"></b-table>
      <h4 class="text-center">Table Schema</h4>
-     <b-table :fields="schemaFields" :items="table.current_table_schemas"></b-table>
+     <b-table :fields="schemaFields" :items="table.currentTableSchemaEntities"></b-table>
      <b-pagination
         size="sm"
         v-model="pagination.page"
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="table.current_table_schemas"
+        @input="table.currentTableSchemaEntities"
       />
  </div>
 </template>
@@ -22,48 +22,48 @@ import moment from 'moment'
 
 const fields = [
   {
-    key: 'table_name'
+    key: 'tableName'
   },
   {
-    key: 'create_by'
+    key: 'createdBy'
   },
   {
-    key: 'create_date'
+    key: 'createdDate'
   },
   {
-    key: 'modified_by'
+    key: 'modifiedBy'
   },
   {
-    key: 'modified_date'
+    key: 'modifiedDate'
   }
 ]
 const schemaFields = [
   {
-    key: 'row_name'
+    key: 'rowName'
   },
   {
-    key: 'row_type'
+    key: 'rowType'
   },
   {
-    key: 'type_size'
+    key: 'typeSize'
   },
   {
-    key: 'default_value'
+    key: 'defaultValue'
   },
   {
-    key: 'possible_value'
+    key: 'possibleValue'
   },
   {
-    key: 'create_by'
+    key: 'createdBy'
   },
   {
-    key: 'create_date'
+    key: 'createdDate'
   },
   {
-    key: 'modified_by'
+    key: 'modifiedBy'
   },
   {
-    key: 'modified_date'
+    key: 'modifiedDate'
   }
 ]
 
@@ -88,18 +88,20 @@ export default {
     async getDetail () {
       try {
         const res = await getTableDetail(this.id)
-        this.table = res
-        this.table.current_table_schemas = res.current_table_schemas
-        this.table.created_date = moment(this.table.created_date).format('YYYY-MM-DD')
-        this.table.modified_date = moment(this.table.modified_date).format('YYYY-MM-DD')
-        this.table.current_table_schemas.forEach((e) => {
-          e.created_date = moment(e.created_date).format('YYYY-MM-DD')
-        })
-        this.table.current_table_schemas.forEach((e) => {
-          e.modified_date = moment(e.modified_date).format('YYYY-MM-DD')
-        })
+        this.table = res.data
+        this.table.currentTableSchemaEntities = res.currentTableSchemaEntities
+        this.table.createdDate = moment(this.table.createdDate).format('YYYY-MM-DD')
+        this.table.modifiedDate = moment(this.table.modifiedDate).format('YYYY-MM-DD')
+        if (this.table.currentTableSchemaEntities) {
+          this.table.currentTableSchemaEntities.forEach((e) => {
+            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+          })
+          this.table.currentTableSchemaEntities.forEach((e) => {
+            e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+          })
+        }
       } catch (e) {
-        this.$message.error(e.message)
+        this.$notify({ type: 'error', text: e.message })
       }
     }
   }

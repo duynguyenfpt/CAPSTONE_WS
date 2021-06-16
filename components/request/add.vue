@@ -99,16 +99,17 @@
                 {{k + 1}}
               </td>
               <td>
-                <input class="form-control" type="text" v-model="row.name" />
+                <b-input class="form-control form-control-sm" type="text" v-model="row.name" />
               </td>
               <td>
-                <input class="form-control" type="text" v-model="row.type" />
+                <b-form-select :options="opsVar" size="sm" v-model="row.type"></b-form-select>
               </td>
               <td>
-                <input class="form-control" type="text" v-model="row.value" />
+                <b-form-select :options="opsValue" size="sm" v-model="row.value"></b-form-select>
               </td>
               <td scope="row" class="text-center">
                 <b-btn
+                  class="btn btn-sm"
                   size="sm"
                   variant="danger"
                   @click="deleteRow(k, row)"
@@ -131,6 +132,7 @@
         <b-col sm="2"></b-col>
         <b-col sm="8" class="text-center">
           <b-btn @click="addRequest" size="sm" variant="primary" class="btn-add-request">
+            <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
             Save
           </b-btn>
         </b-col>
@@ -142,6 +144,7 @@
 <script>
 import { getAllDbType } from '@/service/db'
 import { getTableByDb } from '~/service/table.service'
+import { createRequestSync } from '~/service/request'
 export default {
   data () {
     return {
@@ -155,8 +158,8 @@ export default {
       status: 'not_chosen',
       opsType: [
         { value: null, text: 'Please select an option' },
-        { value: '1', text: 'Synchronized' },
-        { value: '2', text: 'Add Columns' }
+        { value: 1, text: 'Synchronized' },
+        { value: 2, text: 'Add Columns' }
       ],
       opsDb: [
         { value: null, text: 'Please select an option' }
@@ -165,13 +168,24 @@ export default {
         { value: null, text: 'Please select an option' }
       ],
       min: null,
+      opsVar: [
+        { value: null, text: 'Please select an option' },
+        { value: 1, text: 'Int' },
+        { value: 2, text: 'Float' }
+      ],
+      opsValue: [
+        { value: null, text: 'Please select an option' },
+        { value: 1, text: '0' },
+        { value: 2, text: 'null' }
+      ],
       rows: [{
-        name: '',
-        type: '',
-        value: ''
+        name: null,
+        type: null,
+        value: null
       }],
       isSync: false,
-      isAdd: false
+      isAdd: false,
+      isLoadingCreate: false
     }
   },
   async mounted () {
@@ -199,10 +213,10 @@ export default {
       }
     },
     showRequest () {
-      if (this.request.type === '1') {
+      if (this.request.type === 1) {
         this.isSync = true
         this.isAdd = false
-      } else if (this.request.type === '2') {
+      } else if (this.request.type === 2) {
         this.isSync = false
         this.isAdd = true
       } else {
@@ -222,13 +236,52 @@ export default {
         this.request.table = null
       }
     },
-    addRequest () {
+    async addRequest () {
+      if (this.request.isAll === 'chosen') {
+        this.request.isAll = true
+      } else {
+        this.request.isAll = false
+      }
       if (this.isSync) {
-        console.log(this.isSync)
+        try {
+          this.isLoadingCreate = true
+          const today = new Date()
+          const time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
+          const req = {
+            requestId: this.request.type,
+            tableId: this.request.table,
+            isAll: this.request.isAll,
+            fromDate: this.request.fromDate,
+            toDate: this.request.toDate,
+            time: time
+          }
+          console.log(req)
+          const res = await createRequestSync(req)
+          this.isLoadingCreate = false
+          if (res.code) {
+            this.$notify({ type: 'success', text: 'Add successful' })
+            this.resetData()
+          } else {
+            this.$notify({ type: 'error', text: 'Add failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoadingCreate = false
+        }
       }
       if (this.isAdd) {
-        console.log(this.isAdd)
+        const req = this.rows
+        console.log(req)
       }
+    },
+    resetData () {
+      this.request.type = null
+      this.request.database = null
+      this.request.table = null
+      this.request.isAll = 'not_chosen'
+      this.request.fromDate = null
+      this.request.toDate = null
     }
   }
 }

@@ -1,9 +1,13 @@
 <template>
- <div v-if="loading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-    <b-table :fields="tableFields" :items="tableList">
+ <div>
+   <section name="view" class="pt-3">
+    <b-table
+      responsive
+      hover
+      striped
+      :fields="tableFields"
+      :items="tableList"
+      :busy="loading">
       <template #cell(action)="item">
         <b-btn
           v-b-tooltip="`Detail table config`"
@@ -17,7 +21,7 @@
           v-b-tooltip="`Delete table config`"
           size="sm"
           variant="danger"
-          @click="deleteTableDetail(item.item.id)"
+          @click="deleteTb(item.item.id)"
         >
           <i class="fa fa-trash" />
         </b-btn>
@@ -37,12 +41,17 @@
         align="right"
         @input="getListTable"
       />
+   </section>
+      <section name="popup">
+      <table-component-deleteTable ref="delete" @onDeleted="onReload"/>
+    </section>
   </div>
 </template>
 
 <script>
-import { getListTable, deleteTableDetail } from '@/service/table.service'
+import { getListTable } from '@/service/table.service'
 import moment from 'moment'
+import { } from '@/components/table-component/deleteTable.vue'
 const tableFields = [
   {
     key: 'tableName'
@@ -101,14 +110,11 @@ export default {
         this.loading = false
       }
     },
-    async deleteTableDetail (id) {
-      const result = await deleteTableDetail(id)
-      if (result) {
-        this.$notify({ type: 'success', text: 'Delete Success!' })
-        this.$router.go()
-      } else {
-        this.$notify({ type: 'error', text: 'Delete unsuccessfully!' })
-      }
+    deleteTb (id) {
+      this.$refs.delete.show(id)
+    },
+    onReload () {
+      this.getListTable()
     }
   }
 }

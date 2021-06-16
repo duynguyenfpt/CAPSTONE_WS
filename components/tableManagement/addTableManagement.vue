@@ -160,7 +160,8 @@ export default {
       if (id !== null) {
         try {
           this.isLoadingCreate = true
-          const res = await createTable(this.config)
+          const info = [id, this.config.table]
+          const res = await createTable(info)
           this.isLoadingCreate = false
           if (res.code) {
             this.$notify({ type: 'success', text: 'Add successful' })
@@ -175,7 +176,7 @@ export default {
           const db = [this.config.host, this.config.port, this.config.dbName, this.config.username, this.config.password, this.config.dbType]
           const resDb = await createDatabase(db)
           if (resDb.code) {
-            const tb = [this.config.dbName, this.config.table]
+            const tb = [resDb.data.id, this.config.table]
             await createTable(tb)
           }
         } catch (e) {

@@ -1,3 +1,11 @@
 .vh-max {
   height: 100vh;
 }
+.pt-3-half { 
+  padding-top: 1.4rem; 
+}
+
+.btn-add-request {
+  padding-left: 25px;
+  padding-right: 25px;
+}

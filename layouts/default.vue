@@ -12,10 +12,6 @@
                 <i class="fa fa-list-ol" />
                 List Databases
               </b-nav-item>
-              <b-nav-item :to="{ name: 'db-add' }">
-                <i class="fa fa-plus" />
-                Add Database
-              </b-nav-item>
             </b-collapse>
           </b-nav-item>
 

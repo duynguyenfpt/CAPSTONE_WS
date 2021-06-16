@@ -119,8 +119,16 @@ export default {
         this.isLoadingCheck = true
         const res = await checkConnection(this.config)
         this.isConnected = res.success
+        if (this.isConnected) {
+          this.$notify({ type: 'success', text: 'Connect successful' })
+        } else {
+          this.$notify({ type: 'error', text: 'Connect failed' })
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
         this.isLoadingCheck = false
-      } catch (e) {}
+      }
     }
   }
 }

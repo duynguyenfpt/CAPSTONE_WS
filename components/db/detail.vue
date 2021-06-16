@@ -7,7 +7,7 @@
       <b-col cols="10">
         <h4>Tables</h4>
       </b-col>
-      <b-col class="pb-2">
+      <b-col class="text-right">
         <b-button v-b-modal.add-table size="sm" variant="primary"
           >Add Table</b-button
         >
@@ -49,12 +49,14 @@
         <AddTable v-if="detail" :database="detail" />
       </b-modal>
     </section>
+    <section name="popup">
+      <table-component-deleteTable ref="delete" @onDeleted="onReload"/>
+    </section>
   </div>
 </template>
 
 <script>
 import { getDatabaseDetail } from '@/service/db'
-import { deleteTableDetail } from '@/service/table.service'
 import AddTable from '@/components/table-component/addTable.vue'
 import moment from 'moment'
 
@@ -168,14 +170,10 @@ export default {
       }
     },
     async deleteTableDetail (id) {
-      const result = await deleteTableDetail(id)
-      if (result) {
-        this.$notify({ type: 'success', text: 'Delete Success!' })
-        this.$router.go()
-      } else {
-        this.$notify({ type: 'error', text: 'Delete unsuccessfully!' })
-        this.$router.go()
-      }
+      this.$refs.delete.show(id)
+    },
+    onReload () {
+      this.getDetail()
     }
   }
 }

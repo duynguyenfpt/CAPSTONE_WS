@@ -3,14 +3,14 @@
      <h4 class="text-center">Table Detail</h4>
      <b-table :fields="fields" :items="[table]"></b-table>
      <h4 class="text-center">Table Schema</h4>
-     <b-table :fields="schemaFields" :items="table.currentTableSchemaEntities"></b-table>
+     <b-table :fields="schemaFields" :items="table.currentTableSchemas"></b-table>
      <b-pagination
         size="sm"
         v-model="pagination.page"
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="table.currentTableSchemaEntities"
+        @input="table.currentTableSchemas"
       />
  </div>
 </template>
@@ -89,14 +89,14 @@ export default {
       try {
         const res = await getTableDetail(this.id)
         this.table = res.data
-        this.table.currentTableSchemaEntities = res.currentTableSchemaEntities
+        this.table.currentTableSchemas = res.data.currentTableSchemas
         this.table.createdDate = moment(this.table.createdDate).format('YYYY-MM-DD')
         this.table.modifiedDate = moment(this.table.modifiedDate).format('YYYY-MM-DD')
-        if (this.table.currentTableSchemaEntities) {
-          this.table.currentTableSchemaEntities.forEach((e) => {
+        if (this.table.currentTableSchemas) {
+          this.table.currentTableSchemas.forEach((e) => {
             e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
           })
-          this.table.currentTableSchemaEntities.forEach((e) => {
+          this.table.currentTableSchemas.forEach((e) => {
             e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
           })
         }

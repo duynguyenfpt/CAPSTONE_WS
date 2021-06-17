@@ -102,7 +102,7 @@ export default {
           approvedById: this.account.id
         }
         const data = await updateRequest(this.idItem, body)
-        if (!data.id) throw new Error('Update failed')
+        if (data.id) throw new Error('Update failed')
         this.$notify({ type: 'success', text: 'Update successful' })
         this.$emit('onUpdated', data)
       } catch (e) {

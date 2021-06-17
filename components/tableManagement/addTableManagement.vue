@@ -34,7 +34,7 @@
       </b-col>
       <b-col>
         <label>Password</label>
-        <b-input size="sm" v-model="config.password"></b-input>
+        <b-input size="sm" type="password" v-model="config.password"></b-input>
       </b-col>
     </b-row>
     <b-row>
@@ -160,11 +160,12 @@ export default {
       if (id !== null) {
         try {
           this.isLoadingCreate = true
-          const info = [id, this.config.table]
+          const info = { databaseInforId: id, tableName: this.config.table }
           const res = await createTable(info)
           this.isLoadingCreate = false
           if (res.code) {
             this.$notify({ type: 'success', text: 'Add successful' })
+            this.resetData()
           } else {
             this.$notify({ type: 'error', text: 'Add failed' })
           }
@@ -173,11 +174,19 @@ export default {
         }
       } else {
         try {
-          const db = [this.config.host, this.config.port, this.config.dbName, this.config.username, this.config.password, this.config.dbType]
+          const db = { serverInforId: this.config.host, port: this.config.port, databaseName: this.config.dbName, username: this.config.username, password: this.config.password, databaseType: this.config.dbType }
           const resDb = await createDatabase(db)
           if (resDb.code) {
-            const tb = [resDb.data.id, this.config.table]
-            await createTable(tb)
+            const tb = { databaseInforId: resDb.data.id, tableName: this.config.table }
+            this.isLoadingCreate = true
+            const resq = await createTable(tb)
+            this.isLoadingCreate = false
+            if (resq.code) {
+              this.$notify({ type: 'success', text: 'Add successful' })
+              this.resetData()
+            } else {
+              this.$notify({ type: 'error', text: 'Add failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

@@ -44,6 +44,7 @@
             v-model="request.table"
             :options="opsTb"
             size="sm"
+            @change="fillTable"
           >
           </b-form-select>
         </b-col>
@@ -99,13 +100,13 @@
                 {{k + 1}}
               </td>
               <td>
-                <b-input class="form-control form-control-sm" type="text" v-model="row.name" />
+                <v-select class="select-sm" :reduce="text => text.value" label="text" :options="opsName" v-model="row.name" size="sm" @input="fillRow(k)"></v-select>
               </td>
               <td>
-                <b-form-select :options="opsVar" size="sm" v-model="row.type"></b-form-select>
+                <b-form-input disabled size="sm" v-model="row.type"></b-form-input>
               </td>
               <td>
-                <b-form-select :options="opsValue" size="sm" v-model="row.value"></b-form-select>
+                <b-form-input disabled size="sm" v-model="row.value"></b-form-input>
               </td>
               <td scope="row" class="text-center">
                 <b-btn
@@ -143,8 +144,13 @@
 
 <script>
 import { getAllDbType } from '@/service/db'
-import { getTableByDb } from '~/service/table.service'
-import { createRequestSync } from '~/service/request'
+import { getTableByDb, getTableSchema } from '~/service/table.service'
+import { createRequestSync, createRequestAddColumn } from '~/service/request'
+import { getSchemaById } from '@/service/schema'
+import Vue from 'vue'
+import vSelect from 'vue-select'
+
+Vue.component('v-select', vSelect)
 export default {
   data () {
     return {
@@ -168,15 +174,8 @@ export default {
         { value: null, text: 'Please select an option' }
       ],
       min: null,
-      opsVar: [
-        { value: null, text: 'Please select an option' },
-        { value: 1, text: 'Int' },
-        { value: 2, text: 'Float' }
-      ],
-      opsValue: [
-        { value: null, text: 'Please select an option' },
-        { value: 1, text: '0' },
-        { value: 2, text: 'null' }
+      opsName: [
+        { value: null, text: 'Please select an option' }
       ],
       rows: [{
         name: null,
@@ -201,9 +200,9 @@ export default {
     },
     addNewRow () {
       this.rows.push({
-        name: '',
-        type: '',
-        value: ''
+        name: null,
+        type: null,
+        value: null
       })
     },
     deleteRow (index, row) {
@@ -225,6 +224,11 @@ export default {
       }
     },
     async fillData () {
+      this.rows = [{
+        name: null,
+        type: null,
+        value: null
+      }]
       const id = this.request.database
       if (id !== null) {
         const res = await getTableByDb(id)
@@ -234,6 +238,28 @@ export default {
         })
       } else {
         this.request.table = null
+      }
+    },
+    async fillTable () {
+      this.rows = [{
+        name: null,
+        type: null,
+        value: null
+      }]
+      const id = this.request.table
+      if (id !== null) {
+        const res = await getTableSchema(id)
+        this.opsName = res.data.map(item => {
+          return { value: item.id, text: item.rowName }
+        })
+      }
+    },
+    async fillRow (index) {
+      const id = this.rows[index].name
+      if (id !== null) {
+        const res = await getSchemaById(id)
+        this.rows[index].type = res.data.rowType
+        this.rows[index].value = res.data.defaultValue
       }
     },
     async addRequest () {
@@ -255,7 +281,6 @@ export default {
             toDate: this.request.toDate,
             time: time
           }
-          console.log(req)
           const res = await createRequestSync(req)
           this.isLoadingCreate = false
           if (res.code) {
@@ -271,8 +296,30 @@ export default {
         }
       }
       if (this.isAdd) {
-        const req = this.rows
-        console.log(req)
+        try {
+          this.isLoadingCreate = true
+          const rows = []
+          this.rows.forEach(element => {
+            rows.push(element.name)
+          })
+          const req = {
+            requestTypeId: this.request.type,
+            rowIds: rows,
+            tableId: this.request.table
+          }
+          const res = await createRequestAddColumn(req)
+          this.isLoadingCreate = false
+          if (res.code) {
+            this.$notify({ type: 'success', text: 'Add successful' })
+            this.resetData()
+          } else {
+            this.$notify({ type: 'error', text: 'Add failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoadingCreate = false
+        }
       }
     },
     resetData () {
@@ -282,9 +329,43 @@ export default {
       this.request.isAll = 'not_chosen'
       this.request.fromDate = null
       this.request.toDate = null
+      this.rows = [{
+        name: null,
+        type: null,
+        value: null
+      }]
     }
   }
 }
 </script>
 
-<style></style>
+<style>
+  @import 'vue-select/dist/vue-select.css';
+
+  .vs--searchable .vs__dropdown-toggle {
+    width: 100%;
+    min-width: 245.54px;
+    white-space: nowrap;
+    max-height: 31px;
+    height: calc(1.5em + 0.5rem + 2px);
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    padding-left: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .vs__selected {
+    margin: 0;
+    padding-bottom: 3px;
+    padding-left: 0;
+  }
+
+  .vs__actions {
+    padding: 0;
+    margin-right: 5px;
+  }
+
+  .vs__clear {
+    margin-bottom: 2px;
+  }
+</style>

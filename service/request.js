@@ -7,3 +7,4 @@ export const createRequest = (requests) => http.post('api/requests', requests)
 export const updateRequest = (id, requests) => http.put(`api/requests/${id}`, requests)
 
 export const createRequestSync = (request) => http.post('api/sync_table_requests', request)
+export const createRequestAddColumn = (request) => http.post('api/add_column_table_request', request)

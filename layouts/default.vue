@@ -26,6 +26,10 @@
                 <i class="fa fa-plus" />
                 Add Tables
               </b-nav-item>
+               <b-nav-item :to="{ name: 'table-changeHistory' }">
+                <i class="fa fa-circle" />
+                 Change Log
+              </b-nav-item>
             </b-collapse>
           </b-nav-item>
           <b-nav-item>

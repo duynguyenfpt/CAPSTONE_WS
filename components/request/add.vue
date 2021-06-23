@@ -144,7 +144,7 @@
 
 <script>
 import { getAllDbType } from '@/service/db'
-import { getTableByDb, getTableSchema } from '~/service/table.service'
+import { getAllTableByDb, getTableSchema } from '~/service/table.service'
 import { createRequestSync, createRequestAddColumn } from '~/service/request'
 import { getSchemaById } from '@/service/schema'
 import Vue from 'vue'
@@ -231,7 +231,7 @@ export default {
       }]
       const id = this.request.database
       if (id !== null) {
-        const res = await getTableByDb(id)
+        const res = await getAllTableByDb(id)
         // eslint-disable-next-line array-callback-return
         res.data.map(item => {
           this.opsTb.push({ value: item.id, text: item.tableName })
@@ -284,10 +284,10 @@ export default {
           const res = await createRequestSync(req)
           this.isLoadingCreate = false
           if (res.code) {
-            this.$notify({ type: 'success', text: 'Add successful' })
+            this.$notify({ type: 'success', text: 'Create request succeeded' })
             this.resetData()
           } else {
-            this.$notify({ type: 'error', text: 'Add failed' })
+            this.$notify({ type: 'error', text: 'Create request failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
@@ -310,10 +310,10 @@ export default {
           const res = await createRequestAddColumn(req)
           this.isLoadingCreate = false
           if (res.code) {
-            this.$notify({ type: 'success', text: 'Add successful' })
+            this.$notify({ type: 'success', text: 'Create request succeeded' })
             this.resetData()
           } else {
-            this.$notify({ type: 'error', text: 'Add failed' })
+            this.$notify({ type: 'error', text: 'Create request failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

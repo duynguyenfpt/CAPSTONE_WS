@@ -1,35 +1,47 @@
 <template>
-  <div v-if="request">
+  <div>
     <b-row class="pt-2">
       <b-col class="text-center">
         <h2>Request Management</h2>
       </b-col>
     </b-row>
-    <br />
-    <b-table :fields="tableFields" :items="request">
-      <template #cell(action)="item">
-        <b-btn @click="edit(item.item.id)" size="sm" variant="info">
-          <i class="fa fa-pen" />
-        </b-btn>
-        <b-btn size="sm" variant="danger" @click="deleteRequest(item.item.id)">
-          <i class="fa fa-trash" />
-        </b-btn>
-      </template>
-      <template #cell(no)="item">
-        {{ countRecord(item.index) }}
-      </template>
-      <template #cell(status)="row">
-        <b-badge :variant="getStatusVariant(row.item.status)">{{row.item.status}}</b-badge>
-      </template>
-    </b-table>
-    <b-pagination
-      size="sm"
-      v-model="pagination.page"
-      :per-page="pagination.limit"
-      :total-rows="pagination.total"
-      align="right"
-      @input="getList"
-    />
+    <section name="view" class="pt-3">
+      <b-table
+      responsive
+      hover
+      striped
+      :fields="tableFields"
+      :items="request"
+      :busy="loading">
+        <template #cell(action)="item">
+          <b-btn @click="edit(item.item.id)" size="sm" variant="info">
+            <i class="fa fa-pen" />
+          </b-btn>
+        </template>
+        <template #cell(no)="item">
+          {{ countRecord(item.index) }}
+        </template>
+        <template #cell(status)="row">
+          <b-badge :variant="getStatusVariant(row.item.status)">{{
+            row.item.status
+          }}</b-badge>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+        </template>
+      </b-table>
+      <b-pagination
+        size="sm"
+        v-model="pagination.page"
+        :per-page="pagination.limit"
+        :total-rows="pagination.total"
+        align="right"
+        @input="getList"
+      />
+    </section>
     <section name="popup">
       <request-edit ref="edit" @onUpdated="refreshData" />
     </section>
@@ -70,30 +82,34 @@ const tableFields = [
 ]
 
 export default {
-  data () {
-    return {
-      pagination: {
-        page: 1,
-        limit: 4,
-        total: 0
-      },
-      tableFields: tableFields,
-      request: null
-    }
-  },
+  data: () => ({
+    pagination: {
+      page: 1,
+      limit: 5,
+      total: 0
+    },
+    tableFields: tableFields,
+    request: null,
+    loading: false
+  }),
   created () {
     this.getList()
   },
   methods: {
     getStatusVariant (status) {
       switch (status) {
-        case 'pending': return 'secondary'
-        case 'approved': return 'success'
-        case 'rejected': return 'danger'
-        default: return 'secondary'
+        case 'pending':
+          return 'secondary'
+        case 'approved':
+          return 'success'
+        case 'rejected':
+          return 'danger'
+        default:
+          return 'secondary'
       }
     },
     async getList () {
+      this.loading = true
       try {
         const res = await getRequest(
           this.pagination.page,
@@ -109,10 +125,11 @@ export default {
         })
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
       }
     },
     edit (id) {
-      console.log(id)
       this.$refs.edit.show(id)
     },
     countRecord (index) {

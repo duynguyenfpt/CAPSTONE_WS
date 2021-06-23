@@ -8,56 +8,68 @@
         <h4>Tables</h4>
       </b-col>
       <b-col class="text-right">
-        <b-button v-b-modal.add-table size="sm" variant="primary"
+        <b-button @click="addTb(detail.id)" size="sm" variant="primary"
           >Add Table</b-button
         >
       </b-col>
     </b-row>
 
-    <b-table class="pt-2" :fields="dbTable" :items="detail.tables">
-      <template #cell(action)="item">
-        <b-btn
-          v-b-tooltip="`Detail table config`"
-          :to="{ name: 'table-id', params: { id: item.item.id } }"
-          size="sm"
-          variant="success"
-        >
-          <i class="fa fa-eye" />
-        </b-btn>
-        <b-btn
-          v-b-tooltip="`Delete table config`"
-          size="sm"
-          variant="danger"
-          @click="deleteTableDetail(item.item.id)"
-        >
-          <i class="fa fa-trash" />
-        </b-btn>
-      </template>
-    </b-table>
-    <b-pagination
-      :per-page="pagination.limit"
-      v-model="pagination.page"
-      :total-rows="pagination.total"
-      align="right"
-      pills
-      size="sm"
-       @input="detail.tables"
-    />
+    <section namen="view" class="pt-3">
+      <b-table
+        responsive
+        hover
+        striped
+        :items="detail.tables"
+        :fields="tbFields"
+        :busy="loading"
+      >
+        <template #cell(no)="item">
+          {{ countRecord(item.index) }}
+        </template>
 
-    <section name="popup">
-      <b-modal id="add-table" title="Add Table" hide-footer>
-        <AddTable v-if="detail" :database="detail" />
-      </b-modal>
+        <template #cell(action)="item">
+          <b-btn
+            :to="{ name: 'table-id', params: { id: item.item.id } }"
+            size="sm"
+            variant="success"
+          >
+            <i class="fa fa-eye" />
+          </b-btn>
+          <b-btn
+            size="sm"
+            variant="danger"
+            @click="deleteTableDetail(item.item.id)"
+          >
+            <i class="fa fa-trash" />
+          </b-btn>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+        </template>
+      </b-table>
+      <b-pagination
+        :per-page="pagination.limit"
+        v-model="pagination.page"
+        :total-rows="pagination.total"
+        align="right"
+        size="sm"
+        @input="detail.tables"
+      />
     </section>
     <section name="popup">
-      <table-component-deleteTable ref="delete" @onDeleted="onReload"/>
+      <table-component-addTable ref="add" @onAdded="onReload"/>
+    </section>
+    <section name="popup">
+      <table-component-deleteTable ref="delete" @onDeleted="onReload" />
     </section>
   </div>
 </template>
 
 <script>
 import { getDatabaseDetail } from '@/service/db'
-import AddTable from '@/components/table-component/addTable.vue'
 import moment from 'moment'
 
 const dbFields = [
@@ -90,7 +102,10 @@ const dbFields = [
   }
 ]
 
-const dbTable = [
+const tbFields = [
+  {
+    key: 'no'
+  },
   {
     key: 'tableName'
   },
@@ -111,20 +126,7 @@ const dbTable = [
   }
 ]
 
-const fields = [
-  {
-    key: 'databaseName',
-    label: 'Database Name'
-  },
-  {
-    key: 'table',
-    label: 'Table'
-  }
-]
 export default {
-  components: {
-    AddTable
-  },
   props: {
     id: {}
   },
@@ -137,19 +139,21 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 4,
+        limit: 5,
         total: 0
       },
-      fields: fields,
       dbFields: dbFields,
-      dbTable: dbTable,
-      detail: null
+      tbFields: tbFields,
+      detail: null,
+      loading: false
     }
   },
   methods: {
     async getDetail () {
       try {
+        this.loading = true
         const res = await getDatabaseDetail(this.id)
+        console.log(res.data)
         this.detail = res.data
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
@@ -167,6 +171,8 @@ export default {
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
       }
     },
     async deleteTableDetail (id) {
@@ -174,6 +180,13 @@ export default {
     },
     onReload () {
       this.getDetail()
+    },
+    addTb (id) {
+      this.$refs.add.show(id)
+    },
+    countRecord (index) {
+      // console.log((this.pagination.page - 1) * this.pagination.limit + index + 1)
+      return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }
 }

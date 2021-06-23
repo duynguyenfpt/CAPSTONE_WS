@@ -10,7 +10,7 @@
         <label class="form-label">Host</label>
         <b-form-select
           v-model="config.serverInforId"
-          :options="options"
+          :options="dbHosts"
           size="sm"
         ></b-form-select>
       </b-col>
@@ -40,7 +40,7 @@
           <b-button size="sm" variant="outline-primary" @click="checkConnectionStatus">
             <b-spinner v-if="isLoadingCheck" variant="primary" small></b-spinner>
             <i v-if="isConnected" class="fas fa-check"></i>
-            Check connection
+            Test connection
           </b-button>
       </b-col>
       <b-col class="text-right">
@@ -61,7 +61,9 @@ import { getAllServers } from '@/service/server'
 
 export default {
   data: () => ({
-    options: [],
+    dbHosts: [
+      { value: null, text: 'Please select an option' }
+    ],
     dbTypes: [
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
@@ -70,7 +72,7 @@ export default {
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
     config: {
-      serverInforId: 0,
+      serverInforId: null,
       port: 3306,
       databaseName: 'example',
       username: 'root',
@@ -87,8 +89,9 @@ export default {
   async mounted () {
     this.isLoading = true
     const hosts = await getAllServers()
-    this.options = hosts.data.map(item => {
-      return { value: item.id, text: item.serverHost }
+    // eslint-disable-next-line array-callback-return
+    hosts.data.map(item => {
+      this.dbHosts.push({ value: item.id, text: item.serverHost })
     })
     this.isLoading = false
   },
@@ -105,10 +108,9 @@ export default {
         this.isVisible = false
         this.$emit('onAdded')
         if (res.code) {
-          this.$notify({ type: 'success', text: 'Add successful' })
-          // this.$router.push({ name: 'db-id', params: { id: res.id } })
+          this.$notify({ type: 'success', text: 'Create database succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Add failed' })
+          this.$notify({ type: 'error', text: 'Create database failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -120,9 +122,9 @@ export default {
         const res = await checkConnection(this.config)
         this.isConnected = res.success
         if (this.isConnected) {
-          this.$notify({ type: 'success', text: 'Connect successful' })
+          this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {
-          this.$notify({ type: 'error', text: 'Connect failed' })
+          this.$notify({ type: 'error', text: 'Test connection failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

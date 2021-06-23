@@ -39,7 +39,6 @@
 
         <template #cell(action)="item">
           <b-btn
-            v-b-tooltip="`Detail database config`"
             :to="{ name: 'db-id', params: { id: item.item.id } }"
             size="sm"
             variant="success"
@@ -48,14 +47,12 @@
           </b-btn>
           <b-btn
             @click="editDb(item.item.id)"
-            v-b-tooltip="`Edit database config`"
             size="sm"
             variant="info"
           >
             <i class="fa fa-pen" />
           </b-btn>
           <b-btn
-            v-b-tooltip="`Delete database config`"
             size="sm"
             variant="danger"
             @click="deleteDb(item.item.id)"
@@ -156,13 +153,12 @@ export default {
           this.pagination.limit
         )
         this.dbs = res.data
-
         this.dbs.forEach((e) => {
           e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
         })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {
-
+        this.$notify({ type: 'error', text: e.message })
       } finally {
         this.loading = false
       }

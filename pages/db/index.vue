@@ -61,10 +61,10 @@
           </b-btn>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>
-            <strong>Loading...</strong>
-          </div>
+          <content-placeholders class="article-card-block">
+            <content-placeholders-text :lines="2" />
+            <content-placeholders-text :lines="6" />
+          </content-placeholders>
         </template>
       </b-table>
       <b-pagination

@@ -19,7 +19,7 @@
         responsive
         hover
         striped
-        :items="detail.tables"
+        :items="listTableDetail"
         :fields="tbFields"
         :busy="loading"
       >
@@ -56,7 +56,7 @@
         :total-rows="pagination.total"
         align="right"
         size="sm"
-        @input="detail.tables"
+        @input="getDetail"
       />
     </section>
     <section name="popup">
@@ -66,10 +66,17 @@
       <table-component-deleteTable ref="delete" @onDeleted="onReload" />
     </section>
   </div>
+   <div v-else>
+   <content-placeholders class="article-card-block">
+      <content-placeholders-text :lines="3" />
+      <content-placeholders-text :lines="18" />
+    </content-placeholders>
+ </div>
 </template>
 
 <script>
 import { getDatabaseDetail } from '@/service/db'
+import { getAllTableByDb } from '@/service/table.service'
 import moment from 'moment'
 
 const dbFields = [
@@ -145,6 +152,7 @@ export default {
       dbFields: dbFields,
       tbFields: tbFields,
       detail: null,
+      listTableDetail: null,
       loading: false
     }
   },
@@ -153,7 +161,10 @@ export default {
       try {
         this.loading = true
         const res = await getDatabaseDetail(this.id)
-        console.log(res.data)
+        const resList = await getAllTableByDb(this.id, this.pagination.page, this.pagination.limit)
+        this.listTableDetail = resList.data
+        this.pagination.total = resList.metaData.totalItem
+        console.log(this.pagination)
         this.detail = res.data
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'

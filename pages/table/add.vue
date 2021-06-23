@@ -1,14 +1,14 @@
 <template>
   <div>
-    <TableManageman/>
+    <TableManagement/>
   </div>
 </template>
 
 <script>
-import TableManageman from '@/components/tableManagement/addTableManagement.vue'
+import TableManagement from '@/components/tableManagement/addTableManagement.vue'
 export default {
   components: {
-    TableManageman
+    TableManagement
   }
 }
 </script>

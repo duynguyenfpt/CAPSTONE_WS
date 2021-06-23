@@ -1,45 +1,51 @@
 <template>
   <div>
-    <b-row>
-      <b-col>
-        <b-alert variant="danger" v-show="message" show>
-          {{message}}
-        </b-alert>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="4">
-        <label class="form-lab">Database Name</label>
-      </b-col>
-      <b-col>
-        <b-input
-          size="sm"
-          disabled
-          :placeholder="database.databaseName"
-        ></b-input>
-      </b-col>
-    </b-row>
-    <b-row class="pt-2">
-      <b-col cols="4">
-        <label class="text-center">Table Name</label>
-
-      </b-col>
-      <b-col>
-        <b-form-input id="input-live" :state="validateTable" size="sm" v-model="table.tableName"></b-form-input>
-      </b-col>
-    </b-row>
-    <b-row class="text-center pt-3">
-      <b-col>
-        <b-button @click="addTable" variant="primary" size="sm"
-          >Add table</b-button
-        >
-      </b-col>
-    </b-row>
+    <b-modal v-model="isVisible" title="Create Table" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col cols="4">
+            <label class="form-lab">Database Name</label>
+          </b-col>
+          <b-col>
+            <b-input size="sm" disabled v-model="table.dbName"></b-input>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="text-center">Table Name</label>
+          </b-col>
+          <b-col>
+            <b-form-input
+              id="input-live"
+              :state="validateTable"
+              size="sm"
+              v-model="table.tableName"
+            ></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="text-center pt-3">
+          <b-col class="text-right">
+            <b-button @click="addTable" variant="primary" size="sm"
+              >
+              <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
+              Add table</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import { addTable } from '@/service/table.service'
+import { getDatabaseDetail } from '@/service/db'
 
 export default {
   props: {
@@ -51,42 +57,47 @@ export default {
     }
   },
   data: () => ({
-    loading: false,
+    isLoading: false,
     table: {
-      tableName: null
+      tableName: null,
+      dbName: null
     },
-    message: null
+    isVisible: false,
+    idItem: 0,
+    isLoadingCreate: false
   }),
-
   methods: {
+    async show (id) {
+      this.idItem = id
+      this.isVisible = true
+      this.isLoading = true
+      const res = await getDatabaseDetail(this.idItem)
+      this.table.dbName = res.data.databaseName
+      this.isLoading = false
+    },
+    onClose () {
+      this.isVisible = false
+    },
     async addTable () {
-      this.loading = true
-      this.message = null
       try {
+        this.isLoadingCreate = true
         const body = {
           tableName: this.table.tableName,
-          databaseInforId: this.database.id
+          databaseInforId: this.idItem
         }
-        if (!this.validateTable) {
-          throw new Error('Invalid table name')
-        }
-        /// fake data loi
-        if (body.tableName === 'Huong_test' || body.tableName === 'table name') {
-          throw new Error('Table is existed')
+        const res = await addTable(body)
+        this.$emit('onAdded')
+        if (res.code) {
+          this.$notify({ type: 'success', text: 'Add table succeeded' })
         } else {
-          const res = await addTable(body)
-          const tableID = res.id
-          if (tableID) {
-            this.$notify({ type: 'error', text: 'Add table unsuccessfully' })
-          } else {
-            this.$notify({ type: 'success', text: 'Add Table Successfully' })
-          }
-          this.$router.go()
+          this.$notify({ type: 'error', text: 'Add table failed' })
         }
+        this.$router.go()
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
         this.loading = false
+        this.isVisible = false
       }
     }
   }

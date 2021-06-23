@@ -43,9 +43,9 @@ export default {
         this.isVisible = false
         this.$emit('onDeleted')
         if (res.code) {
-          this.$notify({ type: 'success', text: 'Delete successful' })
+          this.$notify({ type: 'success', text: 'Delete table succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Delete failed' })
+          this.$notify({ type: 'error', text: 'Delete table failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

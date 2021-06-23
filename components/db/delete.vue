@@ -39,17 +39,16 @@ export default {
       try {
         this.isLoading = true
         const res = await deleteDatabaseDetail(this.idItem)
-        this.isLoading = false
-        this.isVisible = false
         this.$emit('onDeleted')
         if (res.code) {
-          this.$notify({ type: 'success', text: 'Delete successful' })
+          this.$notify({ type: 'success', text: 'Delete database succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Delete failed' })
+          this.$notify({ type: 'error', text: 'Delete database failed' })
           this.$router.go()
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
+      } finally {
         this.isLoading = false
         this.isVisible = false
       }

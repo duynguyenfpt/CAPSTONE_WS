@@ -107,10 +107,10 @@ export default {
         this.isLoadingUpdate = false
         this.isVisible = false
         this.$emit('onUpdated', data)
-        if (data.id) {
-          this.$notify({ type: 'error', text: 'Update failed' })
+        if (data.code) {
+          this.$notify({ type: 'success', text: 'Update database succeeded' })
         } else {
-          this.$notify({ type: 'success', text: 'Update successful' })
+          this.$notify({ type: 'error', text: 'Update database failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

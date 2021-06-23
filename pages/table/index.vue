@@ -8,6 +8,9 @@
       :fields="tableFields"
       :items="tableList"
       :busy="loading">
+      <template #cell(no)="item">
+          {{ countRecord(item.index) }}
+        </template>
       <template #cell(action)="item">
         <b-btn
           v-b-tooltip="`Detail table config`"
@@ -54,6 +57,9 @@ import moment from 'moment'
 import { } from '@/components/table-component/deleteTable.vue'
 const tableFields = [
   {
+    key: 'no'
+  },
+  {
     key: 'tableName'
   },
   {
@@ -78,7 +84,7 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 4,
+        limit: 5,
         total: 0
       },
       tableFields: tableFields,
@@ -115,6 +121,9 @@ export default {
     },
     onReload () {
       this.getListTable()
+    },
+    countRecord (index) {
+      return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }
 }

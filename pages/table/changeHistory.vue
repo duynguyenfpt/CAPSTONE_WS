@@ -5,12 +5,11 @@
         <h3>Table schema change log</h3>
       </b-col>
       <b-col sm="2" class="text-right">
-   <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
-            <i class="fa fa-sync pr-1" />
-            Reload
-          </b-btn>
+        <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+          <i class="fa fa-sync pr-1" />
+          Reload
+        </b-btn>
       </b-col>
-
     </b-row>
 
     <!-- Select Database from api -->
@@ -43,37 +42,52 @@
         ></b-form-select>
       </b-col>
       <!-- Filter search -->
-      <b-col sm="3" class="pt-4 pr-2 text-center">
-        <b-button size="sm" variant="primary" @click="filter">
+      <b-col class="pt-4 text-right">
+        <b-button size="sm" variant="primary" @click="filter" class="btn-fliter">
           Filter
         </b-button>
       </b-col>
     </b-row>
     <!-- Get list Tables change history -->
     <b-row class="pt-4">
-      <b-table :items="schemaChanges" :fields="fields">
+      <b-table
+      responsive
+      hover
+      striped
+      :items="schemaChanges"
+      :fields="fields"
+      :busy="loading">
         <template #cell(no)="item">
-        {{ countRecord(item.index) }}
-      </template>
-    </b-table>
+          {{ countRecord(item.index) }}
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+        </template>
+      </b-table>
     </b-row>
-       <section>
-        <b-pagination
-          size="sm"
-          v-model="pagination.page"
-          :per-page="pagination.limit"
-          :total-rows="pagination.total"
-          align="right"
-          @input="getAllChangeHistory"
-        />
-      </section>
+    <section>
+      <b-pagination
+        size="sm"
+        v-model="pagination.page"
+        :per-page="pagination.limit"
+        :total-rows="pagination.total"
+        align="right"
+        @input="getAllChangeHistory"
+      />
+    </section>
   </div>
 </template>
 
 <script>
-import { getAllChangeHistory, filterByTableIdAndTypeChange } from '@/service/tableSchemaChangeHistory'
+import {
+  getAllChangeHistory,
+  filterByTableIdAndTypeChange
+} from '@/service/tableSchemaChangeHistory'
 import { getListDatabase } from '@/service/db'
-import { getTableByDb } from '@/service/table.service'
+import { getAllTableByDb } from '@/service/table.service'
 const fields = [
   { key: 'no' },
   { key: 'tableInfo.databaseInfo.databaseName', label: 'Database' },
@@ -113,7 +127,8 @@ export default {
     db: null,
     tableOfDb: null,
     typeChange: null,
-    schemaChanges: []
+    schemaChanges: [],
+    loading: false
   }),
 
   created () {
@@ -122,6 +137,7 @@ export default {
   methods: {
     async getAllChangeHistory () {
       try {
+        this.loading = true
         console.log('api')
         const res = await getAllChangeHistory(
           this.pagination.page,
@@ -136,17 +152,18 @@ export default {
         }))
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
       }
     },
     async getTableToDB (db) {
       try {
         if (db != null) {
-          const resTable = await getTableByDb(db)
+          const resTable = await getAllTableByDb(db)
           this.tableOps = resTable.data.map((item) => ({
             value: item.id,
             text: item.tableName
           }))
-          console.log('getTableToDB')
         } else {
           this.tableOps = null
         }
@@ -159,10 +176,18 @@ export default {
     },
     async filter (tableOfDb, typeChange) {
       try {
-        const res = await filterByTableIdAndTypeChange(this.tableOfDb, this.pagination.page, this.pagination.limit, this.typeChange)
+        this.loading = true
+        const res = await filterByTableIdAndTypeChange(
+          this.tableOfDb,
+          this.pagination.page,
+          this.pagination.limit,
+          this.typeChange
+        )
         this.schemaChanges = res.data
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
       }
     },
     onReload () {

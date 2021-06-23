@@ -50,6 +50,10 @@
     </b-row>
     <b-row class="pt-2">
       <b-col class="text-right">
+        <b-button size="sm" variant="outline-primary" @click="checkConnectionStatus">
+            <b-spinner v-if="isLoadingCheck" variant="primary" small></b-spinner>
+            Test connection
+          </b-button>
         <b-button size="sm" variant="primary" @click="createTable">
           <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
           Add Table
@@ -61,7 +65,7 @@
 </template>
 
 <script>
-import { createDatabase, getAllDbType, getDatabaseDetail } from '@/service/db'
+import { createDatabase, getAllDbType, getDatabaseDetail, checkConnection } from '@/service/db'
 import { getAllServers } from '@/service/server'
 import { createTable } from '@/service/table.service'
 
@@ -92,7 +96,8 @@ export default {
     },
     isLoading: false,
     isLoadingCreate: false,
-    isLoadingFill: false
+    isLoadingFill: false,
+    isLoadingCheck: false
   }),
   computed: {
     validateTable () {
@@ -191,6 +196,22 @@ export default {
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
         }
+      }
+    },
+    async checkConnectionStatus () {
+      try {
+        this.isLoadingCheck = true
+        const res = await checkConnection(this.config)
+        this.isConnected = res.success
+        if (this.isConnected) {
+          this.$notify({ type: 'success', text: 'Test connection succeeded.' })
+        } else {
+          this.$notify({ type: 'error', text: 'Test connection failed' })
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.isLoadingCheck = false
       }
     }
   }

@@ -136,9 +136,9 @@ export default {
         const res = await createTable(this.config)
         this.isLoadingCreate = false
         if (res.id) {
-          this.$notify({ type: 'success', text: 'Add successful' })
+          this.$notify({ type: 'success', text: 'Add table succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Add failed' })
+          this.$notify({ type: 'error', text: 'Add table failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -169,10 +169,10 @@ export default {
           const res = await createTable(info)
           this.isLoadingCreate = false
           if (res.code) {
-            this.$notify({ type: 'success', text: 'Add successful' })
+            this.$notify({ type: 'success', text: 'Add table succeeded' })
             this.resetData()
           } else {
-            this.$notify({ type: 'error', text: 'Add failed' })
+            this.$notify({ type: 'error', text: 'Add table failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
@@ -187,10 +187,10 @@ export default {
             const resq = await createTable(tb)
             this.isLoadingCreate = false
             if (resq.code) {
-              this.$notify({ type: 'success', text: 'Add successful' })
+              this.$notify({ type: 'success', text: 'Add table succeeded' })
               this.resetData()
             } else {
-              this.$notify({ type: 'error', text: 'Add failed' })
+              this.$notify({ type: 'error', text: 'Add table failed' })
             }
           }
         } catch (e) {

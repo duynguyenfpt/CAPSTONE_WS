@@ -159,7 +159,7 @@ export default {
     async getTableToDB (db) {
       try {
         if (db != null) {
-          const resTable = await getAllTableByDb(db)
+          const resTable = await getAllTableByDb(db, 1, 1000)
           this.tableOps = resTable.data.map((item) => ({
             value: item.id,
             text: item.tableName

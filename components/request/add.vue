@@ -231,7 +231,7 @@ export default {
       }]
       const id = this.request.database
       if (id !== null) {
-        const res = await getAllTableByDb(id)
+        const res = await getAllTableByDb(id, 1, 1000)
         // eslint-disable-next-line array-callback-return
         res.data.map(item => {
           this.opsTb.push({ value: item.id, text: item.tableName })

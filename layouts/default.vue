@@ -3,8 +3,18 @@
     <b-row no-gutters>
       <b-col cols="2" class="w-100 side-nav-container">
         <b-nav vertical class="side-nav w-100 p-3">
-          <h4 href="/">Capstone</h4>
+          <h4 href="/">FTDS System</h4>
           <hr />
+          <b-nav-item v-b-toggle.db>
+            <i class="fa fa-user mr-1" /> Account Management
+            <b-collapse id="db">
+              <b-nav-item :to="{ name: 'account' }">
+                <i class="fa fa-list-ol" />
+                List Accounts
+              </b-nav-item>
+            </b-collapse>
+          </b-nav-item>
+
           <b-nav-item v-b-toggle.db>
             <i class="fa fa-server mr-1" /> Databases config
             <b-collapse id="db">

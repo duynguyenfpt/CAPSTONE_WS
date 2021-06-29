@@ -83,7 +83,7 @@ background: -webkit-linear-gradient(to bottom, #5e37eb, #7962de);  /* Chrome 10-
 background: linear-gradient(to bottom,#322769, #15747d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 float:left;
 width:100%;
-padding : 50px 0;
+padding : 107px 0;
 }
 .banner-sec{background:url(https://static.pexels.com/photos/33972/pexels-photo.jpg)  no-repeat left bottom; background-size:cover; min-height:500px; border-radius: 0 10px 10px 0; padding:0;}
 .container{background:#fff; border-radius: 10px; box-shadow:15px 20px 0px rgba(0,0,0,0.1);}

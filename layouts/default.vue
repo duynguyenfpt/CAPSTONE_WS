@@ -65,22 +65,34 @@
         </b-nav>
       </b-col>
       <b-col>
-        <b-navbar toggleable="lg" type="dark" variant="light" sticky>
+        <b-navbar toggleable="sm" variant="light" sticky>
           <b-navbar-nav class="ml-auto">
-            <b-nav-item-dropdown text="Lang" right>
-              <b-dropdown-item href="#">EN</b-dropdown-item>
-              <b-dropdown-item href="#">ES</b-dropdown-item>
-              <b-dropdown-item href="#">RU</b-dropdown-item>
-              <b-dropdown-item href="#">FA</b-dropdown-item>
-            </b-nav-item-dropdown>
-
             <b-nav-item-dropdown right>
               <!-- Using 'button-content' slot -->
               <template #button-content>
-                <em>User</em>
+                  <b-img src="~@/assets/images/user.png" class="account-profile"></b-img>
               </template>
-              <b-dropdown-item href="#">Profile</b-dropdown-item>
-              <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+              <b-dropdown-item class="card-info">
+                <div class="account-info">
+                  <b-row>
+                    <b-col cols="8" class="text-12">Admin</b-col>
+                    <b-col class="text-right">
+                      <a id="account-link" class="text-12">Sign Out</a>
+                    </b-col>
+                  </b-row>
+                  <b-row class="account-detail">
+                    <b-col cols="3">
+                      <b-img src="~@/assets/images/user.png" class="account-img"></b-img>
+                    </b-col>
+                    <b-col class="info-detail">
+                      <h6>Nguyen Thi Thuy Linh</h6>
+                      <p class="text-12">linhntt2306@gmail.com</p>
+                      <a class="text-12">View Account</a>
+                    </b-col>
+                  </b-row>
+                </div>
+              </b-dropdown-item>
+              <!-- <b-dropdown-item href="#">Sign Out</b-dropdown-item> -->
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-navbar>
@@ -134,5 +146,50 @@ export default {
 
 .side-nav >>> a:hover {
   color: rgb(124, 137, 255) !important;
+}
+
+.account-profile {
+  width: 35px;
+  padding: 3px;
+  border-radius: 50%;
+  border: 2px solid #2c2e5f;
+}
+
+.sticky-top {
+  padding: 0;
+  padding-top: 5px;
+}
+
+.card-info {
+  width: 350px;
+  height: auto;
+}
+
+.card-info :hover {
+  background-color: #fff;
+}
+
+#account-link {
+  text-decoration: none;
+  color: #212529;
+}
+
+.account-img {
+  width: 75px;
+  border-radius: 50%;
+}
+
+.account-detail {
+  margin-top: 15px;
+}
+
+.info-detail {
+  margin-left: 15px;
+}
+
+.text-12 {
+  font-size: 13px;
+  margin: 0;
+  text-decoration: none;
 }
 </style>

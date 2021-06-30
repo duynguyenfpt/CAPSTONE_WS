@@ -47,10 +47,10 @@ export default {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
-      this.config.username = 'Linh'
-      this.config.email = 'Linh'
-      this.config.phone = 'Linh'
-      this.config.role = 'Linh'
+      this.config.username = 'LinhNTT'
+      this.config.email = 'linhntt2306@gmail.com'
+      this.config.phone = '0342313344'
+      this.config.role = 'Admin'
       this.isLoading = false
     },
     onClose () {

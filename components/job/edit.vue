@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-model="isVisible" title="Edit Account" hide-footer>
+  <b-modal v-model="isVisible" title="Edit Job" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -66,9 +66,9 @@ export default {
         this.isVisible = false
         this.$emit('onUpdated', data)
         if (data.code) {
-          this.$notify({ type: 'success', text: 'Update account succeeded' })
+          this.$notify({ type: 'success', text: 'Update job succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Update account failed' })
+          this.$notify({ type: 'error', text: 'Update job failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

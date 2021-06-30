@@ -25,7 +25,6 @@
   </div>
 
 </form>
-<div class="copy-text">Created with <i class="fa fa-heart"></i> by Grafreez</div>
 </div>
 <div class="col-md-8 banner-sec">
             <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -79,12 +78,12 @@ export default {
 
 <style scoped>
 .login-block{
-    background: #DE6262;  /* fallback for old browsers */
-background: -webkit-linear-gradient(to bottom, #FFB88C, #DE6262);  /* Chrome 10-25, Safari 5.1-6 */
-background: linear-gradient(to bottom, #FFB88C, #DE6262); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: #330e97;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to bottom, #5e37eb, #7962de);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to bottom,#322769, #15747d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 float:left;
 width:100%;
-padding : 50px 0;
+padding : 107px 0;
 }
 .banner-sec{background:url(https://static.pexels.com/photos/33972/pexels-photo.jpg)  no-repeat left bottom; background-size:cover; min-height:500px; border-radius: 0 10px 10px 0; padding:0;}
 .container{background:#fff; border-radius: 10px; box-shadow:15px 20px 0px rgba(0,0,0,0.1);}
@@ -94,9 +93,9 @@ padding : 50px 0;
 .login-sec .copy-text{position:absolute; width:80%; bottom:20px; font-size:13px; text-align:center;}
 .login-sec .copy-text i{color:#FEB58A;}
 .login-sec .copy-text a{color:#E36262;}
-.login-sec h2{margin-bottom:30px; font-weight:800; font-size:30px; color: #DE6262;}
-.login-sec h2:after{content:" "; width:100px; height:5px; background:#FEB58A; display:block; margin-top:20px; border-radius:3px; margin-left:auto;margin-right:auto}
-.btn-login{background: #DE6262; color:#fff; font-weight:600;}
+.login-sec h2{margin-bottom:30px; font-weight:800; font-size:30px; color: #3b3fbf;}
+.login-sec h2:after{content:" "; width:100px; height:5px; background:#50c7c2; display:block; margin-top:20px; border-radius:3px; margin-left:auto;margin-right:auto}
+.btn-login{background: #3b3fbf; color:#fff; font-weight:600;}
 .banner-text{width:70%; position:absolute; bottom:40px; padding-left:20px;}
 .banner-text h2{color:#fff; font-weight:600;}
 .banner-text h2:after{content:" "; width:100px; height:5px; background:#FFF; display:block; margin-top:20px; border-radius:3px;}

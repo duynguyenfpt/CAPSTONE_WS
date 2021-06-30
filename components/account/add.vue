@@ -95,13 +95,13 @@ export default {
     const generateData = (_) => {
       const data = []
       const states = [
-        'California',
-        'Illinois',
-        'Maryland',
-        'Texas',
-        'Florida',
-        'Colorado',
-        'Connecticut '
+        'Create Account',
+        'Create Database',
+        'Create Table',
+        'Creat Job',
+        'Creat Request',
+        'Create Server',
+        'Edit Database '
       ]
       const initials = ['CA', 'IL', 'MD', 'TX', 'FL', 'CO', 'CT']
       states.forEach((city, index) => {
@@ -118,8 +118,7 @@ export default {
         username: null,
         email: null,
         account: null,
-        role: null,
-        tick: null
+        role: null
       },
       isLoading: false,
       isLoadingCreate: false,
@@ -139,35 +138,23 @@ export default {
       }
     }
   },
-  async mounted () {
-    this.isLoading = true
-    // const hosts = await getAllServers()
-    // // eslint-disable-next-line array-callback-return
-    // hosts.data.map(item => {
-    //   this.dbHosts.push({ value: item.id, text: item.serverHost })
-    // })
-    this.isLoading = false
-  },
 
   methods: {
     async show () {
       this.isVisible = true
     },
-    async getAllAccount () {
-      const res = await getAllAccount()
-      // eslint-disable-next-line array-callback-return
-      res.data.map((item) => {
-        this.opsAccount.push({ value: item.id, text: item.username })
-      })
-    },
-    showRole () {
+    async showRole () {
       if (this.config.role === 1) {
         this.isSelected = true
         this.isCopied = false
       } else if (this.config.role === 2) {
         this.isSelected = false
         this.isCopied = true
-        getAllAccount()
+        const res = await getAllAccount()
+        // eslint-disable-next-line array-callback-return
+        res.data.map((item) => {
+          this.opsAccount.push({ value: item.id, text: item.userName })
+        })
       } else {
         this.isSelected = false
         this.isCopied = false
@@ -188,6 +175,9 @@ export default {
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       }
+    },
+    onClose () {
+      this.isVisible = false
     }
   }
 }

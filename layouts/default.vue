@@ -16,7 +16,7 @@
           </b-nav-item>
 
           <b-nav-item v-b-toggle.db>
-            <i class="fa fa-server mr-1" /> Databases config
+            <i class="fa fa-database mr-1" /> Databases config
             <b-collapse id="db">
               <b-nav-item :to="{ name: 'db' }">
                 <i class="fa fa-list-ol" />
@@ -36,19 +36,33 @@
                 <i class="fa fa-plus" />
                 Add Tables
               </b-nav-item>
-               <b-nav-item :to="{ name: 'table-changeHistory' }">
+              <b-nav-item :to="{ name: 'table-changeHistory' }">
                 <i class="fa fa-circle" />
-                 Change Log
+                Change Log
               </b-nav-item>
             </b-collapse>
           </b-nav-item>
-          <b-nav-item>
-            <i class="fa fa-server mr-1"/>Sever config
+          <b-nav-item v-b-toggle.server>
+            <i class="fa fa-server mr-1" />
+            Server config
+            <b-collapse id="server">
+              <b-nav-item :to="{ name: 'server' }">
+                <i class="fa fa-list-ol" />
+                List Servers
+              </b-nav-item>
+            </b-collapse>
           </b-nav-item>
-           <b-nav-item>
-            <i class="fa fa-user mr-1"/>Job
+          <b-nav-item v-b-toggle.job>
+            <i class="fa fa-user mr-1" />
+            Job
+            <b-collapse id="job">
+              <b-nav-item :to="{ name: 'job' }">
+                <i class="fa fa-list-ol" />
+                List Jobs
+              </b-nav-item>
+            </b-collapse>
           </b-nav-item>
-            <b-nav-item v-b-toggle.request>
+          <b-nav-item v-b-toggle.request>
             <i class="fa fa-check mr-1"></i> Request
             <b-collapse id="request">
               <b-nav-item :to="{ name: 'request' }">
@@ -70,7 +84,10 @@
             <b-nav-item-dropdown right>
               <!-- Using 'button-content' slot -->
               <template #button-content>
-                  <b-img src="~@/assets/images/user.png" class="account-profile"></b-img>
+                <b-img
+                  src="~@/assets/images/user.png"
+                  class="account-profile"
+                ></b-img>
               </template>
               <b-dropdown-item class="card-info">
                 <div class="account-info">
@@ -82,7 +99,10 @@
                   </b-row>
                   <b-row class="account-detail">
                     <b-col cols="3">
-                      <b-img src="~@/assets/images/user.png" class="account-img"></b-img>
+                      <b-img
+                        src="~@/assets/images/user.png"
+                        class="account-img"
+                      ></b-img>
                     </b-col>
                     <b-col class="info-detail">
                       <h6>Nguyen Thi Thuy Linh</h6>

@@ -18,6 +18,11 @@
             <i class="fa fa-pen" />
           </b-btn>
         </template>
+        <template #cell(viewLog)="item">
+          <b-btn @click="log(item.item.id)" size="sm" variant="primary">
+            Log
+          </b-btn>
+        </template>
         <template #cell(no)="item">
           {{ countRecord(item.index) }}
         </template>
@@ -44,6 +49,9 @@
     </section>
     <section name="popup">
       <request-edit ref="edit" @onUpdated="refreshData" />
+    </section>
+    <section name="popup">
+      <request-log ref="log" @onUpdated="refreshData"/>
     </section>
   </div>
 </template>
@@ -78,6 +86,9 @@ const tableFields = [
   },
   {
     key: 'action'
+  },
+  {
+    key: 'viewLog'
   }
 ]
 
@@ -131,6 +142,9 @@ export default {
     },
     edit (id) {
       this.$refs.edit.show(id)
+    },
+    log (id) {
+      this.$refs.log.show(id)
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1

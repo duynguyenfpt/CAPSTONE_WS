@@ -9,27 +9,28 @@
       <b-col>
         <label class="form-label">Host</label>
         <b-form-select
-          v-model="config.serverInforId"
+          v-model="serverInforId"
           :options="dbHosts"
           size="sm"
         ></b-form-select>
       </b-col>
       <b-col>
         <label class="form-label">Port</label>
-        <b-input size="sm" v-model="config.port" />
+        <b-input size="sm" v-model="port" />
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label class="form-label">Database</label>
-        <b-input size="sm" v-model="config.databaseName" />
+        <b-input size="sm" v-model="databaseName" />
+        <p class="msg-error" v-if="msg">{{ msg }}</p>
         <label class="form-label">User</label>
-        <b-input size="sm" v-model="config.username" />
+        <b-input size="sm" v-model="username" />
         <label class="form-label">Password</label>
-        <b-input size="sm" v-model="config.password" type="password" />
+        <b-input size="sm" v-model="password" type="password" />
         <label class="form-label">Database Type</label>
         <b-form-select
-          v-model="config.databaseType"
+          v-model="databaseType"
           :options="dbTypes"
           size="sm"
         ></b-form-select>
@@ -71,19 +72,18 @@ export default {
       { value: 'PostgreSQL', text: 'PostgreSQL' },
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
-    config: {
-      serverInforId: null,
-      port: 3306,
-      databaseName: 'example',
-      username: 'root',
-      password: 'root',
-      databaseType: null
-    },
+    serverInforId: null,
+    port: null,
+    databaseName: null,
+    username: null,
+    password: null,
+    databaseType: null,
     isLoading: false,
     isLoadingCreate: false,
     isLoadingCheck: false,
     isConnected: false,
-    isVisible: false
+    isVisible: false,
+    msg: null
   }),
 
   async mounted () {
@@ -96,30 +96,54 @@ export default {
     this.isLoading = false
   },
 
+  watch: {
+    databaseName (value) {
+      this.databaseName = value
+      this.validateDBName(value)
+    }
+  },
+
   methods: {
     async show () {
       this.isVisible = true
     },
+    validateDBName (value) {
+      if (/^[a-zA-Z\d][\w#@]{0,127}$/.test(value)) {
+        this.msg = ''
+      } else {
+        this.msg = 'Invalid database name'
+      }
+    },
     async createDatabaseInfo () {
-      try {
-        this.isLoadingCreate = true
-        const res = await createDatabase(this.config)
-        this.isLoadingCreate = false
-        this.isVisible = false
-        this.$emit('onAdded')
-        if (res.code) {
-          this.$notify({ type: 'success', text: 'Create database succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Create database failed' })
+      if (this.msg === '') {
+        try {
+          this.isLoadingCreate = true
+          const config = {
+            port: this.port,
+            username: this.username,
+            password: this.password,
+            databaseName: this.databaseName,
+            databaseType: this.databaseType,
+            serverInforId: this.serverInforId
+          }
+          const res = await createDatabase(config)
+          this.isLoadingCreate = false
+          this.isVisible = false
+          this.$emit('onAdded')
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Create database succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Create database failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
       }
     },
     async checkConnectionStatus () {
       try {
         this.isLoadingCheck = true
-        const res = await checkConnection(this.config)
+        const res = await checkConnection
         this.isConnected = res.success
         if (this.isConnected) {
           this.$notify({ type: 'success', text: 'Test connection succeeded.' })

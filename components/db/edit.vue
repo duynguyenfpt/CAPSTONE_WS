@@ -8,27 +8,28 @@
         <b-col>
           <label class="form-label">Host</label>
           <b-form-select
-            v-model="config.serverInforId"
+            v-model="serverInforId"
             :options="options"
             size="sm"
           ></b-form-select>
         </b-col>
         <b-col>
           <label class="form-label">Port</label>
-          <b-input size="sm" v-model="config.port" />
+          <b-input size="sm" v-model="port" />
         </b-col>
       </b-row>
       <b-row>
         <b-col>
           <label class="form-label">Database</label>
-          <b-input size="sm" v-model="config.databaseName" />
+          <b-input size="sm" v-model="databaseName" />
+          <p class="msg-error" v-if="msg">{{ msg }}</p>
           <label class="form-label">User</label>
-          <b-input size="sm" v-model="config.username" />
+          <b-input size="sm" v-model="username" />
           <label class="form-label">Password</label>
-          <b-input size="sm" v-model="config.password" type="password" />
+          <b-input size="sm" v-model="password" type="password" />
           <label class="form-label">Database Type</label>
           <b-form-select
-            v-model="config.databaseType"
+            v-model="databaseType"
             :options="dbTypes"
             size="sm"
           ></b-form-select>
@@ -60,18 +61,17 @@ export default {
       { value: 'PostgreSQL', text: 'PostgreSQL' },
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
-    config: {
-      serverInforId: 0,
-      port: 3306,
-      databaseName: 'example',
-      username: 'root',
-      password: 'root',
-      databaseType: null
-    },
+    serverInforId: 0,
+    port: 3306,
+    databaseName: 'example',
+    username: 'root',
+    password: 'root',
+    databaseType: null,
     isVisible: false,
     idItem: 0,
     isLoading: false,
-    isLoadingUpdate: false
+    isLoadingUpdate: false,
+    msg: null
   }),
 
   async mounted () {
@@ -83,37 +83,61 @@ export default {
     this.isLoading = false
   },
 
+  watch: {
+    databaseName (value) {
+      this.databaseName = value
+      this.validateDBName(value)
+    }
+  },
+
   methods: {
     async show (id) {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
       const res = await getDatabaseDetail(id)
-      this.config.serverInforId = res.data.serverInfor.id
-      this.config.port = res.data.port
-      this.config.databaseName = res.data.databaseName
-      this.config.username = res.data.username
-      this.config.password = res.data.password
-      this.config.databaseType = res.data.databaseType
+      this.serverInforId = res.data.serverInfor.id
+      this.port = res.data.port
+      this.databaseName = res.data.databaseName
+      this.username = res.data.username
+      this.password = res.data.password
+      this.databaseType = res.data.databaseType
       this.isLoading = false
+    },
+    validateDBName (value) {
+      if (/^[a-zA-Z\d][\w#@]{0,127}$/.test(value)) {
+        this.msg = ''
+      } else {
+        this.msg = 'Invalid database name'
+      }
     },
     onClose () {
       this.isVisible = false
     },
     async onUpdateDB () {
-      try {
-        this.isLoadingUpdate = true
-        const data = await updateDatabase(this.idItem, this.config)
-        this.isLoadingUpdate = false
-        this.isVisible = false
-        this.$emit('onUpdated', data)
-        if (data.code) {
-          this.$notify({ type: 'success', text: 'Update database succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Update database failed' })
+      if (this.msg === '') {
+        try {
+          this.isLoadingUpdate = true
+          const config = {
+            port: this.port,
+            username: this.username,
+            password: this.password,
+            databaseName: this.databaseName,
+            databaseType: this.databaseType,
+            serverInforId: this.serverInforId
+          }
+          const data = await updateDatabase(this.idItem, config)
+          this.isLoadingUpdate = false
+          this.isVisible = false
+          this.$emit('onUpdated', data)
+          if (data.code === '200') {
+            this.$notify({ type: 'success', text: 'Update database succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Update database failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
       }
     }
   }

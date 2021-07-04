@@ -38,8 +38,7 @@ export default {
     },
     isVisible: false,
     idItem: 0,
-    isLoading: false,
-    isLoadingUpdate: false
+    isLoading: false
   }),
 
   methods: {

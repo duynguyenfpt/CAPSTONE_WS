@@ -5,9 +5,9 @@
         <b-nav vertical class="side-nav w-100 p-3">
           <h4 href="/">FTDS System</h4>
           <hr />
-          <b-nav-item v-b-toggle.db>
+          <b-nav-item v-b-toggle.account>
             <i class="fa fa-user mr-1" /> Account Management
-            <b-collapse id="db">
+            <b-collapse id="account">
               <b-nav-item :to="{ name: 'account' }">
                 <i class="fa fa-list-ol" />
                 List Accounts

@@ -8,43 +8,45 @@
      <b-row>
       <b-col>
         <label>Select Database</label>
-        <b-form-select v-model="config.db" :options="opsDb" size="sm" @change="fillData">
+        <b-form-select v-model="db" :options="opsDb" size="sm" @change="fillData">
           <b-spinner v-if="isLoadingFill" variant="primary" small></b-spinner>
         </b-form-select>
       </b-col>
       <b-col>
         <label>Database Name</label>
-        <b-input size="sm" v-model="config.dbName"></b-input>
+        <b-input size="sm" v-model="dbName"></b-input>
+        <p class="msg-error" v-if="msg.db">{{ msg.db }}</p>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label>Host</label>
-        <b-form-select size="sm" v-model="config.host" :options="opsHost"></b-form-select>
+        <b-form-select size="sm" v-model="host" :options="opsHost"></b-form-select>
       </b-col>
       <b-col>
         <label>Port</label>
-        <b-input size="sm" v-model="config.port"></b-input>
+        <b-input size="sm" v-model="port"></b-input>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label>Username</label>
-        <b-input size="sm" v-model="config.username"></b-input>
+        <b-input size="sm" v-model="username"></b-input>
       </b-col>
       <b-col>
         <label>Password</label>
-        <b-input size="sm" type="password" v-model="config.password"></b-input>
+        <b-input size="sm" type="password" v-model="password"></b-input>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label>Table Name</label>
-        <b-input size="sm" v-model="config.table" :state="validateTable"></b-input>
+        <b-input size="sm" v-model="table"></b-input>
+        <p class="msg-error" v-if="msg.tb">{{ msg.tb }}</p>
       </b-col>
       <b-col>
         <label>Database Type</label>
-        <b-form-select v-model="config.dbType" :options="opsDbType" size="sm">
+        <b-form-select v-model="dbType" :options="opsDbType" size="sm">
         </b-form-select>
       </b-col>
     </b-row>
@@ -84,26 +86,23 @@ export default {
       { value: 'PostgreSQL', text: 'PostgreSQL' },
       { value: 'SQL-Sever', text: 'SQL-Sever' }
     ],
-    config: {
-      db: null,
-      dbName: null,
-      host: null,
-      port: null,
-      username: null,
-      password: null,
-      table: null,
-      dbType: null
-    },
+    db: null,
+    dbName: null,
+    host: null,
+    port: null,
+    username: null,
+    password: null,
+    table: null,
+    dbType: null,
     isLoading: false,
     isLoadingCreate: false,
     isLoadingFill: false,
-    isLoadingCheck: false
-  }),
-  computed: {
-    validateTable () {
-      return /^(\d|\w|_)+$/.test(this.config.table || '')
+    isLoadingCheck: false,
+    msg: {
+      db: null,
+      tb: null
     }
-  },
+  }),
   async mounted () {
     this.isLoading = true
     const dbs = await getAllDbType()
@@ -118,54 +117,89 @@ export default {
     })
     this.isLoading = false
   },
-
+  watch: {
+    table (value) {
+      this.table = value
+      this.validateTableName(value)
+    },
+    dbName (value) {
+      this.dbName = value
+      this.validateDBName(value)
+    }
+  },
   methods: {
+    validateDBName (value) {
+      if (/^[a-zA-Z\d][\w#@]{0,127}$/.test(value)) {
+        this.msg.db = ''
+      } else {
+        this.msg.db = 'Invalid database name'
+      }
+    },
+    validateTableName (value) {
+      if (/^(\d|\w|_)+$/.test(value)) {
+        this.msg.tb = ''
+      } else {
+        this.msg.tb = 'Invalid table name'
+      }
+    },
     resetData () {
-      this.config.db = null
-      this.config.dbName = null
-      this.config.host = null
-      this.config.port = null
-      this.config.username = null
-      this.config.password = null
-      this.config.table = null
-      this.config.dbType = null
+      this.db = null
+      this.dbName = null
+      this.host = null
+      this.port = null
+      this.username = null
+      this.password = null
+      this.table = null
+      this.dbType = null
     },
     async createTableInfo () {
-      try {
-        this.isLoadingCreate = true
-        const res = await createTable(this.config)
-        this.isLoadingCreate = false
-        if (res.id) {
-          this.$notify({ type: 'success', text: 'Add table succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Add table failed' })
+      if (this.msg.db === '' && this.msg.tb === '') {
+        try {
+          this.isLoadingCreate = true
+          const config = {
+            port: this.port,
+            username: this.username,
+            password: this.password,
+            databaseName: this.dbName,
+            databaseType: this.dbType,
+            serverInforId: this.host,
+            db: this.db,
+            table: this.table
+          }
+          const res = await createTable(config)
+          this.isLoadingCreate = false
+          if (res.id) {
+            this.$notify({ type: 'success', text: 'Add table succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Add table failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
       }
     },
     async fillData () {
-      const id = this.config.db
+      const id = this.db
       if (id !== null) {
         this.isLoadingFill = true
         const res = await getDatabaseDetail(id)
         this.isLoadingFill = false
-        this.config.dbName = res.data.databaseName
-        this.config.host = res.data.host
-        this.config.port = res.data.port
-        this.config.username = res.data.username
-        this.config.password = res.data.password
-        this.config.dbType = res.data.databaseType
+        this.dbName = res.data.databaseName
+        this.host = res.data.host
+        this.port = res.data.port
+        this.username = res.data.username
+        this.password = res.data.password
+        this.dbType = res.data.databaseType
       } else {
         this.resetData()
       }
     },
     async createTable () {
-      const id = this.config.db
+      const id = this.db
       if (id !== null) {
         try {
           this.isLoadingCreate = true
-          const info = { databaseInforId: id, tableName: this.config.table }
+          const info = { databaseInforId: id, tableName: this.table }
           const res = await createTable(info)
           this.isLoadingCreate = false
           if (res.code) {
@@ -179,10 +213,10 @@ export default {
         }
       } else {
         try {
-          const db = { serverInforId: this.config.host, port: this.config.port, databaseName: this.config.dbName, username: this.config.username, password: this.config.password, databaseType: this.config.dbType }
+          const db = { serverInforId: this.host, port: this.port, databaseName: this.dbName, username: this.username, password: this.password, databaseType: this.dbType }
           const resDb = await createDatabase(db)
           if (resDb.code) {
-            const tb = { databaseInforId: resDb.data.id, tableName: this.config.table }
+            const tb = { databaseInforId: resDb.data.id, tableName: this.table }
             this.isLoadingCreate = true
             const resq = await createTable(tb)
             this.isLoadingCreate = false

@@ -8,13 +8,13 @@
               size="sm"
               placeholder="Search"
               v-model="textSearch"
-              @keyup.enter="searchAccount(textSearch)"
+              @keyup.enter="searchServer(textSearch)"
             />
             <b-input-group-append>
               <b-btn
                 size="sm"
                 variant="primary"
-                @click="searchAccount(textSearch)"
+                @click="searchServer(textSearch)"
               >
                 <i class="fas fa-search" />
               </b-btn>
@@ -22,9 +22,9 @@
           </b-input-group>
         </b-col>
         <b-col class="text-right">
-          <b-btn @click="addAccount()" size="sm" variant="primary">
+          <b-btn @click="addServer()" size="sm" variant="primary">
             <i class="fa fa-plus pr-1" />
-            Create Account
+            Create Server
           </b-btn>
         </b-col>
       </b-row>
@@ -34,7 +34,7 @@
         responsive
         hover
         striped
-        :items="accounts"
+        :items="servers"
         :fields="fields"
         :busy="loading"
       >
@@ -44,28 +44,25 @@
 
         <template #cell(action)="item">
           <b-btn
-            @click="detailAccount(item.item.id)"
+            @click="detailServer(item.item.id)"
             size="sm"
             variant="success"
           >
             <i class="fa fa-eye" />
           </b-btn>
-          <b-btn @click="editAccount(item.item.id)" size="sm" variant="info">
+           <b-btn
+            @click="editServer(item.item.id)"
+            size="sm"
+            variant="info"
+          >
             <i class="fa fa-pen" />
           </b-btn>
           <b-btn
             size="sm"
-            variant="warning"
-            @click="resetPassword(item.item.id)"
-          >
-            <i class="fas fa-exchange-alt"></i>
-          </b-btn>
-          <b-btn
-            size="sm"
             variant="danger"
-            @click="activeAccount(item.item.id)"
+            @click="deleteServer(item.item.id)"
           >
-            <i class="fa fa-power-off" />
+            <i class="fa fa-trash" />
           </b-btn>
         </template>
         <template #table-busy>
@@ -85,41 +82,45 @@
       />
     </section>
     <section name="popup">
-      <account-add ref="add" @onAdded="refreshData" />
+      <server-add ref="add" @onAdded="refreshData" />
     </section>
     <section name="popup">
-      <account-detail ref="detail" @onDetailed="onReload" />
+      <server-detail ref="detail" @onDetailed="onReload" />
     </section>
     <section name="popup">
-      <account-edit ref="edit" @onUpdated="refreshData" />
+      <server-edit ref="edit" @onUpdated="refreshData" />
     </section>
     <section name="popup">
-      <account-reset ref="reset" @onReseted="onReload" />
-    </section>
-    <section name="popup">
-      <account-active ref="active" @onActived="onReload" />
+      <server-delete ref="delete" @onDeleted="onReload" />
     </section>
   </div>
 </template>
 
 <script>
-import { getListAccount } from '@/service/account'
+import { getListServer } from '@/service/server'
+import moment from 'moment'
 
-const accountFields = [
+const serverFields = [
   {
     key: 'no'
   },
   {
-    key: 'userName'
+    key: 'serverHost'
   },
   {
-    key: 'email'
+    key: 'serverDomain'
   },
   {
-    key: 'role'
+    key: 'createdBy'
   },
   {
-    key: 'phone'
+    key: 'createdDate'
+  },
+  {
+    key: 'modifiedBy'
+  },
+  {
+    key: 'modifiedDate'
   },
   {
     key: 'action'
@@ -131,7 +132,7 @@ export default {
     id: {}
   },
   data: () => ({
-    fields: accountFields,
+    fields: serverFields,
     textSearch: null,
     pagination: {
       page: 1,
@@ -139,7 +140,7 @@ export default {
       total: 0
     },
     loading: false,
-    accounts: []
+    servers: []
   }),
 
   created () {
@@ -150,11 +151,15 @@ export default {
     async getList () {
       this.loading = true
       try {
-        const res = await getListAccount(
+        const res = await getListServer(
           this.pagination.page,
           this.pagination.limit
         )
-        this.accounts = res.data
+        this.servers = res.data
+        this.servers.forEach((e) => {
+          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+          e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+        })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -173,20 +178,17 @@ export default {
         this.getList()
       }
     },
-    addAccount () {
+    addServer () {
       this.$refs.add.show()
     },
-    detailAccount (id) {
+    detailServer (id) {
       this.$refs.detail.show(id)
     },
-    editAccount (id) {
+    editServer (id) {
       this.$refs.edit.show(id)
     },
-    resetPassword (id) {
-      this.$refs.reset.show(id)
-    },
-    activeAccount (id) {
-      this.$refs.active.show(id)
+    deleteServer (id) {
+      this.$refs.delete.show(id)
     }
   }
 }

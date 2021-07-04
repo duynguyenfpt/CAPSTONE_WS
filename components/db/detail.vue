@@ -103,9 +103,6 @@ const dbFields = [
   },
   {
     key: 'modifiedDate'
-  },
-  {
-    key: 'action'
   }
 ]
 
@@ -120,7 +117,7 @@ const tbFields = [
     key: 'createdBy'
   },
   {
-    key: 'createDate'
+    key: 'createdDate'
   },
   {
     key: 'modifiedBy'
@@ -164,7 +161,6 @@ export default {
         const resList = await getAllTableByDb(this.id, this.pagination.page, this.pagination.limit)
         this.listTableDetail = resList.data
         this.pagination.total = resList.metaData.totalItem
-        console.log(this.pagination)
         this.detail = res.data
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
@@ -172,11 +168,11 @@ export default {
         this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
           'YYYY-MM-DD'
         )
-        if (this.detail.tables) {
-          this.detail.tables.forEach((e) => {
+        if (this.listTableDetail) {
+          this.listTableDetail.forEach((e) => {
             e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
           })
-          this.detail.tables.forEach((e) => {
+          this.listTableDetail.forEach((e) => {
             e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
           })
         }
@@ -196,7 +192,6 @@ export default {
       this.$refs.add.show(id)
     },
     countRecord (index) {
-      // console.log((this.pagination.page - 1) * this.pagination.limit + index + 1)
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }

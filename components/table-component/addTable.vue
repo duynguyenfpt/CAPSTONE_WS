@@ -10,7 +10,7 @@
             <label class="form-lab">Database Name</label>
           </b-col>
           <b-col>
-            <b-input size="sm" disabled v-model="table.dbName"></b-input>
+            <b-input size="sm" disabled v-model="dbName"></b-input>
           </b-col>
         </b-row>
         <b-row class="pt-2">
@@ -20,10 +20,10 @@
           <b-col>
             <b-form-input
               id="input-live"
-              :state="validateTable"
               size="sm"
-              v-model="table.tableName"
+              v-model="tableName"
             ></b-form-input>
+            <p class="msg-error" v-if="msg">{{ msg }}</p>
           </b-col>
         </b-row>
         <b-row class="text-center pt-3">
@@ -51,53 +51,62 @@ export default {
   props: {
     database: {}
   },
-  computed: {
-    validateTable () {
-      return /^(\d|\w|_)+$/.test(this.table.tableName || '')
-    }
-  },
   data: () => ({
     isLoading: false,
-    table: {
-      tableName: null,
-      dbName: null
-    },
+    tableName: null,
+    dbName: null,
     isVisible: false,
     idItem: 0,
-    isLoadingCreate: false
+    isLoadingCreate: false,
+    msg: null
   }),
+  watch: {
+    tableName (value) {
+      this.tableName = value
+      this.validateTableName(value)
+    }
+  },
   methods: {
+    validateTableName (value) {
+      if (/^(\d|\w|_)+$/.test(value)) {
+        this.msg = ''
+      } else {
+        this.msg = 'Invalid table name'
+      }
+    },
     async show (id) {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
       const res = await getDatabaseDetail(this.idItem)
-      this.table.dbName = res.data.databaseName
+      this.dbName = res.data.databaseName
       this.isLoading = false
     },
     onClose () {
       this.isVisible = false
     },
     async addTable () {
-      try {
-        this.isLoadingCreate = true
-        const body = {
-          tableName: this.table.tableName,
-          databaseInforId: this.idItem
+      if (this.msg === '') {
+        try {
+          this.isLoadingCreate = true
+          const body = {
+            tableName: this.tableName,
+            databaseInforId: this.idItem
+          }
+          const res = await addTable(body)
+          this.$emit('onAdded')
+          if (res.code) {
+            this.$notify({ type: 'success', text: 'Add table succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Add table failed' })
+          }
+          this.$router.go()
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.loading = false
+          this.isVisible = false
         }
-        const res = await addTable(body)
-        this.$emit('onAdded')
-        if (res.code) {
-          this.$notify({ type: 'success', text: 'Add table succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Add table failed' })
-        }
-        this.$router.go()
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.loading = false
-        this.isVisible = false
       }
     }
   }

@@ -29,6 +29,8 @@
 
 <script>
 import { getServer } from '@/service/server'
+import moment from 'moment'
+
 export default {
   data: () => ({
     config: {
@@ -48,8 +50,10 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getServer(this.idItem)
-      console.log(res.data)
       this.config = res.data
+      this.config.createdDate = moment(this.config.createdDate).format(
+        'YYYY-MM-DD'
+      )
       this.isLoading = false
     },
     onClose () {

@@ -19,6 +19,7 @@
             @change="showRequest"
           >
           </b-form-select>
+          <p class="msg-error" v-if="msg.type">{{ msg.type }}</p>
         </b-col>
       </b-row>
       <!-- Database -->
@@ -33,6 +34,7 @@
             @change="fillData"
           >
           </b-form-select>
+          <p class="msg-error" v-if="msg.database">{{ msg.database }}</p>
         </b-col>
       </b-row>
       <!-- Table -->
@@ -47,6 +49,7 @@
             @change="fillTable"
           >
           </b-form-select>
+          <p class="msg-error" v-if="msg.table">{{ msg.table }}</p>
         </b-col>
         <b-col sm="4" class="pt-2" v-if="isSync">
           <label></label>
@@ -184,7 +187,12 @@ export default {
       }],
       isSync: false,
       isAdd: false,
-      isLoadingCreate: false
+      isLoadingCreate: false,
+      msg: {
+        type: null,
+        database: null,
+        table: null
+      }
     }
   },
   async mounted () {
@@ -263,62 +271,73 @@ export default {
       }
     },
     async addRequest () {
-      if (this.request.isAll === 'chosen') {
-        this.request.isAll = true
-      } else {
-        this.request.isAll = false
+      if (this.request.type === null) {
+        this.msg.type = 'Please select type'
       }
-      if (this.isSync) {
-        try {
-          this.isLoadingCreate = true
-          const today = new Date()
-          const time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
-          const req = {
-            requestId: this.request.type,
-            tableId: this.request.table,
-            isAll: this.request.isAll,
-            fromDate: this.request.fromDate,
-            toDate: this.request.toDate,
-            time: time
-          }
-          const res = await createRequestSync(req)
-          this.isLoadingCreate = false
-          if (res.code) {
-            this.$notify({ type: 'success', text: 'Create request succeeded' })
-            this.resetData()
-          } else {
-            this.$notify({ type: 'error', text: 'Create request failed' })
-          }
-        } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
-        } finally {
-          this.isLoadingCreate = false
+      if (this.request.database === null) {
+        this.msg.database = 'Please select database'
+      }
+      if (this.request.table === null) {
+        this.msg.table = 'Please select table'
+      }
+      if (this.msg.type === '' && this.msg.database === '' && this.msg.table === '') {
+        if (this.request.isAll === 'chosen') {
+          this.request.isAll = true
+        } else {
+          this.request.isAll = false
         }
-      }
-      if (this.isAdd) {
-        try {
-          this.isLoadingCreate = true
-          const rows = []
-          this.rows.forEach(element => {
-            rows.push(element.name)
-          })
-          const req = {
-            requestTypeId: this.request.type,
-            rowIds: rows,
-            tableId: this.request.table
+        if (this.isSync) {
+          try {
+            this.isLoadingCreate = true
+            const today = new Date()
+            const time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
+            const req = {
+              requestId: this.request.type,
+              tableId: this.request.table,
+              isAll: this.request.isAll,
+              fromDate: this.request.fromDate,
+              toDate: this.request.toDate,
+              time: time
+            }
+            const res = await createRequestSync(req)
+            this.isLoadingCreate = false
+            if (res.code) {
+              this.$notify({ type: 'success', text: 'Create request succeeded' })
+              this.resetData()
+            } else {
+              this.$notify({ type: 'error', text: 'Create request failed' })
+            }
+          } catch (e) {
+            this.$notify({ type: 'error', text: e.message })
+          } finally {
+            this.isLoadingCreate = false
           }
-          const res = await createRequestAddColumn(req)
-          this.isLoadingCreate = false
-          if (res.code) {
-            this.$notify({ type: 'success', text: 'Create request succeeded' })
-            this.resetData()
-          } else {
-            this.$notify({ type: 'error', text: 'Create request failed' })
+        }
+        if (this.isAdd) {
+          try {
+            this.isLoadingCreate = true
+            const rows = []
+            this.rows.forEach(element => {
+              rows.push(element.name)
+            })
+            const req = {
+              requestTypeId: this.request.type,
+              rowIds: rows,
+              tableId: this.request.table
+            }
+            const res = await createRequestAddColumn(req)
+            this.isLoadingCreate = false
+            if (res.code) {
+              this.$notify({ type: 'success', text: 'Create request succeeded' })
+              this.resetData()
+            } else {
+              this.$notify({ type: 'error', text: 'Create request failed' })
+            }
+          } catch (e) {
+            this.$notify({ type: 'error', text: e.message })
+          } finally {
+            this.isLoadingCreate = false
           }
-        } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
-        } finally {
-          this.isLoadingCreate = false
         }
       }
     },

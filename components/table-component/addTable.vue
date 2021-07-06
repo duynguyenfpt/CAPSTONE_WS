@@ -68,7 +68,7 @@ export default {
   },
   methods: {
     validateTableName (value) {
-      if (/^(\d|\w|_)+$/.test(value)) {
+      if (/^(\d|\w|_){1,127}$/.test(value)) {
         this.msg = ''
       } else {
         this.msg = 'Invalid table name'
@@ -80,12 +80,17 @@ export default {
       this.isLoading = true
       const res = await getDatabaseDetail(this.idItem)
       this.dbName = res.data.databaseName
+      this.msg = null
       this.isLoading = false
     },
     onClose () {
       this.isVisible = false
     },
     async addTable () {
+      this.validateTableName(this.tableName)
+      if (this.tableName === null) {
+        this.msg = 'Invalid table name'
+      }
       if (this.msg === '') {
         try {
           this.isLoadingCreate = true

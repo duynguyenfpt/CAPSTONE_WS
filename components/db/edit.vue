@@ -16,18 +16,21 @@
         <b-col>
           <label class="form-label">Port</label>
           <b-input size="sm" v-model="port" />
+          <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
         </b-col>
       </b-row>
       <b-row>
         <b-col>
           <label class="form-label">Database</label>
           <b-input size="sm" v-model="databaseName" />
-          <p class="msg-error" v-if="msg">{{ msg }}</p>
-          <label class="form-label">User</label>
+          <p class="msg-error" v-if="msg.databaseName">{{ msg.databaseName }}</p>
+          <label class="form-label">Username</label>
           <b-input size="sm" v-model="username" />
+          <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
           <label class="form-label">Password</label>
           <b-input size="sm" v-model="password" type="password" />
           <label class="form-label">Database Type</label>
+          <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
           <b-form-select
             v-model="databaseType"
             :options="dbTypes"
@@ -71,7 +74,12 @@ export default {
     idItem: 0,
     isLoading: false,
     isLoadingUpdate: false,
-    msg: null
+    msg: {
+      databaseName: null,
+      port: null,
+      username: null,
+      password: null
+    }
   }),
 
   async mounted () {
@@ -87,6 +95,18 @@ export default {
     databaseName (value) {
       this.databaseName = value
       this.validateDBName(value)
+    },
+    port (value) {
+      this.port = value
+      this.validatePortNumber(value)
+    },
+    username (value) {
+      this.username = value
+      this.validateUsername(value)
+    },
+    password (value) {
+      this.password = value
+      this.validatePassword(value)
     }
   },
 
@@ -103,19 +123,54 @@ export default {
       this.password = res.data.password
       this.databaseType = res.data.databaseType
       this.isLoading = false
+      this.msg.databaseName = null
+      this.msg.port = null
+      this.msg.username = null
+      this.msg.password = null
     },
     validateDBName (value) {
-      if (/^[a-zA-Z\d][\w#@]{0,127}$/.test(value)) {
-        this.msg = ''
+      if (/^[a-zA-Z\d][\w#@]{1,127}$/.test(value)) {
+        this.msg.databaseName = ''
       } else {
-        this.msg = 'Invalid database name'
+        this.msg.databaseName = 'Invalid database name'
+      }
+    },
+    validatePortNumber (value) {
+      if (/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(value)) {
+        this.msg.port = ''
+      } else {
+        this.msg.port = 'Invalid port number'
+      }
+    },
+    validateUsername (value) {
+      if (/^[a-zA-Z0-9]+$/.test(value)) {
+        this.msg.username = ''
+      } else {
+        this.msg.username = 'Invalid username'
+      }
+    },
+    validatePassword (value) {
+      if (/^[\w#@]{6,127}$/.test(value)) {
+        this.msg.password = ''
+      } else {
+        this.msg.password = 'Invalid password'
       }
     },
     onClose () {
       this.isVisible = false
     },
     async onUpdateDB () {
-      if (this.msg === '') {
+      this.validateDBName(this.databaseName)
+      this.validatePortNumber(this.port)
+      this.validateUsername(this.username)
+      this.validatePassword(this.password)
+      if (this.databaseName === null) {
+        this.msg.databaseName = 'Invalid database name'
+      }
+      if (this.username === null) {
+        this.msg.username = 'Invalid username'
+      }
+      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '') {
         try {
           this.isLoadingUpdate = true
           const config = {

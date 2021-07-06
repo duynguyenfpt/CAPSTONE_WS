@@ -30,6 +30,8 @@
 </template>
 
 <script>
+import { getAccountDetail } from '@/service/account'
+
 export default {
   data: () => ({
     config: {
@@ -49,10 +51,11 @@ export default {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
-      this.config.username = 'LinhNTT'
-      this.config.email = 'linhntt2306@gmail.com'
-      this.config.phone = '0342313344'
-      this.config.role = 'Admin'
+      const res = await getAccountDetail(this.idItem)
+      this.config.username = res.data.username
+      this.config.email = res.data.email
+      this.config.phone = res.data.phone
+      this.config.role = res.data.role
       this.isLoading = false
     },
     onClose () {

@@ -22,20 +22,24 @@
       <b-col>
         <label>Host</label>
         <b-form-select size="sm" v-model="host" :options="opsHost"></b-form-select>
+        <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
       </b-col>
       <b-col>
         <label>Port</label>
         <b-input size="sm" v-model="port"></b-input>
+        <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label>Username</label>
         <b-input size="sm" v-model="username"></b-input>
+        <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
       </b-col>
       <b-col>
         <label>Password</label>
         <b-input size="sm" type="password" v-model="password"></b-input>
+        <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
       </b-col>
     </b-row>
     <b-row>
@@ -48,6 +52,7 @@
         <label>Database Type</label>
         <b-form-select v-model="dbType" :options="opsDbType" size="sm">
         </b-form-select>
+        <p class="msg-error" v-if="msg.dbType">{{ msg.dbType }}</p>
       </b-col>
     </b-row>
     <b-row class="pt-2">
@@ -100,7 +105,12 @@ export default {
     isLoadingCheck: false,
     msg: {
       db: null,
-      tb: null
+      tb: null,
+      host: null,
+      port: null,
+      username: null,
+      password: null,
+      dbType: null
     }
   }),
   async mounted () {
@@ -113,7 +123,7 @@ export default {
     const hosts = await getAllServers()
     // eslint-disable-next-line array-callback-return
     hosts.data.map(item => {
-      this.opsHost.push({ value: item.id, text: item.serverHost })
+      this.opsHost.push({ value: item.id, text: item.serverHost + ' - ' + item.serverDomain })
     })
     this.isLoading = false
   },
@@ -125,21 +135,54 @@ export default {
     dbName (value) {
       this.dbName = value
       this.validateDBName(value)
+    },
+    port (value) {
+      this.port = value
+      this.validatePortNumber(value)
+    },
+    username (value) {
+      this.username = value
+      this.validateUsername(value)
+    },
+    password (value) {
+      this.password = value
+      this.validatePassword(value)
     }
   },
   methods: {
     validateDBName (value) {
-      if (/^[a-zA-Z\d][\w#@]{0,127}$/.test(value)) {
+      if (/^[a-zA-Z\d][\w#@]{1,127}$/.test(value)) {
         this.msg.db = ''
       } else {
         this.msg.db = 'Invalid database name'
       }
     },
     validateTableName (value) {
-      if (/^(\d|\w|_)+$/.test(value)) {
+      if (/^(\d|\w|_){1,127}$/.test(value)) {
         this.msg.tb = ''
       } else {
         this.msg.tb = 'Invalid table name'
+      }
+    },
+    validatePortNumber (value) {
+      if (/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(value)) {
+        this.msg.port = ''
+      } else {
+        this.msg.port = 'Invalid port number'
+      }
+    },
+    validateUsername (value) {
+      if (/^[a-zA-Z0-9]+$/.test(value)) {
+        this.msg.username = ''
+      } else {
+        this.msg.username = 'Invalid username'
+      }
+    },
+    validatePassword (value) {
+      if (/^[\w#@]{6,127}$/.test(value)) {
+        this.msg.password = ''
+      } else {
+        this.msg.password = 'Invalid password'
       }
     },
     resetData () {
@@ -151,6 +194,13 @@ export default {
       this.password = null
       this.table = null
       this.dbType = null
+      this.msg.db = null
+      this.msg.tb = null
+      this.msg.host = null
+      this.msg.port = null
+      this.msg.username = null
+      this.msg.password = null
+      this.msg.dbType = null
     },
     async createTableInfo () {
       if (this.msg.db === '' && this.msg.tb === '') {
@@ -185,7 +235,7 @@ export default {
         const res = await getDatabaseDetail(id)
         this.isLoadingFill = false
         this.dbName = res.data.databaseName
-        this.host = res.data.host
+        this.host = res.data.serverInfor.id
         this.port = res.data.port
         this.username = res.data.username
         this.password = res.data.password
@@ -196,39 +246,67 @@ export default {
     },
     async createTable () {
       const id = this.db
+      this.validateDBName(this.dbName)
+      this.validateTableName(this.table)
+      this.validatePortNumber(this.port)
+      this.validateUsername(this.username)
+      this.validatePassword(this.password)
+      if (this.databaseName === null) {
+        this.msg.db = 'Invalid database name'
+      }
+      if (this.username === null) {
+        this.msg.username = 'Invalid username'
+      }
+      if (this.table === null) {
+        this.msg.tb = 'Invalid table name'
+      }
+      if (this.host === null) {
+        this.msg.host = 'Please select host'
+      }
+      if (this.dbType === null) {
+        this.msg.dbType = 'Please select type database'
+      }
       if (id !== null) {
-        try {
-          this.isLoadingCreate = true
-          const info = { databaseInforId: id, tableName: this.table }
-          const res = await createTable(info)
-          this.isLoadingCreate = false
-          if (res.code) {
-            this.$notify({ type: 'success', text: 'Add table succeeded' })
-            this.resetData()
-          } else {
-            this.$notify({ type: 'error', text: 'Add table failed' })
-          }
-        } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
-        }
-      } else {
-        try {
-          const db = { serverInforId: this.host, port: this.port, databaseName: this.dbName, username: this.username, password: this.password, databaseType: this.dbType }
-          const resDb = await createDatabase(db)
-          if (resDb.code) {
-            const tb = { databaseInforId: resDb.data.id, tableName: this.table }
+        if (this.msg.db === '' && this.msg.tb === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.host === '' && this.msg.dbType === '') {
+          try {
             this.isLoadingCreate = true
-            const resq = await createTable(tb)
+            const info = { databaseInforId: id, tableName: this.table }
+            const res = await createTable(info)
             this.isLoadingCreate = false
-            if (resq.code) {
+            if (res.code) {
               this.$notify({ type: 'success', text: 'Add table succeeded' })
               this.resetData()
             } else {
               this.$notify({ type: 'error', text: 'Add table failed' })
             }
+          } catch (e) {
+            this.$notify({ type: 'error', text: e.message })
           }
-        } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+        }
+      } else {
+        this.validateDBName(this.dbName)
+        if (this.dbName === null) {
+          this.msg.db = 'Invalid database name'
+        }
+        if (this.msg.db === '' && this.msg.tb === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.host === '' && this.msg.dbType === '') {
+          try {
+            const db = { serverInforId: this.host, port: this.port, databaseName: this.dbName, username: this.username, password: this.password, databaseType: this.dbType }
+            const resDb = await createDatabase(db)
+            if (resDb.code) {
+              const tb = { databaseInforId: resDb.data.id, tableName: this.table }
+              this.isLoadingCreate = true
+              const resq = await createTable(tb)
+              this.isLoadingCreate = false
+              if (resq.code) {
+                this.$notify({ type: 'success', text: 'Add table succeeded' })
+                this.resetData()
+              } else {
+                this.$notify({ type: 'error', text: 'Add table failed' })
+              }
+            }
+          } catch (e) {
+            this.$notify({ type: 'error', text: e.message })
+          }
         }
       }
     },

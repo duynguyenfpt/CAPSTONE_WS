@@ -68,7 +68,7 @@ export default {
       }
     },
     validateDomain (value) {
-      if (/^[0-9][0-9.-]+[0-9]$/.test(value)) {
+      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
         this.msg.domain = ''
       } else {
         this.msg.domain = 'Invalid server domain'

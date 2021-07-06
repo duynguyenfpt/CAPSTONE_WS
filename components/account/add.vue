@@ -11,7 +11,8 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input size="sm" v-model="config.username"></b-form-input>
+          <b-form-input size="sm" v-model="username"></b-form-input>
+          <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
         </b-form-group>
         <b-form-group
           label="Email:"
@@ -19,7 +20,17 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input size="sm" v-model="config.email"></b-form-input>
+          <b-form-input size="sm" v-model="email"></b-form-input>
+          <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
+        </b-form-group>
+        <b-form-group
+          label="Phone:"
+          label-cols-sm="3"
+          label-align-sm="left"
+          label-size="sm"
+        >
+          <b-form-input size="sm" v-model="phone"></b-form-input>
+          <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
         </b-form-group>
         <b-form-group
           label="Role:"
@@ -30,7 +41,7 @@
         >
           <b-form-radio-group
             class="pt-2"
-            v-model="config.role"
+            v-model="role"
             :options="roles"
             :aria-describedby="ariaDescribedby"
             @change="showRole"
@@ -63,7 +74,7 @@
         >
           <b-form-select
             size="sm"
-            v-model="config.account"
+            v-model="account"
             :options="opsAccount"
           ></b-form-select>
         </b-form-group>
@@ -114,12 +125,11 @@ export default {
       return data
     }
     return {
-      config: {
-        username: null,
-        email: null,
-        account: null,
-        role: null
-      },
+      username: null,
+      email: null,
+      phone: null,
+      account: null,
+      role: null,
       isLoading: false,
       isLoadingCreate: false,
       isVisible: false,
@@ -133,21 +143,68 @@ export default {
       data: generateData(),
       titles: ['LinhCancer', 'Linh Ham'],
       value: [],
+      msg: {
+        username: null,
+        email: null,
+        phone: null
+      },
       filterMethod (query, item) {
         return item.initial.toLowerCase().indexOf(query.toLowerCase()) > -1
       }
     }
   },
-
+  watch: {
+    username (value) {
+      this.username = value
+      this.validateUsername(value)
+    },
+    email (value) {
+      this.email = value
+      this.validateEmail(value)
+    },
+    phone (value) {
+      this.phone = value
+      this.validatePhone(value)
+    }
+  },
   methods: {
     async show () {
       this.isVisible = true
+      this.email = null
+      this.username = null
+      this.phone = null
+      this.isCopied = null
+      this.isSelected = null
+      this.msg.username = null
+      this.msg.email = null
+      this.msg.phone = null
+    },
+    validateUsername (value) {
+      if (/^\W{5,127}$/.test(value)) {
+        this.msg.username = ''
+      } else {
+        this.msg.username = 'Invalid username'
+      }
+    },
+    validateEmail (value) {
+      if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) {
+        this.msg.email = ''
+      } else {
+        this.msg.email = 'Invalid email address'
+      }
+    },
+    validatePhone (value) {
+      if (/((09|03|07|08|05)+([0-9]{8})\b)/g.test(value)) {
+        this.msg.phone = ''
+      } else {
+        this.msg.phone = 'Invalid phone number'
+      }
     },
     async showRole () {
-      if (this.config.role === 1) {
+      if (this.role === 1) {
         this.isSelected = true
         this.isCopied = false
-      } else if (this.config.role === 2) {
+      } else if (this.role === 2) {
         this.isSelected = false
         this.isCopied = true
         const res = await getAllAccount()
@@ -161,19 +218,24 @@ export default {
       }
     },
     async createAccount () {
-      try {
-        this.isLoadingCreate = true
-        const res = true
-        this.isLoadingCreate = false
-        this.isVisible = false
-        this.$emit('onAdded')
-        if (res.code) {
-          this.$notify({ type: 'success', text: 'Create account succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Create account failed' })
+      this.validateUsername(this.username)
+      this.validateEmail(this.email)
+      this.validatePhone(this.phone)
+      if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '') {
+        try {
+          this.isLoadingCreate = true
+          const res = true
+          this.isLoadingCreate = false
+          this.isVisible = false
+          this.$emit('onAdded')
+          if (res.code) {
+            this.$notify({ type: 'success', text: 'Create account succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Create account failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
       }
     },
     onClose () {

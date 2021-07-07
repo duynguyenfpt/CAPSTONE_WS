@@ -85,7 +85,7 @@
       />
     </section>
     <section name="popup">
-      <account-add ref="add" @onAdded="refreshData" />
+      <account-add ref="add" @onAdded="onReload" />
     </section>
     <section name="popup">
       <account-detail ref="detail" @onDetailed="onReload" />
@@ -110,7 +110,7 @@ const accountFields = [
     key: 'no'
   },
   {
-    key: 'userName'
+    key: 'username'
   },
   {
     key: 'email'

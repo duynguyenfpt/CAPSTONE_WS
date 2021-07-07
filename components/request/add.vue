@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col class="text-center">
-        <h3>Request Management</h3>
+        <h3>Create Request</h3>
       </b-col>
     </b-row>
 
@@ -162,13 +162,14 @@ export default {
         database: null,
         table: null,
         fromDate: null,
-        toDate: null
+        toDate: null,
+        isAdd: false
       },
       status: 'not_chosen',
       opsType: [
         { value: null, text: 'Please select an option' },
-        { value: 1, text: 'Synchronized' },
-        { value: 2, text: 'Add Columns' }
+        { value: 'SyncTable', text: 'Synchronized' },
+        { value: 'AddColumn', text: 'Add Columns' }
       ],
       opsDb: [
         { value: null, text: 'Please select an option' }
@@ -220,15 +221,18 @@ export default {
       }
     },
     showRequest () {
-      if (this.request.type === 1) {
+      if (this.request.type === 'SyncTable') {
         this.isSync = true
         this.isAdd = false
-      } else if (this.request.type === 2) {
+        this.msg.type = ''
+      } else if (this.request.type === 'AddColumn') {
         this.isSync = false
         this.isAdd = true
+        this.msg.type = ''
       } else {
         this.isSync = false
         this.isAdd = false
+        this.msg.type = 'Please select type'
       }
     },
     async fillData () {
@@ -244,8 +248,10 @@ export default {
         res.data.map(item => {
           this.opsTb.push({ value: item.id, text: item.tableName })
         })
+        this.msg.database = ''
       } else {
         this.request.table = null
+        this.msg.database = 'Please select database'
       }
     },
     async fillTable () {
@@ -260,6 +266,9 @@ export default {
         this.opsName = res.data.map(item => {
           return { value: item.id, text: item.rowName }
         })
+        this.msg.table = ''
+      } else {
+        this.msg.table = 'Please select table'
       }
     },
     async fillRow (index) {
@@ -292,7 +301,7 @@ export default {
             const today = new Date()
             const time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds()
             const req = {
-              requestId: this.request.type,
+              requestType: this.request.type,
               tableId: this.request.table,
               isAll: this.request.isAll,
               fromDate: this.request.fromDate,
@@ -300,8 +309,7 @@ export default {
               time: time
             }
             const res = await createRequestSync(req)
-            this.isLoadingCreate = false
-            if (res.code) {
+            if (res.code === '201') {
               this.$notify({ type: 'success', text: 'Create request succeeded' })
               this.resetData()
             } else {
@@ -321,13 +329,13 @@ export default {
               rows.push(element.name)
             })
             const req = {
-              requestTypeId: this.request.type,
+              requestType: this.request.type,
               rowIds: rows,
               tableId: this.request.table
             }
             const res = await createRequestAddColumn(req)
             this.isLoadingCreate = false
-            if (res.code) {
+            if (res.code === '201') {
               this.$notify({ type: 'success', text: 'Create request succeeded' })
               this.resetData()
             } else {

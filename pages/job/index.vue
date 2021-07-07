@@ -41,6 +41,9 @@
         <template #cell(no)="item">
           {{ countRecord(item.index) }}
         </template>
+        <template #cell(request)="item">
+          {{ getRequestName(item.index) }}
+        </template>
 
         <template #cell(cancel)="row">
           <b-badge :variant="getCancelVariant(row.item.cancel)">{{
@@ -97,6 +100,7 @@
 </template>
 
 <script>
+import { getListJob } from '@/service/job'
 const jobFields = [
   {
     key: 'no'
@@ -169,34 +173,10 @@ export default {
     async getList () {
       this.loading = true
       try {
-        const res = {
-          code: '200',
-          message: null,
-          data: [
-            {
-              id: 1,
-              request: 'request1212',
-              creator: 'huongdlq',
-              executedBy: 'linhntt',
-              jobSchedule: '00**0',
-              lastestStatus: 'Fail',
-              cancel: 'Deactivate'
-            },
-            {
-              id: 2,
-              request: 'request1213',
-              creator: 'longvt',
-              executedBy: 'cuongnx',
-              jobSchedule: '00**0',
-              lastestStatus: 'Success',
-              cancel: 'Activate'
-            }
-          ],
-          metaData: {
-            totalPage: 1,
-            totalItem: 2
-          }
-        }
+        const res = await getListJob(
+          this.pagination.page,
+          this.pagination.limit
+        )
         this.jobs = res.data
         this.pagination.total = res.metaData.totalItem
       } catch (e) {
@@ -207,6 +187,9 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    getRequestName (index) {
+      return this.jobs[index].request.requestType + ' - ' + this.jobs[index].request.id
     },
     refreshData (data) {
       if (data) {

@@ -82,7 +82,7 @@ export default {
         const accounts = await getListAccount(1, 100)
         this.opsAccount = accounts.data.map((acc) => ({
           value: acc.id,
-          text: acc.userName
+          text: acc.username
         }))
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

@@ -82,7 +82,7 @@
       />
     </section>
     <section name="popup">
-      <server-add ref="add" @onAdded="refreshData" />
+      <server-add ref="add" @onAdded="onReload" />
     </section>
     <section name="popup">
       <server-detail ref="detail" @onDetailed="onReload" />

@@ -6,5 +6,6 @@ export const getDetailRequest = (id) => http.get(`api/requests/${id}`)
 export const createRequest = (requests) => http.post('api/requests', requests)
 export const updateRequest = (id, requests) => http.put(`api/requests/${id}`, requests)
 
-export const createRequestSync = (request) => http.post('api/sync_table_requests', request)
-export const createRequestAddColumn = (request) => http.post('api/add_column_table_request', request)
+export const createRequestSync = (request) => http.post('api/requests', request)
+export const createRequestAddColumn = (request) => http.post('api/requests', request)
+export const getAllRequest = (page, limit) => http.get('api/requests', { params: { page: 1, limit: 100 } })

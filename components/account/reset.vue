@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { resetAccount } from '@/service/account'
 export default {
   data: () => ({
     isVisible: false,
@@ -37,9 +38,9 @@ export default {
     async onReset () {
       try {
         this.isLoading = this.idItem
-        const res = true
+        const res = await resetAccount(this.idItem)
         this.$emit('onReseted')
-        if (res.code) {
+        if (res.code === '200') {
           this.$notify({ type: 'success', text: 'Reset password succeeded' })
         } else {
           this.$notify({ type: 'error', text: 'Reset password  failed' })

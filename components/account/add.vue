@@ -35,16 +35,30 @@
         <b-form-group
           label="Role:"
           label-cols-sm="3"
+          label-align-sm="left"
+          label-size="sm"
+        >
+          <b-form-select
+          v-model="role"
+          :options="roles"
+          size="sm"
+          @change="chooseRole"
+        ></b-form-select>
+          <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
+        </b-form-group>
+        <b-form-group
+          label="Right:"
+          label-cols-sm="3"
           class="mb-0"
           v-slot="{ ariaDescribedby }"
           label-size="sm"
         >
           <b-form-radio-group
             class="pt-2"
-            v-model="role"
-            :options="roles"
+            v-model="right"
+            :options="rights"
             :aria-describedby="ariaDescribedby"
-            @change="showRole"
+            @change="showRight"
             size="sm"
           ></b-form-radio-group>
         </b-form-group>
@@ -59,7 +73,7 @@
           style="text-align: left; display: inline-block"
           filterable
           :filter-method="filterMethod"
-          filter-placeholder="Search role"
+          filter-placeholder="Search right"
           v-model="value"
           :data="data"
           :titles="['Select', 'Selected']"
@@ -99,7 +113,7 @@
 </template>
 
 <script>
-import { getAllAccount } from '@/service/account'
+import { getAllAccount, createAccount } from '@/service/account'
 
 export default {
   data () {
@@ -130,12 +144,19 @@ export default {
       phone: null,
       account: null,
       role: null,
+      right: null,
       isLoading: false,
       isLoadingCreate: false,
       isVisible: false,
+      rights: [
+        { text: 'Select right', value: 1 },
+        { text: 'Copy right', value: 2 }
+      ],
       roles: [
-        { text: 'Select role', value: 1 },
-        { text: 'Copy role', value: 2 }
+        { value: null, text: 'Please select a role' },
+        { value: 'viewer', text: 'Viewer' },
+        { value: 'engineer', text: 'Engineer' },
+        { value: 'admin', text: 'Admin' }
       ],
       opsAccount: [{ value: null, text: 'Please select an account' }],
       isCopied: false,
@@ -146,7 +167,8 @@ export default {
       msg: {
         username: null,
         email: null,
-        phone: null
+        phone: null,
+        role: null
       },
       filterMethod (query, item) {
         return item.initial.toLowerCase().indexOf(query.toLowerCase()) > -1
@@ -173,14 +195,23 @@ export default {
       this.email = null
       this.username = null
       this.phone = null
+      this.role = null
       this.isCopied = null
       this.isSelected = null
       this.msg.username = null
       this.msg.email = null
       this.msg.phone = null
+      this.msg.role = null
+    },
+    chooseRole () {
+      if (this.role === null) {
+        this.msg.role = 'Please select role'
+      } else {
+        this.msg.role = ''
+      }
     },
     validateUsername (value) {
-      if (/^\W{5,127}$/.test(value)) {
+      if (/^[a-zA-Z-]+$/.test(value)) {
         this.msg.username = ''
       } else {
         this.msg.username = 'Invalid username'
@@ -200,11 +231,11 @@ export default {
         this.msg.phone = 'Invalid phone number'
       }
     },
-    async showRole () {
-      if (this.role === 1) {
+    async showRight () {
+      if (this.right === 1) {
         this.isSelected = true
         this.isCopied = false
-      } else if (this.role === 2) {
+      } else if (this.right === 2) {
         this.isSelected = false
         this.isCopied = true
         const res = await getAllAccount()
@@ -221,20 +252,33 @@ export default {
       this.validateUsername(this.username)
       this.validateEmail(this.email)
       this.validatePhone(this.phone)
-      if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '') {
+      if (this.username === null) {
+        this.msg.username = 'Invalid username'
+      }
+      if (this.role === null) {
+        this.msg.role = 'Please select role'
+      }
+      if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '' && this.msg.role === '') {
         try {
           this.isLoadingCreate = true
-          const res = true
-          this.isLoadingCreate = false
-          this.isVisible = false
+          const data = {
+            username: this.username,
+            email: this.email,
+            role: this.role,
+            phone: this.phone
+          }
+          const res = await createAccount(data)
           this.$emit('onAdded')
-          if (res.code) {
+          if (res.code === '201') {
             this.$notify({ type: 'success', text: 'Create account succeeded' })
           } else {
             this.$notify({ type: 'error', text: 'Create account failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoadingCreate = false
+          this.isVisible = false
         }
       }
     },

@@ -27,9 +27,9 @@
           {{ countRecord(item.index) }}
         </template>
         <template #cell(status)="row">
-          <b-badge :variant="getStatusVariant(row.item.status)">{{
-            row.item.status
-          }}</b-badge>
+          <b-badge :variant="getStatusVariant(row.item.status)">
+            {{ getStatus(row.item.status) }}
+          </b-badge>
         </template>
         <template #table-busy>
           <div class="text-center text-danger my-2">
@@ -67,11 +67,11 @@ const tableFields = [
     key: 'requestType'
   },
   {
-    key: 'creator.userName',
+    key: 'creator.username',
     label: 'Creator'
   },
   {
-    key: 'approvedBy.userName',
+    key: 'approvedBy.username',
     label: 'Approver'
   },
   {
@@ -109,14 +109,14 @@ export default {
   methods: {
     getStatusVariant (status) {
       switch (status) {
-        case 'pending':
+        case '1':
           return 'secondary'
-        case 'approved':
+        case '2':
           return 'success'
-        case 'rejected':
+        case '0':
           return 'danger'
         default:
-          return 'secondary'
+          return null
       }
     },
     async getList () {
@@ -153,6 +153,15 @@ export default {
       if (data) {
         this.getList()
       }
+    },
+    getStatus (status) {
+      if (status === '1') {
+        return 'Pending'
+      } else if (status === '2') {
+        return 'Approved'
+      } else if (status === '0') {
+        return 'Reject'
+      } return null
     }
   }
 }

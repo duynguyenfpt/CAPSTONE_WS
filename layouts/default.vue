@@ -5,33 +5,17 @@
         <b-nav vertical class="side-nav w-100 p-3">
           <h4 href="/">FTDS System</h4>
           <hr />
-          <b-nav-item v-b-toggle.account>
+          <b-nav-item v-b-toggle.account :to="{ name: 'account' }">
             <i class="fa fa-user mr-1" /> Account Management
-            <b-collapse id="account">
-              <b-nav-item :to="{ name: 'account' }">
-                <i class="fa fa-list-ol" />
-                List Accounts
-              </b-nav-item>
-            </b-collapse>
           </b-nav-item>
 
-          <b-nav-item v-b-toggle.db>
+          <b-nav-item v-b-toggle.db :to="{ name: 'db' }">
             <i class="fa fa-database mr-1" /> Databases config
-            <b-collapse id="db">
-              <b-nav-item :to="{ name: 'db' }">
-                <i class="fa fa-list-ol" />
-                List Databases
-              </b-nav-item>
-            </b-collapse>
           </b-nav-item>
 
-          <b-nav-item v-b-toggle.table>
+          <b-nav-item v-b-toggle.table :to="{ name: 'table' }">
             <i class="fa fa-table mr-1"></i> Tables config
             <b-collapse id="table">
-              <b-nav-item :to="{ name: 'table' }">
-                <i class="fa fa-list-ol" />
-                List Tables
-              </b-nav-item>
               <b-nav-item :to="{ name: 'table-add' }">
                 <i class="fa fa-plus" />
                 Add Tables
@@ -42,33 +26,17 @@
               </b-nav-item>
             </b-collapse>
           </b-nav-item>
-          <b-nav-item v-b-toggle.server>
+          <b-nav-item v-b-toggle.server :to="{ name: 'server' }">
             <i class="fa fa-server mr-1" />
             Server config
-            <b-collapse id="server">
-              <b-nav-item :to="{ name: 'server' }">
-                <i class="fa fa-list-ol" />
-                List Servers
-              </b-nav-item>
-            </b-collapse>
           </b-nav-item>
-          <b-nav-item v-b-toggle.job>
+          <b-nav-item v-b-toggle.job :to="{ name: 'job' }">
             <i class="fa fa-user mr-1" />
             Job
-            <b-collapse id="job">
-              <b-nav-item :to="{ name: 'job' }">
-                <i class="fa fa-list-ol" />
-                List Jobs
-              </b-nav-item>
-            </b-collapse>
           </b-nav-item>
-          <b-nav-item v-b-toggle.request>
+          <b-nav-item v-b-toggle.request :to="{ name: 'request' }">
             <i class="fa fa-check mr-1"></i> Request
             <b-collapse id="request">
-              <b-nav-item :to="{ name: 'request' }">
-                <i class="fa fa-list-ol" />
-                List Request
-              </b-nav-item>
               <b-nav-item :to="{ name: 'request-add' }">
                 <i class="fa fa-plus" />
                 Add Request

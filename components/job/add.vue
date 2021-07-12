@@ -118,7 +118,7 @@ export default {
     const resAcc = await getAllAccount()
     // eslint-disable-next-line array-callback-return
     resAcc.data.map(item => {
-      this.executedBys.push({ value: item.id, text: item.username })
+      this.executedBys.push({ value: item.id, text: item.userName })
     })
     const resReq = await getAllRequest()
     // eslint-disable-next-line array-callback-return

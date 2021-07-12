@@ -29,8 +29,8 @@
           <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
           <label class="form-label">Password</label>
           <b-input size="sm" v-model="password" type="password" />
-          <label class="form-label">Database Type</label>
           <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
+          <label class="form-label">Database Type</label>
           <b-form-select
             v-model="databaseType"
             :options="dbTypes"
@@ -60,9 +60,10 @@ export default {
     options: [],
     dbTypes: [
       { value: 'mysql', text: 'My Sql' },
-      { value: 'mongoDB', text: 'Mongo DB' },
-      { value: 'PostgreSQL', text: 'PostgreSQL' },
-      { value: 'SQL-Sever', text: 'SQL-Sever' }
+      { value: 'mogodb', text: 'Mongo DB' },
+      { value: 'postgresql', text: 'PostgreSQL' },
+      { value: 'sql', text: 'SQL-Sever' },
+      { value: 'oracal', text: 'Oracle' }
     ],
     serverInforId: 0,
     port: 3306,

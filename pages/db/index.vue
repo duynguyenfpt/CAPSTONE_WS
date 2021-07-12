@@ -154,6 +154,23 @@ export default {
         )
         this.dbs = res.data
         this.dbs.forEach((e) => {
+          if (e.databaseType === 'sql') {
+            e.databaseType = 'SQL-Server'
+          }
+          if (e.databaseType === 'mysql') {
+            e.databaseType = 'My Sql'
+          }
+          if (e.databaseType === 'mogodb') {
+            e.databaseType = 'Mongo DB'
+          }
+          if (e.databaseType === 'postgresql') {
+            e.databaseType = 'PostgreSQL'
+          }
+          if (e.databaseType === 'oracal') {
+            e.databaseType = 'Oracle'
+          }
+        })
+        this.dbs.forEach((e) => {
           e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
         })
         this.pagination.total = res.metaData.totalItem
@@ -192,7 +209,6 @@ export default {
           this.textSearch
         )
         this.dbs = result.data
-
         this.dbs.forEach((e) => {
           e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
         })

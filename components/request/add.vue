@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col class="text-center">
-        <h3>Create Request</h3>
+        <h1>Create Request</h1>
       </b-col>
     </b-row>
 

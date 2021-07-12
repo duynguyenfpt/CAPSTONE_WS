@@ -25,4 +25,11 @@
   color: red;
 }
 
+.info {
+  margin-bottom: 15px;
+  padding: 4px 12px;
+  background-color: #e7f3fe;
+  border-left: 6px solid #2196F3;
+}
+
 

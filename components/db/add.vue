@@ -11,6 +11,7 @@
         <b-form-select
           v-model="serverInforId"
           :options="dbHosts"
+          @change="chooseHost"
           size="sm"
         ></b-form-select>
         <p class="msg-error" v-if="msg.serverInforId">{{ msg.serverInforId }}</p>
@@ -41,6 +42,7 @@
           v-model="databaseType"
           :options="dbTypes"
           size="sm"
+          @change="chooseDbType"
         ></b-form-select>
         <p class="msg-error" v-if="msg.databaseType">{{ msg.databaseType }}</p>
       </b-col>
@@ -77,9 +79,10 @@ export default {
     dbTypes: [
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
-      { value: 'mongoDB', text: 'Mongo DB' },
-      { value: 'PostgreSQL', text: 'PostgreSQL' },
-      { value: 'SQL-Sever', text: 'SQL-Sever' }
+      { value: 'mogodb', text: 'Mongo DB' },
+      { value: 'postgresql', text: 'PostgreSQL' },
+      { value: 'sql', text: 'SQL-Sever' },
+      { value: 'oracal', text: 'Oracle' }
     ],
     serverInforId: null,
     port: null,
@@ -173,6 +176,20 @@ export default {
         this.msg.password = ''
       } else {
         this.msg.password = 'Invalid password'
+      }
+    },
+    chooseHost () {
+      if (this.serverInforId === null) {
+        this.msg.serverInforId = 'Please select host'
+      } else {
+        this.msg.serverInforId = ''
+      }
+    },
+    chooseDbType () {
+      if (this.databaseType === null) {
+        this.msg.databaseType = 'Please select type database'
+      } else {
+        this.msg.databaseType = ''
       }
     },
     async createDatabaseInfo () {

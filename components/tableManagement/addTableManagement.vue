@@ -21,7 +21,7 @@
     <b-row>
       <b-col>
         <label>Host</label>
-        <b-form-select size="sm" v-model="host" :options="opsHost"></b-form-select>
+        <b-form-select size="sm" v-model="host" :options="opsHost" @change="chooseHost"></b-form-select>
         <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
       </b-col>
       <b-col>
@@ -50,7 +50,7 @@
       </b-col>
       <b-col>
         <label>Database Type</label>
-        <b-form-select v-model="dbType" :options="opsDbType" size="sm">
+        <b-form-select v-model="dbType" :options="opsDbType" size="sm" @change="chooseType">
         </b-form-select>
         <p class="msg-error" v-if="msg.dbType">{{ msg.dbType }}</p>
       </b-col>
@@ -87,9 +87,10 @@ export default {
     opsDbType: [
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
-      { value: 'mongoDB', text: 'Mongo DB' },
-      { value: 'PostgreSQL', text: 'PostgreSQL' },
-      { value: 'SQL-Sever', text: 'SQL-Sever' }
+      { value: 'mogodb', text: 'Mongo DB' },
+      { value: 'postgresql', text: 'PostgreSQL' },
+      { value: 'sql', text: 'SQL-Sever' },
+      { value: 'oracal', text: 'Oracle' }
     ],
     db: null,
     dbName: null,
@@ -183,6 +184,20 @@ export default {
         this.msg.password = ''
       } else {
         this.msg.password = 'Invalid password'
+      }
+    },
+    chooseHost () {
+      if (this.host === null) {
+        this.msg.dbType = 'Please select host'
+      } else {
+        this.msg.host = ''
+      }
+    },
+    chooseType () {
+      if (this.dbType === null) {
+        this.msg.dbType = 'Please select type database'
+      } else {
+        this.msg.dbType = ''
       }
     },
     resetData () {

@@ -9,3 +9,5 @@ export const updateRequest = (id, requests) => http.put(`api/requests/${id}`, re
 export const createRequestSync = (request) => http.post('api/requests', request)
 export const createRequestAddColumn = (request) => http.post('api/requests', request)
 export const getAllRequest = (page, limit) => http.get('api/requests', { params: { page: 1, limit: 100 } })
+
+export const getLogByRequest = (id) => http.get(`api/requests/${id}/notes`, { params: { page: 1, limit: 100 } })

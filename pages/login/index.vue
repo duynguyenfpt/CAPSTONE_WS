@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import { login } from '@/service/authen'
+// import { login } from '@/service/authen'
 
 export default {
   layout: 'auth',
@@ -136,13 +136,16 @@ export default {
   }),
   methods: {
     async onLogin () {
-      const data = {
+      const user = {
         username: this.username,
         password: this.password
-
       }
-      const res = await login(data)
-      console.log(res.token)
+      const res = await this.$store.dispatch('auth/login', user)
+      if (res) {
+        this.$router.push('/test-after')
+      } else {
+        this.$router.push('/login')
+      }
     }
   }
 }

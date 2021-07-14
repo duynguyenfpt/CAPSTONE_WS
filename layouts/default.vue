@@ -94,6 +94,7 @@
 </template>
 <script>
 export default {
+  middleware: 'isAuthenticated',
   data () {
     return {
       collapsed: false

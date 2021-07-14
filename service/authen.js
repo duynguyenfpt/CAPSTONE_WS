@@ -1,3 +1,3 @@
 import { http } from './common'
 
-export const login = (data) => http.post('login', data)
+export const login = (data) => http.post('api/authenticate', data)

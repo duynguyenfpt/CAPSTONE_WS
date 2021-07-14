@@ -7,6 +7,10 @@ export const http = axios.create({
 // Request interceptors
 http.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem('token')
+    if (token !== null) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
@@ -21,6 +25,6 @@ http.interceptors.response.use(
   },
   (error) => {
     Promise.reject(error)
-    throw error
+    // throw error
   }
 )

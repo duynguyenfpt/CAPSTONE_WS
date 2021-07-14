@@ -8,6 +8,9 @@ export const state = () => ({
 export const mutations = {
   setToken: (state, token) => {
     state.token = token
+  },
+  removeToken: (state) => {
+    state.token = null
   }
 }
 
@@ -15,8 +18,10 @@ export const actions = {
   async login ({ commit }, user) {
     try {
       const data = await login(user)
-      localStorage.setItem('token', data.token)
-      commit('setToken', data.token)
+      if (data) {
+        localStorage.setItem('token', data.token)
+        commit('setToken', data.token)
+      }
       return data
     } catch (error) {
       return null
@@ -24,5 +29,6 @@ export const actions = {
   },
   logout ({ commit }) {
     localStorage.removeItem('token')
+    commit('removeToken')
   }
 }

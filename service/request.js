@@ -11,3 +11,4 @@ export const createRequestAddColumn = (request) => http.post('api/requests', req
 export const getAllRequest = (page, limit) => http.get('api/requests', { params: { page: 1, limit: 100 } })
 
 export const getLogByRequest = (id) => http.get(`api/requests/${id}/notes`, { params: { page: 1, limit: 100 } })
+export const createLog = (data) => http.post('api/notes', data)

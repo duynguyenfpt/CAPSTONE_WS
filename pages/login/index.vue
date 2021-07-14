@@ -16,6 +16,7 @@
                   placeholder=""
                   v-model="username"
                 />
+                <span class="msg-error">{{ error_mgs.username }}</span>
               </div>
               <div class="form-group">
                 <label for="exampleInputPassword1" class="text-uppercase"
@@ -27,15 +28,21 @@
                   placeholder=""
                   v-model="password"
                 />
+                <span class="msg-error">{{ error_mgs.password }}</span>
               </div>
 
               <div class="form-check">
-                <label class="form-check-label">
+                <!-- <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" />
                   <small>Remember Me</small>
-                </label>
-                <button class="btn btn-login float-right" @click="onLogin">
-                  Submit
+                </label> -->
+                <button class="btn btn-login float-right" @click="onLogin" :disabled="isLoading">
+                  <b-spinner
+                    v-if="isLoading"
+                    variant="primary"
+                    small
+                  ></b-spinner>
+                  Login
                 </button>
               </div>
             </div>
@@ -126,23 +133,47 @@
 </template>
 
 <script>
-import { login } from '@/service/authen'
 
 export default {
   layout: 'auth',
   data: () => ({
     username: null,
-    password: null
+    password: null,
+    isLoading: false,
+    error_mgs: {
+      username: '',
+      password: ''
+    }
   }),
   methods: {
     async onLogin () {
-      const data = {
-        username: this.username,
-        password: this.password
-
+      let isError = false
+      if (!this.username) {
+        isError = true
+        this.error_mgs.username = 'Please fill username'
+      } else {
+        this.error_mgs.username = ''
       }
-      const res = await login(data)
-      console.log(res.token)
+      if (!this.username) {
+        isError = true
+        this.error_mgs.password = 'Please fill password'
+      } else {
+        this.error_mgs.password = ''
+      }
+      if (!isError) {
+        this.isLoading = true
+        const user = {
+          username: this.username,
+          password: this.password
+        }
+        const data = await this.$store.dispatch('auth/login', user)
+        this.isLoading = false
+        if (data) {
+          this.$router.push('/')
+        } else {
+          this.$notify({ type: 'error', text: 'Login failed' })
+        }
+      }
     }
   }
 }

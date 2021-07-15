@@ -62,7 +62,7 @@
                   <b-row>
                     <b-col cols="8" class="text-12">Admin</b-col>
                     <b-col class="text-right">
-                      <a id="account-link" class="text-12">Sign Out</a>
+                      <a id="account-link" class="text-12" @click="logout">Sign Out</a>
                     </b-col>
                   </b-row>
                   <b-row class="account-detail">
@@ -98,6 +98,12 @@ export default {
   data () {
     return {
       collapsed: false
+    }
+  },
+  methods: {
+    async logout () {
+      this.$store.dispatch('auth/logout')
+      this.$router.push('/login')
     }
   }
 }

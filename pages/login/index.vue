@@ -150,13 +150,13 @@ export default {
       let isError = false
       if (!this.username) {
         isError = true
-        this.error_mgs.username = 'Hãy điền tên đăng nhập'
+        this.error_mgs.username = 'Please fill username'
       } else {
         this.error_mgs.username = ''
       }
       if (!this.username) {
         isError = true
-        this.error_mgs.password = 'Hãy điền tên mật khẩu'
+        this.error_mgs.password = 'Please fill password'
       } else {
         this.error_mgs.password = ''
       }
@@ -171,7 +171,7 @@ export default {
         if (data) {
           this.$router.push('/')
         } else {
-          this.$notify({ type: 'error', text: 'Tài khoản đăng nhập không chính xác !' })
+          this.$notify({ type: 'error', text: 'Login failed' })
         }
       }
     }

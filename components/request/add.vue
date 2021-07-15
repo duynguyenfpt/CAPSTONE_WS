@@ -66,6 +66,13 @@
       <b-row class="pt-2" v-if="isSync">
         <b-col sm="2"></b-col>
         <b-col sm="4">
+          <label>Id</label>
+          <b-input v-model="request.idRaw" type="number" size="sm"></b-input>
+        </b-col>
+      </b-row>
+      <b-row class="pt-2" v-if="isSync">
+        <b-col sm="2"></b-col>
+        <b-col sm="4">
           <label for="example-datepicker">From date</label>
           <b-form-datepicker
             id="date-from"

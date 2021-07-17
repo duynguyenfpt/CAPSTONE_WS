@@ -151,7 +151,7 @@ export default {
       this.msg.databaseType = null
     },
     validateDBName (value) {
-      if (/^[a-zA-Z\d][\w#@]{1,127}$/.test(value)) {
+      if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
         this.msg.databaseName = ''
       } else {
         this.msg.databaseName = 'Invalid database name'
@@ -165,7 +165,7 @@ export default {
       }
     },
     validateUsername (value) {
-      if (/^[a-zA-Z0-9]+$/.test(value)) {
+      if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
         this.msg.username = ''
       } else {
         this.msg.username = 'Invalid username'

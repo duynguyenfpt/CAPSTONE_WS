@@ -212,6 +212,23 @@ export default {
         this.dbs.forEach((e) => {
           e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
         })
+        this.dbs.forEach((e) => {
+          if (e.databaseType === 'sql') {
+            e.databaseType = 'SQL-Server'
+          }
+          if (e.databaseType === 'mysql') {
+            e.databaseType = 'My Sql'
+          }
+          if (e.databaseType === 'mogodb') {
+            e.databaseType = 'Mongo DB'
+          }
+          if (e.databaseType === 'postgresql') {
+            e.databaseType = 'PostgreSQL'
+          }
+          if (e.databaseType === 'oracal') {
+            e.databaseType = 'Oracle'
+          }
+        })
         this.pagination.total = result.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

@@ -84,6 +84,9 @@ const dbFields = [
     key: 'databaseName'
   },
   {
+    key: 'host'
+  },
+  {
     key: 'port'
   },
   {

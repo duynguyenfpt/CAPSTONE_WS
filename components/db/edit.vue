@@ -66,10 +66,10 @@ export default {
       { value: 'oracal', text: 'Oracle' }
     ],
     serverInforId: 0,
-    port: 3306,
-    databaseName: 'example',
-    username: 'root',
-    password: 'root',
+    port: null,
+    databaseName: null,
+    username: null,
+    password: null,
     databaseType: null,
     isVisible: false,
     idItem: 0,
@@ -87,7 +87,7 @@ export default {
     this.isLoading = true
     const hosts = await getAllServers()
     this.options = hosts.data.map(item => {
-      return { value: item.id, text: item.serverHost }
+      return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
     })
     this.isLoading = false
   },

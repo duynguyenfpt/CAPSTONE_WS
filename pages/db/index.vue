@@ -107,6 +107,9 @@ const TableFields = [
     key: 'databaseName'
   },
   {
+    key: 'host'
+  },
+  {
     key: 'port'
   },
   {

@@ -211,7 +211,7 @@ export default {
       }
     },
     validateUsername (value) {
-      if (/^[a-zA-Z-]+$/.test(value)) {
+      if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
         this.msg.username = ''
       } else {
         this.msg.username = 'Invalid username'

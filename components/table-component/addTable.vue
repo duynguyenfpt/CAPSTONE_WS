@@ -68,7 +68,7 @@ export default {
   },
   methods: {
     validateTableName (value) {
-      if (/^(\d|\w|_){1,127}$/.test(value)) {
+      if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
         this.msg = ''
       } else {
         this.msg = 'Invalid table name'

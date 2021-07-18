@@ -152,14 +152,14 @@ export default {
   },
   methods: {
     validateDBName (value) {
-      if (/^[a-zA-Z\d][\w#@]{1,127}$/.test(value)) {
+      if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
         this.msg.db = ''
       } else {
         this.msg.db = 'Invalid database name'
       }
     },
     validateTableName (value) {
-      if (/^(\d|\w|_){1,127}$/.test(value)) {
+      if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
         this.msg.tb = ''
       } else {
         this.msg.tb = 'Invalid table name'
@@ -173,7 +173,7 @@ export default {
       }
     },
     validateUsername (value) {
-      if (/^[a-zA-Z0-9]+$/.test(value)) {
+      if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
         this.msg.username = ''
       } else {
         this.msg.username = 'Invalid username'

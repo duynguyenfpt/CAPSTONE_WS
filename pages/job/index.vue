@@ -26,6 +26,10 @@
             <i class="fa fa-plus pr-1" />
             Create Job
           </b-btn>
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload
+          </b-btn>
         </b-col>
       </b-row>
     </section>
@@ -201,6 +205,9 @@ export default {
     },
     editJob (id) {
       this.$refs.edit.show(id)
+    },
+    onReload () {
+      this.getList()
     }
   }
 }

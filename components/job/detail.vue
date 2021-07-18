@@ -9,7 +9,7 @@
       </b-col>
     </b-row>
 
-    <section namen="view" class="pt-3">
+    <!-- <section namen="view" class="pt-3">
       <b-table
         responsive
         hover
@@ -59,7 +59,7 @@
     </section>
     <section name="popup">
       <table-component-deleteTable ref="delete" @onDeleted="onReload" />
-    </section>
+    </section> -->
   </div>
    <div v-else>
    <content-placeholders class="article-card-block">
@@ -70,22 +70,12 @@
 </template>
 
 <script>
-import { getDatabaseDetail } from '@/service/db'
-import { getAllTableByDb } from '@/service/table.service'
+import { getDetailJob } from '@/service/job'
 import moment from 'moment'
 
 const jobFields = [
   {
-    key: 'databaseName'
-  },
-  {
-    key: 'port'
-  },
-  {
-    key: 'username'
-  },
-  {
-    key: 'databaseType'
+    key: 'jobName'
   },
   {
     key: 'createdBy'
@@ -100,7 +90,16 @@ const jobFields = [
     key: 'modifiedDate'
   },
   {
-    key: 'action'
+    key: 'executedById'
+  },
+  {
+    key: 'jobSchedule'
+  },
+  {
+    key: 'maxRetry'
+  },
+  {
+    key: 'active'
   }
 ]
 
@@ -155,10 +154,9 @@ export default {
     async getDetail () {
       try {
         this.loading = true
-        const res = await getDatabaseDetail(this.id)
-        const resList = await getAllTableByDb(this.id, this.pagination.page, this.pagination.limit)
-        this.listTableDetail = resList.data
-        this.pagination.total = resList.metaData.totalItem
+        const res = await getDetailJob(this.id)
+        this.listTableDetail = res.data
+        // this.pagination.total = resList.metaData.totalItem
         console.log(this.pagination)
         this.detail = res.data
         this.detail.createdDate = moment(this.detail.createdDate).format(
@@ -191,7 +189,6 @@ export default {
       this.$refs.add.show(id)
     },
     countRecord (index) {
-      // console.log((this.pagination.page - 1) * this.pagination.limit + index + 1)
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }

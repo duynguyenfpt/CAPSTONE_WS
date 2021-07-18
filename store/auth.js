@@ -19,8 +19,8 @@ export const actions = {
     try {
       const data = await login(user)
       if (data) {
-        localStorage.setItem('token', data.token)
-        commit('setToken', data.token)
+        localStorage.setItem('token', data.data.token)
+        commit('setToken', data.data.token)
       }
       return data
     } catch (error) {

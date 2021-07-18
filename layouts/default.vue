@@ -72,9 +72,9 @@
                         class="account-img"
                       ></b-img>
                     </b-col>
-                    <b-col class="info-detail">
-                      <h6>Nguyen Thi Thuy Linh</h6>
-                      <p class="text-12">linhntt2306@gmail.com</p>
+                    <b-col class="info-detail" v-if="user">
+                      <h6>{{ user.username }}</h6>
+                      <p class="text-12">{{ user.email }}</p>
                       <a class="text-12">View Account</a>
                     </b-col>
                   </b-row>
@@ -93,12 +93,18 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 export default {
   middleware: 'isAuthenticated',
   data () {
     return {
       collapsed: false
     }
+  },
+  computed: {
+    ...mapGetters({
+      user: 'auth/getUser'
+    })
   },
   methods: {
     async logout () {

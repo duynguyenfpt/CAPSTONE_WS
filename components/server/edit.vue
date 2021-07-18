@@ -53,18 +53,18 @@ export default {
     }
   },
   methods: {
-    validateHost (value) {
-      if (/^[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]$/.test(value)) {
-        this.msg.host = ''
-      } else {
-        this.msg.host = 'Invalid server host'
-      }
-    },
     validateDomain (value) {
-      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
+      if (/^[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]$/.test(value)) {
         this.msg.domain = ''
       } else {
-        this.msg.domain = 'Invalid server domain'
+        this.msg.domain = 'Invalid server host'
+      }
+    },
+    validateHost (value) {
+      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
+        this.msg.host = ''
+      } else {
+        this.msg.host = 'Invalid server domain'
       }
     },
     async show (id) {
@@ -76,6 +76,8 @@ export default {
       this.serverHost = res.data.serverHost
       this.serverDomain = res.data.serverDomain
       this.isLoading = false
+      this.msg.domain = null
+      this.msg.host = null
     },
     onClose () {
       this.isVisible = false

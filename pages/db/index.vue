@@ -153,6 +153,7 @@ export default {
           this.pagination.limit
         )
         this.dbs = res.data
+        console.log(res.data)
         this.dbs.forEach((e) => {
           if (e.databaseType === 'sql') {
             e.databaseType = 'SQL-Server'

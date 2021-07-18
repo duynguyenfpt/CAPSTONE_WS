@@ -60,29 +60,39 @@ export default {
     }
   },
   methods: {
-    validateHost (value) {
-      if (/^[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]$/.test(value)) {
-        this.msg.host = ''
-      } else {
-        this.msg.host = 'Invalid server host'
-      }
-    },
     validateDomain (value) {
-      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
+      if (/^[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]$/.test(value)) {
         this.msg.domain = ''
       } else {
-        this.msg.domain = 'Invalid server domain'
+        this.msg.domain = 'Invalid server host'
+      }
+    },
+    validateHost (value) {
+      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
+        this.msg.host = ''
+      } else {
+        this.msg.host = 'Invalid server domain'
       }
     },
     async show () {
       this.isVisible = true
       this.serverHost = null
       this.serverDomain = null
+      this.msg.host = null
+      this.msg.domain = null
     },
     onClose () {
       this.isVisible = false
     },
     async onCreateServer () {
+      this.validateHost(this.serverHost)
+      this.validateHost(this.serverDomain)
+      if (this.serverHost === null) {
+        this.msg.host = 'Invalid server host'
+      }
+      if (this.serverDomain === null) {
+        this.msg.domain = 'Invalid server domain'
+      }
       if (this.msg.host === '' && this.msg.domain === '') {
         try {
           this.isLoadingCreate = true

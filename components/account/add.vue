@@ -39,11 +39,11 @@
           label-size="sm"
         >
           <b-form-select
-          v-model="role"
-          :options="roles"
-          size="sm"
-          @change="chooseRole"
-        ></b-form-select>
+            v-model="role"
+            :options="roles"
+            size="sm"
+            @change="chooseRole"
+          ></b-form-select>
           <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
         </b-form-group>
         <b-form-group
@@ -70,13 +70,13 @@
           v-if="isSelected"
         >
           <el-transfer
-          style="text-align: left; display: inline-block"
-          filterable
-          :filter-method="filterMethod"
-          filter-placeholder="Search right"
-          v-model="value"
-          :data="data"
-          :titles="['Select', 'Selected']"
+            style="text-align: left; display: inline-block"
+            filterable
+            :filter-method="filterMethod"
+            filter-placeholder="Search right"
+            v-model="value"
+            :data="data"
+            :titles="['Select', 'Selected']"
           >
           </el-transfer>
         </b-form-group>
@@ -86,11 +86,14 @@
           label-size="sm"
           v-if="isCopied"
         >
-          <b-form-select
-            size="sm"
-            v-model="account"
+          <v-select
+            class="select-sm"
+            :reduce="(text) => text.value"
+            label="text"
             :options="opsAccount"
-          ></b-form-select>
+            v-model="account"
+            size="sm"
+          ></v-select>
         </b-form-group>
         <b-row class="pt-3">
           <b-col class="text-right">
@@ -114,6 +117,10 @@
 
 <script>
 import { getAllAccount, createAccount } from '@/service/account'
+import Vue from 'vue'
+import vSelect from 'vue-select'
+
+Vue.component('v-select', vSelect)
 
 export default {
   data () {
@@ -196,8 +203,8 @@ export default {
       this.username = null
       this.phone = null
       this.role = null
-      this.isCopied = null
-      this.isSelected = null
+      this.isCopied = false
+      this.isSelected = false
       this.msg.username = null
       this.msg.email = null
       this.msg.phone = null
@@ -218,7 +225,11 @@ export default {
       }
     },
     validateEmail (value) {
-      if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) {
+      if (
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+          value
+        )
+      ) {
         this.msg.email = ''
       } else {
         this.msg.email = 'Invalid email address'
@@ -241,7 +252,7 @@ export default {
         const res = await getAllAccount()
         // eslint-disable-next-line array-callback-return
         res.data.map((item) => {
-          this.opsAccount.push({ value: item.id, text: item.userName })
+          this.opsAccount.push({ value: item.id, text: item.username })
         })
       } else {
         this.isSelected = false
@@ -258,7 +269,12 @@ export default {
       if (this.role === null) {
         this.msg.role = 'Please select role'
       }
-      if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '' && this.msg.role === '') {
+      if (
+        this.msg.username === '' &&
+        this.msg.email === '' &&
+        this.msg.phone === '' &&
+        this.msg.role === ''
+      ) {
         try {
           this.isLoadingCreate = true
           const data = {
@@ -288,3 +304,34 @@ export default {
   }
 }
 </script>
+
+<style>
+@import "vue-select/dist/vue-select.css";
+
+.vs--searchable .vs__dropdown-toggle {
+  width: 100%;
+  min-width: 245.54px;
+  white-space: nowrap;
+  max-height: 31px;
+  height: calc(1.5em + 0.5rem + 2px);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.vs__selected {
+  margin: 0;
+  padding-bottom: 3px;
+  padding-left: 0;
+}
+
+.vs__actions {
+  padding: 0;
+  margin-right: 5px;
+}
+
+.vs__clear {
+  margin-bottom: 2px;
+}
+</style>

@@ -66,8 +66,23 @@
       <b-row class="pt-2" v-if="isSync">
         <b-col sm="2"></b-col>
         <b-col sm="4">
-          <label>Id</label>
-          <b-input v-model="request.idRaw" type="number" size="sm"></b-input>
+          <label>Unique key</label>
+          <!-- <b-input v-model="request.idRaw" type="number" size="sm"></b-input> -->
+          <div>
+            <el-select class="w-100"
+              v-model="valueKey"
+              multiple
+              filterable
+              no-match-text="Data search not found"
+              placeholder="Choose unique key">
+              <el-option
+                v-for="item in opsUniqueKey"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
         </b-col>
       </b-row>
       <b-row class="pt-2" v-if="isSync">
@@ -235,6 +250,17 @@ export default {
       opsDb: [{ value: null, text: 'Please select an option' }],
       opsTb: [{ value: null, text: 'Please select an option' }],
       min: null,
+      opsUniqueKey: [{
+        value: 'HTML',
+        label: 'HTML'
+      }, {
+        value: 'CSS',
+        label: 'CSS'
+      }, {
+        value: 'JavaScript',
+        label: 'JavaScript'
+      }],
+      valueKey: [],
       opsName: [{ value: null, text: 'Please select an option' }],
       rows: [
         {
@@ -334,6 +360,9 @@ export default {
         const res = await getTableSchema(id)
         this.opsName = res.data.map((item) => {
           return { value: item.id, text: item.rowName }
+        })
+        this.opsUniqueKey = res.data.map((item) => {
+          return { value: item.id, label: item.rowName }
         })
         this.msg.table = ''
       } else {

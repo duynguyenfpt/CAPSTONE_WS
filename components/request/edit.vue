@@ -53,14 +53,11 @@ export default {
       approvedById: null
     },
     opsStatus: [
-      { value: 'pending', text: 'Pending' },
-      { value: 'rejected', text: 'Rejected' },
-      { value: 'approved', text: 'Approved' }
+      { value: '0', text: 'Pending' },
+      { value: '2', text: 'Rejected' },
+      { value: '1', text: 'Approved' }
     ],
-    opsAccount: [
-      { value: '1', text: 'Huong' },
-      { value: '2', text: 'Linh' }
-    ],
+    opsAccount: [],
     isLoading: false,
     isVisible: false,
     isLoadingUpdate: false,
@@ -69,6 +66,14 @@ export default {
       id: null
     }
   }),
+  async mounted () {
+    // get username
+    const accounts = await getListAccount(1, 100)
+    this.opsAccount = accounts.data.map((acc) => ({
+      value: acc.id,
+      text: acc.username
+    }))
+  },
   methods: {
     async show (id) {
       this.idItem = id
@@ -78,12 +83,6 @@ export default {
         const res = await getDetailRequest(id)
         this.request.requestType = res.data.requestType
         this.request.status = res.data.status
-        // get username
-        const accounts = await getListAccount(1, 100)
-        this.opsAccount = accounts.data.map((acc) => ({
-          value: acc.id,
-          text: acc.username
-        }))
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

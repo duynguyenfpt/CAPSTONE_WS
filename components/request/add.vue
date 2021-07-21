@@ -549,6 +549,8 @@ export default {
       this.request.isAll = 'not_chosen'
       this.request.fromDate = null
       this.request.toDate = null
+      this.request.unique = null
+      this.request.partition = null
       this.rows = [
         {
           name: null,

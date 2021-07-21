@@ -11,11 +11,7 @@
               @keyup.enter="searchJob(textSearch)"
             />
             <b-input-group-append>
-              <b-btn
-                size="sm"
-                variant="primary"
-                @click="searchJob(textSearch)"
-              >
+              <b-btn size="sm" variant="primary" @click="searchJob(textSearch)">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -49,21 +45,24 @@
           {{ getRequestName(item.index) }}
         </template>
 
-        <template #cell(cancel)="row">
-          <b-badge :variant="getCancelVariant(row.item.cancel)">{{
-            row.item.cancel
-          }}</b-badge>
+        <template #cell(active)>
+          <b-btn size="sm" variant="danger" v-if="isDeactive">
+            <i class="fa fa-power-off" v-if="isDeactive" />
+          </b-btn>
+          <b-btn size="sm" variant="success" v-if="isActive">
+            <i class="fas fa-check" v-if="isActive" />
+          </b-btn>
         </template>
 
-        <template #cell(lastestStatus)="row">
-          <b-badge :variant="getLastestStatusVariant(row.item.lastestStatus)">{{
-            row.item.lastestStatus
+        <template #cell(status)="row">
+          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{
+            row.item.status
           }}</b-badge>
         </template>
 
         <template #cell(action)="item">
           <b-btn
-          :to="{ name: 'job-id', params: { id: item.item.id } }"
+            :to="{ name: 'job-id', params: { id: item.item.id } }"
             size="sm"
             variant="success"
           >
@@ -113,20 +112,19 @@ const jobFields = [
     key: 'request'
   },
   {
-    key: 'creator'
+    key: 'createdBy'
   },
   {
-    key: 'executedBy'
+    key: 'excutedBy'
   },
   {
     key: 'jobSchedule'
   },
   {
-    key: 'lastestStatus'
+    key: 'status'
   },
   {
-    key: 'cancel',
-    variant: 'denger'
+    key: 'active'
   },
   {
     key: 'action'
@@ -146,7 +144,9 @@ export default {
       total: 0
     },
     loading: false,
-    jobs: []
+    jobs: [],
+    isActive: false,
+    isDeactive: false
   }),
 
   created () {
@@ -154,22 +154,16 @@ export default {
   },
 
   methods: {
-    getCancelVariant (cancel) {
-      switch (cancel) {
-        case 'Activate':
+    getLastestStatusVariant (status) {
+      switch (status) {
+        case 'success':
           return 'success'
-        case 'Deactivate':
+        case 'fail':
           return 'danger'
-        default:
+        case 'processing':
+          return 'primary'
+        case 'pending':
           return 'secondary'
-      }
-    },
-    getLastestStatusVariant (lastestStatus) {
-      switch (lastestStatus) {
-        case 'Success':
-          return 'success'
-        case 'Fail':
-          return 'danger'
         default:
           return 'secondary'
       }
@@ -182,6 +176,18 @@ export default {
           this.pagination.limit
         )
         this.jobs = res.data
+        this.jobs.forEach((e) => {
+          e.excutedBy = e.excutedBy.username
+        })
+        this.jobs.forEach((e) => {
+          if (e.active === true) {
+            this.isActive = true
+            this.isDeactive = false
+          } else {
+            this.isActive = false
+            this.isDeactive = true
+          }
+        })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -193,7 +199,11 @@ export default {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
     },
     getRequestName (index) {
-      return this.jobs[index].request.requestType + ' - ' + this.jobs[index].request.id
+      return (
+        this.jobs[index].request.requestType +
+        ' - ' +
+        this.jobs[index].request.id
+      )
     },
     refreshData (data) {
       if (data) {

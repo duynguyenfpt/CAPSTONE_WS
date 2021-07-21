@@ -12,3 +12,4 @@ export const getAllTableByDb = (db, page, limit) => http.get(`api/database_infor
 export const getTableSchema = (id) => http.get(`api/tables/${id}/current_table_schemas`, { params: { page: 1, limit: 100 } })
 export const getTableByDb = (db, page, limit) => http.get(`api/database_infors/${db}/tables`, { params: { page, limit } })
 export const getSchemaByTableId = (id, page, limit) => http.get(`api/tables/${id}/current_table_schemas`, { params: { page, limit } })
+export const getColumnByTable = (id) => http.get(`api/tables/${id}/columns`, { id })

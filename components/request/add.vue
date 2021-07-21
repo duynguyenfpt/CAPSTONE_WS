@@ -58,6 +58,7 @@
             name="checkbox-1"
             value="chosen"
             unchecked-value="not_chosen"
+            @change="chooseIsAll"
           >
             Is All
           </b-form-checkbox>
@@ -69,7 +70,7 @@
           <label>Unique key</label>
           <div>
             <el-select class="w-100"
-              v-model="valueKey"
+              v-model="request.unique"
               multiple
               filterable
               no-match-text="Data search not found"
@@ -94,9 +95,9 @@
               multiple
               filterable
               no-match-text="Data search not found"
-              placeholder="Choose unique key">
+              placeholder="Choose partition key">
               <el-option
-                v-for="item in opsUniqueKey"
+                v-for="item in opsPartitionKey"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
@@ -118,7 +119,9 @@
             }"
             v-model="request.fromDate"
             class="mb-2"
+            @context="chooseDateFrom"
           ></b-form-datepicker>
+          <p class="msg-error" v-if="msg.fromDate">{{ msg.fromDate }}</p>
         </b-col>
         <b-col sm="4">
           <label for="example-datepicker">To date</label>
@@ -133,7 +136,9 @@
             :min="min"
             v-model="request.toDate"
             class="mb-2"
+            @context="chooseDateTo"
           ></b-form-datepicker>
+          <p class="msg-error" v-if="msg.toDate">{{ msg.toDate }}</p>
         </b-col>
       </b-row>
       <b-row class="pt-2" v-if="isAdd">
@@ -242,7 +247,7 @@
 
 <script>
 import { getAllDbType } from '@/service/db'
-import { getAllTableByDb, getTableSchema } from '~/service/table.service'
+import { getAllTableByDb, getColumnByTable } from '~/service/table.service'
 import { createRequestSync, createRequestAddColumn } from '~/service/request'
 import { getSchemaById } from '@/service/schema'
 import Vue from 'vue'
@@ -258,7 +263,9 @@ export default {
         table: null,
         fromDate: null,
         toDate: null,
-        isAdd: false
+        isAdd: false,
+        unique: [],
+        partition: []
       },
       status: 'not_chosen',
       opsType: [
@@ -270,17 +277,8 @@ export default {
       opsDb: [{ value: null, text: 'Please select an option' }],
       opsTb: [{ value: null, text: 'Please select an option' }],
       min: null,
-      opsUniqueKey: [{
-        value: 'HTML',
-        label: 'HTML'
-      }, {
-        value: 'CSS',
-        label: 'CSS'
-      }, {
-        value: 'JavaScript',
-        label: 'JavaScript'
-      }],
-      valueKey: [],
+      opsUniqueKey: [],
+      opsPartitionKey: [],
       opsName: [{ value: null, text: 'Please select an option' }],
       rows: [
         {
@@ -296,7 +294,9 @@ export default {
       msg: {
         type: null,
         database: null,
-        table: null
+        table: null,
+        toDate: null,
+        fromDate: null
       }
     }
   },
@@ -324,12 +324,38 @@ export default {
         this.rows.splice(idx, 1)
       }
     },
+    chooseDateTo () {
+      if (this.request.toDate === null) {
+        this.msg.toDate = 'Please select a date'
+      } else {
+        this.msg.toDate = ''
+      }
+    },
+    chooseDateFrom () {
+      if (this.request.fromDate === null) {
+        this.msg.fromDate = 'Please select a date'
+      } else {
+        this.msg.fromDate = ''
+      }
+    },
+    chooseIsAll () {
+      console.log('LCC: ', this.request.isAll)
+      if (this.request.isAll === 'chosen') {
+        this.msg.fromDate = ''
+        this.msg.toDate = ''
+      } else {
+        this.msg.fromDate = 'Please select a date'
+        this.msg.toDate = 'Please select a date'
+      }
+    },
     showRequest () {
       if (this.request.type === 'SyncTable') {
         this.isSync = true
         this.isAdd = false
         this.isETL = false
         this.msg.type = ''
+        this.msg.toDate = ''
+        this.msg.fromDate = ''
       } else if (this.request.type === 'AddColumn') {
         this.isSync = false
         this.isAdd = true
@@ -357,10 +383,12 @@ export default {
       const id = this.request.database
       if (id !== null) {
         const res = await getAllTableByDb(id, 1, 1000)
+        this.opsTb = [{ value: null, text: 'Please select an option' }]
         // eslint-disable-next-line array-callback-return
         res.data.map((item) => {
           this.opsTb.push({ value: item.id, text: item.tableName })
         })
+        this.request.table = null
         this.msg.database = ''
       } else {
         this.request.table = null
@@ -377,12 +405,15 @@ export default {
       ]
       const id = this.request.table
       if (id !== null) {
-        const res = await getTableSchema(id)
+        const res = await getColumnByTable(id)
         this.opsName = res.data.map((item) => {
           return { value: item.id, text: item.rowName }
         })
         this.opsUniqueKey = res.data.map((item) => {
-          return { value: item.id, label: item.rowName }
+          return { value: item, label: item }
+        })
+        this.opsPartitionKey = res.data.map((item) => {
+          return { value: item, label: item }
         })
         this.msg.table = ''
       } else {
@@ -414,41 +445,58 @@ export default {
       ) {
         if (this.request.isAll === 'chosen') {
           this.request.isAll = true
+          this.msg.toDate = ''
+          this.msg.fromDate = ''
         } else {
           this.request.isAll = false
+          this.msg.toDate = ''
+          this.msg.fromDate = ''
         }
         if (this.isSync) {
-          try {
-            this.isLoadingCreate = true
-            const today = new Date()
-            const time =
+          if (this.request.isAll === false) {
+            if (this.request.toDate === null) {
+              this.msg.toDate = 'Please select a date'
+            }
+            if (this.request.fromDate === null) {
+              this.msg.fromDate = 'Please select a date'
+            }
+          } else {
+            this.msg.toDate = ''
+            this.msg.fromDate = ''
+          }
+          if (this.msg.toDate === null && this.msg.fromDate === '') {
+            try {
+              this.isLoadingCreate = true
+              const today = new Date()
+              const time =
               today.getHours() +
               ':' +
               today.getMinutes() +
               ':' +
               today.getSeconds()
-            const req = {
-              requestType: this.request.type,
-              tableId: this.request.table,
-              isAll: this.request.isAll,
-              fromDate: this.request.fromDate,
-              toDate: this.request.toDate,
-              time: time
+              const req = {
+                requestType: this.request.type,
+                tableId: this.request.table,
+                isAll: this.request.isAll,
+                fromDate: this.request.fromDate,
+                toDate: this.request.toDate,
+                time: time
+              }
+              const res = await createRequestSync(req)
+              if (res.code === '201') {
+                this.$notify({
+                  type: 'success',
+                  text: 'Create request succeeded'
+                })
+                this.resetData()
+              } else {
+                this.$notify({ type: 'error', text: 'Create request failed' })
+              }
+            } catch (e) {
+              this.$notify({ type: 'error', text: e.message })
+            } finally {
+              this.isLoadingCreate = false
             }
-            const res = await createRequestSync(req)
-            if (res.code === '201') {
-              this.$notify({
-                type: 'success',
-                text: 'Create request succeeded'
-              })
-              this.resetData()
-            } else {
-              this.$notify({ type: 'error', text: 'Create request failed' })
-            }
-          } catch (e) {
-            this.$notify({ type: 'error', text: e.message })
-          } finally {
-            this.isLoadingCreate = false
           }
         }
         if (this.isAdd && !this.isETL) {

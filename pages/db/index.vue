@@ -107,6 +107,10 @@ const TableFields = [
     key: 'databaseName'
   },
   {
+    key: 'serverInfor',
+    label: 'Host'
+  },
+  {
     key: 'port'
   },
   {
@@ -171,6 +175,9 @@ export default {
           }
         })
         this.dbs.forEach((e) => {
+          e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+        })
+        this.dbs.forEach((e) => {
           e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
         })
         this.pagination.total = res.metaData.totalItem
@@ -209,6 +216,9 @@ export default {
           this.textSearch
         )
         this.dbs = result.data
+        this.dbs.forEach((e) => {
+          e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+        })
         this.dbs.forEach((e) => {
           e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
         })

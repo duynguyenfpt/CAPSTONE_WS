@@ -107,16 +107,13 @@ export default {
     },
     fields: fields,
     databaseOps: [
-      { value: '1', text: 'DB1' },
-      { value: '2', text: 'DB2' },
-      { value: '3', text: 'DB3' }
+      { value: null, text: 'Please select a database' }
     ],
     tableOps: [
-      { value: '1', text: 'TB1' },
-      { value: '2', text: 'TB2' },
-      { value: '3', text: 'TB3' }
+      { value: null, text: 'Please select a table' }
     ],
     typeChangeOps: [
+      { value: null, text: 'Please select a type' },
       { value: 'added', text: 'Added' },
       { value: 'deleted', text: 'Deleted' },
       { value: 'changeType', text: 'Change Type' },
@@ -146,10 +143,10 @@ export default {
         this.schemaChanges = res.data
         this.pagination.total = res.metaData.totalPage
         const dbRes = await getListDatabase(1, 1000)
-        this.databaseOps = dbRes.data.map((e) => ({
-          value: e.id,
-          text: e.databaseName
-        }))
+        // eslint-disable-next-line array-callback-return
+        dbRes.data.map((item) => {
+          this.databaseOps.push({ value: item.id, text: item.databaseName })
+        })
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -160,12 +157,10 @@ export default {
       try {
         if (db != null) {
           const resTable = await getAllTableByDb(db, 1, 1000)
-          this.tableOps = resTable.data.map((item) => ({
-            value: item.id,
-            text: item.tableName
-          }))
-        } else {
-          this.tableOps = null
+          // eslint-disable-next-line array-callback-return
+          resTable.data.map((item) => {
+            this.tableOps.push({ value: item.id, text: item.tableName })
+          })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -191,6 +186,9 @@ export default {
       }
     },
     onReload () {
+      this.db = null
+      this.tableOfDb = null
+      this.typeChange = null
       this.getAllChangeHistory()
     }
   }

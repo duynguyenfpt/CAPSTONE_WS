@@ -54,16 +54,11 @@ export default {
       account: null
     },
     opsStatus: [
-      { value: null, text: 'Please select status' },
-      { value: 'pending', text: 'Pending' },
-      { value: 'processed', text: 'Processed' },
-      { value: 'notapproved', text: 'Not Apporoved' },
-      { value: 'done', text: 'Done' },
-      { value: 'rejected', text: 'Rejected' }
+      { value: '0', text: 'Pending' },
+      { value: '2', text: 'Rejected' },
+      { value: '1', text: 'Approved' }
     ],
-    opsAccount: [
-      { value: null, text: 'Please select approver' }
-    ],
+    opsAccount: [],
     isLoading: false,
     isVisible: false,
     isLoadingUpdate: false,
@@ -74,14 +69,12 @@ export default {
     }
   }),
   async mounted () {
-    this.isLoading = true
     // get username
     const accounts = await getListAccount(1, 100)
-    // eslint-disable-next-line array-callback-return
-    accounts.data.map(item => {
-      this.opsAccount.push({ value: item.id, text: item.username })
-    })
-    this.isLoading = false
+    this.opsAccount = accounts.data.map((acc) => ({
+      value: acc.id,
+      text: acc.username
+    }))
   },
   methods: {
     async show (id) {
@@ -94,7 +87,6 @@ export default {
         const res = await getDetailRequest(id)
         this.request.requestType = res.data.requestType
         this.request.status = res.data.status
-        this.request.account = res.data.approvedBy.id
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

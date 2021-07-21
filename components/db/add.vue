@@ -110,7 +110,7 @@ export default {
     const hosts = await getAllServers()
     // eslint-disable-next-line array-callback-return
     hosts.data.map(item => {
-      this.dbHosts.push({ value: item.id, text: item.serverHost + ' - ' + item.serverDomain })
+      this.dbHosts.push({ value: item.id, text: item.serverDomain + ' - ' + item.serverHost })
     })
     this.isLoading = false
   },

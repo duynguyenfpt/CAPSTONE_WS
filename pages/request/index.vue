@@ -155,12 +155,12 @@ export default {
       }
     },
     getStatus (status) {
-      if (status === '1') {
+      if (status === '0') {
         return 'Pending'
-      } else if (status === '2') {
+      } else if (status === '1') {
         return 'Approved'
-      } else if (status === '0') {
-        return 'Reject'
+      } else if (status === '2') {
+        return 'Rejected'
       } return null
     }
   }

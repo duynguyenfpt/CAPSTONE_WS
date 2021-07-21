@@ -20,7 +20,7 @@
         </template>
         <template #cell(viewLog)="item">
           <b-btn @click="log(item.item.id)" size="sm" variant="primary">
-            Log
+            View Log
           </b-btn>
         </template>
         <template #cell(no)="item">
@@ -67,11 +67,11 @@ const tableFields = [
     key: 'requestType'
   },
   {
-    key: 'creator.username',
+    key: 'createdBy',
     label: 'Creator'
   },
   {
-    key: 'approvedBy.username',
+    key: 'approvedBy',
     label: 'Approver'
   },
   {

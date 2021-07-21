@@ -58,7 +58,7 @@ export default {
       { value: '2', text: 'Rejected' },
       { value: '1', text: 'Approved' }
     ],
-    opsAccount: [],
+    opsAccount: [{ value: null, text: 'Please select an approver' }],
     isLoading: false,
     isVisible: false,
     isLoadingUpdate: false,
@@ -71,22 +71,23 @@ export default {
   async mounted () {
     // get username
     const accounts = await getListAccount(1, 100)
-    this.opsAccount = accounts.data.map((acc) => ({
-      value: acc.id,
-      text: acc.username
-    }))
+    // eslint-disable-next-line array-callback-return
+    accounts.data.map((acc) => {
+      this.opsAccount.push({ value: acc.username, text: acc.username })
+    })
   },
   methods: {
     async show (id) {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
-      this.msg.account = null
-      this.msg.status = null
+      this.msg.account = ''
+      this.msg.status = ''
       try {
         const res = await getDetailRequest(id)
         this.request.requestType = res.data.requestType
         this.request.status = res.data.status
+        this.request.account = res.data.approvedBy
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -122,9 +123,9 @@ export default {
           this.isLoadingUpdate = true
           const body = {
             status: this.request.status,
-            requestType: this.request.requestType,
-            approvedById: this.request.account.id
+            approvedBy: this.request.account
           }
+          console.log('LCC: ', body)
           const data = await updateRequest(this.idItem, body)
           this.$emit('onUpdated', data)
           if (data.code === '200') {

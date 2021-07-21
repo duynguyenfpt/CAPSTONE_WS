@@ -3,22 +3,21 @@
     <b-row no-gutters>
       <b-col cols="2" class="w-100 side-nav-container">
         <b-nav vertical class="side-nav w-100 p-3">
-          <h4 href="/">FTDS System</h4>
-          <hr />
+          <router-link to="/" class="link">FTDS System</router-link>
           <b-nav-item v-b-toggle.account :to="{ name: 'account' }">
-            <i class="fa fa-user mr-1" /> Account Management
+            <i class="fa fa-user mr-1" /> Accounts
           </b-nav-item>
 
           <b-nav-item v-b-toggle.db :to="{ name: 'db' }">
-            <i class="fa fa-database mr-1" /> Databases config
+            <i class="fa fa-database mr-1" /> Databases
           </b-nav-item>
 
           <b-nav-item v-b-toggle.table :to="{ name: 'table' }">
-            <i class="fa fa-table mr-1"></i> Tables config
+            <i class="fa fa-table mr-1"></i> Tables
             <b-collapse id="table">
               <b-nav-item :to="{ name: 'table-add' }">
                 <i class="fa fa-plus" />
-                Add Tables
+                Add Table
               </b-nav-item>
               <b-nav-item :to="{ name: 'table-changeHistory' }">
                 <i class="fa fa-circle" />
@@ -32,10 +31,10 @@
           </b-nav-item>
           <b-nav-item v-b-toggle.job :to="{ name: 'job' }">
             <i class="fa fa-user mr-1" />
-            Job
+            Jobs
           </b-nav-item>
           <b-nav-item v-b-toggle.request :to="{ name: 'request' }">
-            <i class="fa fa-check mr-1"></i> Request
+            <i class="fa fa-check mr-1"></i> Requests
             <b-collapse id="request">
               <b-nav-item :to="{ name: 'request-add' }">
                 <i class="fa fa-plus" />
@@ -192,5 +191,18 @@ export default {
   font-size: 13px;
   margin: 0;
   text-decoration: none;
+}
+
+.link {
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.link :hover {
+  color: #fff;
 }
 </style>

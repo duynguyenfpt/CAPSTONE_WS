@@ -105,13 +105,13 @@ export default {
     isLoadingFill: false,
     isLoadingCheck: false,
     msg: {
-      db: null,
-      tb: null,
-      host: null,
-      port: null,
-      username: null,
-      password: null,
-      dbType: null
+      db: '',
+      tb: '',
+      host: '',
+      port: '',
+      username: '',
+      password: '',
+      dbType: ''
     }
   }),
   async mounted () {
@@ -126,6 +126,8 @@ export default {
     hosts.data.map(item => {
       this.opsHost.push({ value: item.id, text: item.serverHost + ' - ' + item.serverDomain })
     })
+    this.msg.password = ''
+    this.msg.port = ''
     this.isLoading = false
   },
   watch: {
@@ -166,13 +168,14 @@ export default {
       }
     },
     validatePortNumber (value) {
-      if (/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(value)) {
+      if (/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(value) || value === null) {
         this.msg.port = ''
       } else {
         this.msg.port = 'Invalid port number'
       }
     },
     validateUsername (value) {
+      console.log('User: ', value)
       if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
         this.msg.username = ''
       } else {
@@ -180,7 +183,8 @@ export default {
       }
     },
     validatePassword (value) {
-      if (/^[\w#@]{6,127}$/.test(value)) {
+      console.log('Pass: ', value)
+      if (/^[\w#@]{6,127}$/.test(value) || value === null) {
         this.msg.password = ''
       } else {
         this.msg.password = 'Invalid password'
@@ -209,13 +213,13 @@ export default {
       this.password = null
       this.table = null
       this.dbType = null
-      this.msg.db = null
-      this.msg.tb = null
-      this.msg.host = null
-      this.msg.port = null
-      this.msg.username = null
-      this.msg.password = null
-      this.msg.dbType = null
+      this.msg.db = ''
+      this.msg.tb = ''
+      this.msg.host = ''
+      this.msg.port = ''
+      this.msg.username = ''
+      this.msg.password = ''
+      this.msg.dbType = ''
     },
     async createTableInfo () {
       if (this.msg.db === '' && this.msg.tb === '') {
@@ -281,6 +285,12 @@ export default {
       if (this.dbType === null) {
         this.msg.dbType = 'Please select type database'
       }
+      if (this.password === null) {
+        this.msg.password = 'Invalid password'
+      }
+      if (this.port === null) {
+        this.msg.port = 'Invalid port number'
+      }
       if (id !== null) {
         if (this.msg.db === '' && this.msg.tb === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.host === '' && this.msg.dbType === '') {
           try {
@@ -288,7 +298,7 @@ export default {
             const info = { databaseInforId: id, tableName: this.table }
             const res = await createTable(info)
             this.isLoadingCreate = false
-            if (res.code) {
+            if (res.code === '201') {
               this.$notify({ type: 'success', text: 'Add table succeeded' })
               this.resetData()
             } else {
@@ -307,7 +317,7 @@ export default {
           try {
             const db = { serverInforId: this.host, port: this.port, databaseName: this.dbName, username: this.username, password: this.password, databaseType: this.dbType }
             const resDb = await createDatabase(db)
-            if (resDb.code) {
+            if (resDb.code === '201') {
               const tb = { databaseInforId: resDb.data.id, tableName: this.table }
               this.isLoadingCreate = true
               const resq = await createTable(tb)

@@ -64,14 +64,14 @@ export default {
       if (/^[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]$/.test(value)) {
         this.msg.domain = ''
       } else {
-        this.msg.domain = 'Invalid server host'
+        this.msg.domain = 'Invalid server domain'
       }
     },
     validateHost (value) {
       if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
         this.msg.host = ''
       } else {
-        this.msg.host = 'Invalid server domain'
+        this.msg.host = 'Invalid server host'
       }
     },
     async show () {
@@ -86,7 +86,7 @@ export default {
     },
     async onCreateServer () {
       this.validateHost(this.serverHost)
-      this.validateHost(this.serverDomain)
+      this.validateDomain(this.serverDomain)
       if (this.serverHost === null) {
         this.msg.host = 'Invalid server host'
       }

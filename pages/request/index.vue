@@ -109,11 +109,11 @@ export default {
   methods: {
     getStatusVariant (status) {
       switch (status) {
-        case '1':
-          return 'secondary'
-        case '2':
-          return 'success'
         case '0':
+          return 'secondary'
+        case '1':
+          return 'success'
+        case '2':
           return 'danger'
         default:
           return null

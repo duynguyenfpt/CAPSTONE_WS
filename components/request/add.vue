@@ -464,7 +464,7 @@ export default {
             this.msg.toDate = ''
             this.msg.fromDate = ''
           }
-          if (this.msg.toDate === null && this.msg.fromDate === '') {
+          if (this.msg.toDate === '' && this.msg.fromDate === '') {
             try {
               this.isLoadingCreate = true
               const today = new Date()
@@ -474,13 +474,25 @@ export default {
               today.getMinutes() +
               ':' +
               today.getSeconds()
+              let partitions = this.request.partition[0]
+              const lenPart = this.request.partition.length
+              for (let i = 1; i < lenPart; i++) {
+                partitions += ', ' + this.request.partition[i]
+              }
+              let identities = this.request.unique[0]
+              const lenIden = this.request.unique.length
+              for (let i = 1; i < lenIden; i++) {
+                identities += ', ' + this.request.unique[i]
+              }
               const req = {
                 requestType: this.request.type,
                 tableId: this.request.table,
                 isAll: this.request.isAll,
                 fromDate: this.request.fromDate,
                 toDate: this.request.toDate,
-                time: time
+                timeRequest: time,
+                partitionBy: partitions,
+                identityId: identities
               }
               const res = await createRequestSync(req)
               if (res.code === '201') {

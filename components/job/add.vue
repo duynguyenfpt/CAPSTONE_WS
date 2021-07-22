@@ -185,10 +185,11 @@ export default {
       if (this.msg.request === '' && this.msg.executedBy === '' && this.msg.maxRetry === '') {
         try {
           this.isLoadingCreate = true
+          console.log('LCC: ', this.isActive)
           const data = {
             requestId: this.request,
             executedById: this.executedBy,
-            isActive: this.isActive,
+            active: this.isActive,
             maxRetry: this.maxRetry
           }
           const res = await createJob(data)

@@ -121,6 +121,9 @@ const jobFields = [
     key: 'jobSchedule'
   },
   {
+    key: 'maxRetries'
+  },
+  {
     key: 'status'
   },
   {

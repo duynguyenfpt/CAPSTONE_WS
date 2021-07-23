@@ -4,10 +4,12 @@
       <b-col cols="2" class="w-100 side-nav-container">
         <b-nav vertical class="side-nav w-100 p-3">
           <router-link to="/" class="link">FTDS System</router-link>
+          <b-nav-item v-b-toggle.right :to="{ name: 'right' }">
+            <i class="fa fa-user mr-1" /> Rights
+          </b-nav-item>
           <b-nav-item v-b-toggle.account :to="{ name: 'account' }">
             <i class="fa fa-user mr-1" /> Accounts
           </b-nav-item>
-
           <b-nav-item v-b-toggle.db :to="{ name: 'db' }">
             <i class="fa fa-database mr-1" /> Databases
           </b-nav-item>
@@ -74,7 +76,7 @@
                     <b-col class="info-detail" v-if="user">
                       <h6>{{ user.username }}</h6>
                       <p class="text-12">{{ user.email }}</p>
-                      <a class="text-12">View Account</a>
+                      <b-link class="text-12" :to="{ name: 'password-change' }">Change password</b-link>
                     </b-col>
                   </b-row>
                 </div>

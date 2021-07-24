@@ -8,4 +8,6 @@ export const getAll =
         limit: 1000
       }
     })
-export const deleteRight = (id) => http.delete(`api/rights/${id}`)
+export const createRight = (data) => http.post('api/rights/', data)
+export const createRightForAcc = (data) => http.post('api/account_rights/', data)
+export const getRightByAcc = (id, page, limit) => http.get(`api/accounts/${id}/rights`, { params: { page, limit } })

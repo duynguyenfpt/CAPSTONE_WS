@@ -5,7 +5,7 @@
         <b-nav vertical class="side-nav w-100 p-3">
           <router-link to="/" class="link">FTDS System</router-link>
           <b-nav-item v-b-toggle.right :to="{ name: 'right' }">
-            <i class="fa fa-user mr-1" /> Rights
+            <i class="fas fa-balance-scale-right"/> Rights
           </b-nav-item>
           <b-nav-item v-b-toggle.account :to="{ name: 'account' }">
             <i class="fa fa-user mr-1" /> Accounts
@@ -29,7 +29,7 @@
           </b-nav-item>
           <b-nav-item v-b-toggle.server :to="{ name: 'server' }">
             <i class="fa fa-server mr-1" />
-            Server config
+            Servers
           </b-nav-item>
           <b-nav-item v-b-toggle.job :to="{ name: 'job' }">
             <i class="fa fa-user mr-1" />

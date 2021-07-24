@@ -1,48 +1,50 @@
 <template>
   <div v-if="detail">
-    <h4>Job detail</h4>
+    <b-row>
+      <b-col cols="6">
+        <h4>Job Detail</h4>
+      </b-col>
+      <b-col class="text-right">
+          <span>Lastest Status</span>
+          <b-badge :variant="getLastestStatusVariant('success')" class="text-center">Success</b-badge>
+      </b-col>
+    </b-row>
     <b-table :fields="jobFields" :items="[detail]"></b-table>
 
     <b-row>
-      <b-col cols="10">
+      <b-col cols="4">
         <h4>Job Log</h4>
+      </b-col>
+      <b-col cols="4">
+        <div>
+          <p></p>
+          <b-progress :value="500" :max="1000" show-progress animated></b-progress>
+        </div>
+      </b-col>
+      <b-col class="text-right">
+        <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Refresh
+          </b-btn>
       </b-col>
     </b-row>
 
-    <!-- <section namen="view" class="pt-3">
+    <section name="view" class="pt-3">
       <b-table
         responsive
         hover
         striped
-        :items="listTableDetail"
-        :fields="tbFields"
+        :items="listLogDetail"
+        :fields="logFields"
         :busy="loading"
       >
         <template #cell(no)="item">
           {{ countRecord(item.index) }}
         </template>
-
-        <template #cell(action)="item">
-          <b-btn
-            :to="{ name: 'table-id', params: { id: item.item.id } }"
-            size="sm"
-            variant="success"
-          >
-            <i class="fa fa-eye" />
-          </b-btn>
-          <b-btn
-            size="sm"
-            variant="danger"
-            @click="deleteTableDetail(item.item.id)"
-          >
-            <i class="fa fa-trash" />
-          </b-btn>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>
-            <strong>Loading...</strong>
-          </div>
+        <template #cell(status)="row">
+          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{
+            row.item.status
+          }}</b-badge>
         </template>
       </b-table>
       <b-pagination
@@ -54,12 +56,6 @@
         @input="getDetail"
       />
     </section>
-    <section name="popup">
-      <table-component-addTable ref="add" @onAdded="onReload"/>
-    </section>
-    <section name="popup">
-      <table-component-deleteTable ref="delete" @onDeleted="onReload" />
-    </section> -->
   </div>
    <div v-else>
    <content-placeholders class="article-card-block">
@@ -70,7 +66,7 @@
 </template>
 
 <script>
-import { getDetailJob } from '@/service/job'
+import { getDetailJob, getLogByJob } from '@/service/job'
 import moment from 'moment'
 
 const jobFields = [
@@ -103,27 +99,39 @@ const jobFields = [
   }
 ]
 
-const tbFields = [
+const logFields = [
   {
     key: 'no'
+  },
+  {
+    key: 'host'
+  },
+  {
+    key: 'port'
+  },
+  {
+    key: 'databaseName'
   },
   {
     key: 'tableName'
   },
   {
-    key: 'createdBy'
+    key: 'step'
   },
   {
-    key: 'createDate'
+    key: 'requestType'
   },
   {
-    key: 'modifiedBy'
+    key: 'numberStep'
   },
   {
-    key: 'modifiedDate'
+    key: 'message'
   },
   {
-    key: 'action'
+    key: 'status'
+  },
+  {
+    key: 'createdAt'
   }
 ]
 
@@ -144,20 +152,34 @@ export default {
         total: 0
       },
       jobFields: jobFields,
-      tbFields: tbFields,
+      logFields: logFields,
       detail: null,
-      listTableDetail: null,
+      listLogDetail: null,
       loading: false
     }
   },
   methods: {
+    getLastestStatusVariant (status) {
+      switch (status) {
+        case 'success':
+          return 'success'
+        case 'fail':
+          return 'danger'
+        case 'processing':
+          return 'primary'
+        case 'pending':
+          return 'secondary'
+        default:
+          return 'secondary'
+      }
+    },
     async getDetail () {
       try {
         this.loading = true
         const res = await getDetailJob(this.id)
-        this.listTableDetail = res.data
-        // this.pagination.total = resList.metaData.totalItem
-        console.log(this.pagination)
+        const resList = await getLogByJob(this.id, this.pagination.page, this.pagination.limit)
+        this.listLogDetail = resList.data
+        this.pagination.total = resList.metaData.totalItem
         this.detail = res.data
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
@@ -165,12 +187,9 @@ export default {
         this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
           'YYYY-MM-DD'
         )
-        if (this.detail.tables) {
-          this.detail.tables.forEach((e) => {
-            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
-          })
-          this.detail.tables.forEach((e) => {
-            e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+        if (this.listLogDetail) {
+          this.listLogDetail.forEach((e) => {
+            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD')
           })
         }
       } catch (e) {
@@ -179,14 +198,8 @@ export default {
         this.loading = false
       }
     },
-    async deleteTableDetail (id) {
-      this.$refs.delete.show(id)
-    },
-    onReload () {
+    onRefresh () {
       this.getDetail()
-    },
-    addTb (id) {
-      this.$refs.add.show(id)
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1

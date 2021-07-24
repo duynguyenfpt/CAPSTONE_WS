@@ -4,6 +4,11 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
+      <div v-if="isReadMore" class="mb-2" style="text-align: center;">
+        <b-badge variant="primary" style="cursor: pointer;" @click="readMore()"
+          >Read more ...</b-badge
+        >
+      </div>
       <div v-for="(note, index) in shortNotes" :key="index">
         <div class="comment my-1">
           <div class="header pl-2 py-1">
@@ -12,11 +17,6 @@
           </div>
           <div class="pl-3 py-1">{{ note.content }}</div>
         </div>
-      </div>
-      <div v-if="isReadMore" class="mb-2" style="text-align: center;">
-        <b-badge variant="primary" style="cursor: pointer;" @click="readMore()"
-          >Read more ...</b-badge
-        >
       </div>
       <div class="create">
         <b-row>

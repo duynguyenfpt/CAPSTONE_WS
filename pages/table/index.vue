@@ -1,5 +1,17 @@
 <template>
  <div>
+   <b-row>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="clickSearch()"/>
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="clickSearch()">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
    <section name="view" class="pt-3">
     <b-table
       responsive
@@ -42,7 +54,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getListTable"
+        @input="searchTable(textSearch)"
       />
    </section>
       <section name="popup">
@@ -52,7 +64,7 @@
 </template>
 
 <script>
-import { getListTable } from '@/service/table.service'
+import { getListTable, searchTable } from '@/service/table.service'
 import moment from 'moment'
 import { } from '@/components/table-component/deleteTable.vue'
 const tableFields = [
@@ -89,7 +101,8 @@ export default {
       },
       tableFields: tableFields,
       tableList: null,
-      loading: false
+      loading: false,
+      textSearch: null
     }
   },
   created () {
@@ -124,6 +137,35 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    async clickSearch () {
+      this.pagination.page = 1
+      this.searchTable()
+    },
+    async searchTable () {
+      this.loading = true
+      try {
+        const result = await searchTable(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.tableList = result.data
+        this.pagination.total = result.metaData.totalItem
+        this.tableList.forEach((e) => {
+          e.createdDate = moment(this.tableList.createdDate).format(
+            'YYYY-MM-DD'
+          )
+          e.modifiedDate = moment(this.tableList.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        })
+        this.pagination.total = result.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

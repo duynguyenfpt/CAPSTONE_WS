@@ -5,6 +5,18 @@
         <h2>Request Management</h2>
       </b-col>
     </b-row>
+    <b-row>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="clickSearch()"/>
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="clickSearch()">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
     <section name="view" class="pt-3">
       <b-table
       responsive
@@ -44,7 +56,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getList"
+        @input="searchRequest(textSearch)"
       />
     </section>
     <section name="popup">
@@ -57,7 +69,7 @@
 </template>
 
 <script>
-import { getRequest } from '@/service/request'
+import { getRequest, searchRequest } from '@/service/request'
 import moment from 'moment'
 const tableFields = [
   {
@@ -101,7 +113,8 @@ export default {
     },
     tableFields: tableFields,
     request: null,
-    loading: false
+    loading: false,
+    textSearch: null
   }),
   created () {
     this.getList()
@@ -162,6 +175,33 @@ export default {
       } else if (status === '2') {
         return 'Rejected'
       } return null
+    },
+    async clickSearch () {
+      this.pagination.page = 1
+      this.searchRequest()
+    },
+    async searchRequest () {
+      this.loading = true
+      try {
+        const result = await searchRequest(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.request = result.data
+        this.pagination.total = result.metaData.totalItem
+        this.request.forEach((e) => {
+          e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+          e.modifiedDate = moment(this.request.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        })
+        this.pagination.total = result.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

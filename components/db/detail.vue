@@ -14,7 +14,7 @@
       </b-col>
     </b-row>
 
-    <section namen="view" class="pt-3">
+    <section name="view" class="pt-3">
       <b-table
         responsive
         hover

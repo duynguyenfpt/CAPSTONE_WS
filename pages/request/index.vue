@@ -5,6 +5,25 @@
         <h2>Request Management</h2>
       </b-col>
     </b-row>
+    <section name="action">
+      <b-row>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input
+              size="sm"
+              placeholder="Search"
+              v-model="textSearch"
+              @keyup.enter="searchRequest()"
+            />
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="searchRequest()">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
+    </section>
     <section name="view" class="pt-3">
       <b-table
       responsive
@@ -16,6 +35,9 @@
         <template #cell(action)="item">
           <b-btn @click="edit(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
+          </b-btn>
+          <b-btn size="sm" @click="onAssign()" variant="primary">
+            <i class="fa fa-users" aria-hidden="true"></i>
           </b-btn>
         </template>
         <template #cell(viewLog)="item">
@@ -49,6 +71,7 @@
     </section>
     <section name="popup">
       <request-edit ref="edit" @onUpdated="refreshData" />
+      <request-assign ref="assign" />
     </section>
     <section name="popup">
       <request-log ref="log" @onUpdated="refreshData"/>
@@ -57,7 +80,7 @@
 </template>
 
 <script>
-import { getRequest } from '@/service/request'
+import { getRequest, searchReq } from '@/service/request'
 import moment from 'moment'
 const tableFields = [
   {
@@ -101,7 +124,8 @@ export default {
     },
     tableFields: tableFields,
     request: null,
-    loading: false
+    loading: false,
+    textSearch: null
   }),
   created () {
     this.getList()
@@ -143,6 +167,9 @@ export default {
     edit (id) {
       this.$refs.edit.show(id)
     },
+    onAssign () {
+      this.$refs.assign.onShow()
+    },
     log (id) {
       this.$refs.log.show(id)
     },
@@ -162,6 +189,28 @@ export default {
       } else if (status === '2') {
         return 'Rejected'
       } return null
+    },
+    async searchRequest () {
+      this.loading = true
+      try {
+        const res = await searchReq(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.request = res.data
+        this.request.forEach((e) => {
+          e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+          e.modifiedDate = moment(this.request.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        })
+        this.pagination.total = res.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

@@ -12,3 +12,10 @@ export const getAllRequest = (page, limit) => http.get('api/requests', { params:
 
 export const getLogByRequest = (id) => http.get(`api/requests/${id}/notes`, { params: { page: 1, limit: 100 } })
 export const createLog = (data) => http.post('api/notes', data)
+export const searchReq = (page, limit, textSearch) => http.get('api/requests', {
+  params: {
+    page: page,
+    limit: limit,
+    keyword: textSearch
+  }
+})

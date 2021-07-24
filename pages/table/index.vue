@@ -1,5 +1,24 @@
 <template>
  <div>
+   <section name="action">
+      <b-row>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input
+              size="sm"
+              placeholder="Search"
+              v-model="textSearch"
+              @keyup.enter="searchTable()"
+            />
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="searchTable()">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
+    </section>
    <section name="view" class="pt-3">
     <b-table
       responsive
@@ -89,7 +108,8 @@ export default {
       },
       tableFields: tableFields,
       tableList: null,
-      loading: false
+      loading: false,
+      textSearch: null
     }
   },
   created () {
@@ -124,6 +144,9 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    searchTable () {
+      console.log(this.textSearch)
     }
   }
 }

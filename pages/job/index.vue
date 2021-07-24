@@ -202,10 +202,16 @@ export default {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
     },
     getRequestName (index) {
+      let isAll = 'Not All'
+      if (this.jobs[index].request.all) {
+        isAll = 'All'
+      }
       return (
         this.jobs[index].request.requestType +
         ' - ' +
-        this.jobs[index].request.id
+        this.jobs[index].request.id +
+        ' - ' +
+        isAll
       )
     },
     refreshData (data) {

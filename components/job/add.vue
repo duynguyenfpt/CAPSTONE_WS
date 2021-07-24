@@ -125,7 +125,11 @@ export default {
     const resReq = await getAllRequest()
     // eslint-disable-next-line array-callback-return
     resReq.data.map(item => {
-      this.requests.push({ value: item.id, text: item.requestType + ' - ' + item.id })
+      let isAll = 'Not All'
+      if (item.all) {
+        isAll = 'All'
+      }
+      this.requests.push({ value: item.id, text: item.requestType + ' - ' + item.id + ' - ' + isAll })
     })
   },
   watch: {

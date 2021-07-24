@@ -348,7 +348,7 @@ export default {
       try {
         const data = {
           accountId: this.account,
-          rightId: this.rightUpdate[0]
+          rightId: this.rightUpdate
         }
         const res = await createRightForAcc(data)
         if (res.code === '201') {

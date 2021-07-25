@@ -6,10 +6,19 @@
       </b-col>
       <b-col class="text-right">
           <span>Lastest Status</span>
-          <b-badge :variant="getLastestStatusVariant('success')" class="text-center">Success</b-badge>
+          <b-badge :variant="getLastestStatusVariant(status)" class="text-center" v-model="status">Success</b-badge>
       </b-col>
     </b-row>
-    <b-table :fields="jobFields" :items="[detail]"></b-table>
+    <b-table :fields="jobFields" :items="[detail]">
+        <template #cell(active)>
+          <b-btn size="sm" variant="danger" v-if="isDeactive">
+            <i class="fa fa-power-off" v-if="isDeactive" />
+          </b-btn>
+          <b-btn size="sm" variant="success" v-if="isActive">
+            <i class="fas fa-check" v-if="isActive" />
+          </b-btn>
+        </template>
+    </b-table>
 
     <b-row>
       <b-col cols="4">
@@ -80,19 +89,17 @@ const jobFields = [
     key: 'createdDate'
   },
   {
-    key: 'modifiedBy'
-  },
-  {
-    key: 'modifiedDate'
-  },
-  {
-    key: 'executedById'
-  },
-  {
     key: 'jobSchedule'
   },
   {
-    key: 'maxRetry'
+    key: 'maxRetries'
+  },
+  {
+    key: 'numberRetries'
+  },
+  {
+    key: 'excutedBy.username',
+    label: 'Excuted By'
   },
   {
     key: 'active'
@@ -155,7 +162,10 @@ export default {
       logFields: logFields,
       detail: null,
       listLogDetail: null,
-      loading: false
+      loading: false,
+      status: null,
+      isActive: false,
+      isDeactive: false
     }
   },
   methods: {
@@ -181,12 +191,22 @@ export default {
         this.listLogDetail = resList.data
         this.pagination.total = resList.metaData.totalItem
         this.detail = res.data
+        this.status = res.data.status
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
         )
-        this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
-          'YYYY-MM-DD'
-        )
+        if (this.detail.request.all === true) {
+          this.detail.jobName = this.detail.request.requestType + ' - ' + this.detail.request.id + ' - All'
+        } else {
+          this.detail.jobName = this.detail.request.requestType + ' - ' + this.detail.request.id + ' - Not All'
+        }
+        if (this.detail.active === true) {
+          this.isActive = true
+          this.isDeactive = false
+        } else {
+          this.isActive = false
+          this.isDeactive = true
+        }
         if (this.listLogDetail) {
           this.listLogDetail.forEach((e) => {
             e.createdAt = moment(e.createdAt).format('YYYY-MM-DD')

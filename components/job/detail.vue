@@ -6,7 +6,7 @@
       </b-col>
       <b-col class="text-right">
           <span>Lastest Status</span>
-          <b-badge :variant="getLastestStatusVariant(status)" class="text-center" v-model="status">Success</b-badge>
+          <b-badge :variant="getLastestStatusVariant(status)" class="text-center badge-status" v-model="status">{{ status }}</b-badge>
       </b-col>
     </b-row>
     <b-table :fields="jobFields" :items="[detail]">
@@ -21,14 +21,9 @@
     </b-table>
 
     <b-row>
-      <b-col cols="4">
+      <b-col cols="5" class="inline">
         <h4>Job Log</h4>
-      </b-col>
-      <b-col cols="4">
-        <div>
-          <p></p>
-          <b-progress :value="500" :max="1000" show-progress animated></b-progress>
-        </div>
+        <b-progress :value="progress" v-model="progress" :max="100" show-progress animated></b-progress>
       </b-col>
       <b-col class="text-right">
         <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
@@ -75,7 +70,7 @@
 </template>
 
 <script>
-import { getDetailJob, getLogByJob } from '@/service/job'
+import { getDetailJob, getLogByJob, getLastJobLog } from '@/service/job'
 import moment from 'moment'
 
 const jobFields = [
@@ -165,7 +160,8 @@ export default {
       loading: false,
       status: null,
       isActive: false,
-      isDeactive: false
+      isDeactive: false,
+      progress: 0
     }
   },
   methods: {
@@ -188,6 +184,8 @@ export default {
         this.loading = true
         const res = await getDetailJob(this.id)
         const resList = await getLogByJob(this.id, this.pagination.page, this.pagination.limit)
+        const resLast = await getLastJobLog(this.id)
+        this.progress = resLast.data.step * 100 / resLast.data.numberStep
         this.listLogDetail = resList.data
         this.pagination.total = resList.metaData.totalItem
         this.detail = res.data
@@ -196,9 +194,9 @@ export default {
           'YYYY-MM-DD'
         )
         if (this.detail.request.all === true) {
-          this.detail.jobName = this.detail.request.requestType + ' - ' + this.detail.request.id + ' - All'
+          this.detail.jobName = this.detail.request.requestType + ' - ' + resLast.data.tableName + ' - All'
         } else {
-          this.detail.jobName = this.detail.request.requestType + ' - ' + this.detail.request.id + ' - Not All'
+          this.detail.jobName = this.detail.request.requestType + ' - ' + resLast.data.tableName + ' - Not All'
         }
         if (this.detail.active === true) {
           this.isActive = true
@@ -209,7 +207,7 @@ export default {
         }
         if (this.listLogDetail) {
           this.listLogDetail.forEach((e) => {
-            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD')
+            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
           })
         }
       } catch (e) {

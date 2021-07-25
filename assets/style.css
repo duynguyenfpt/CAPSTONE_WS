@@ -66,3 +66,11 @@
   width: 60%;
 }
 
+.badge-status {
+  font-size: 15px;
+  padding: 5px 10px;
+}
+
+.inline {
+  display: inline-flexbox;
+}

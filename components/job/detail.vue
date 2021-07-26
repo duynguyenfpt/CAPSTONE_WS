@@ -70,21 +70,27 @@
 </template>
 
 <script>
-import { getDetailJob, getLogByJob, getLastJobLog } from '@/service/job'
+import { getJobDetail, getLogByJob, getLastJobLog } from '@/service/job'
 import moment from 'moment'
 
 const jobFields = [
   {
-    key: 'jobName'
+    key: 'server'
   },
   {
-    key: 'createdBy'
+    key: 'port'
+  },
+  {
+    key: 'port'
+  },
+  {
+    key: 'database'
+  },
+  {
+    key: 'table'
   },
   {
     key: 'createdDate'
-  },
-  {
-    key: 'jobSchedule'
   },
   {
     key: 'maxRetries'
@@ -93,8 +99,8 @@ const jobFields = [
     key: 'numberRetries'
   },
   {
-    key: 'excutedBy.username',
-    label: 'Excuted By'
+    key: 'executedBy',
+    label: 'Executed By'
   },
   {
     key: 'active'
@@ -112,16 +118,19 @@ const logFields = [
     key: 'port'
   },
   {
-    key: 'databaseName'
+    key: 'databaseName',
+    label: 'Database'
   },
   {
-    key: 'tableName'
+    key: 'tableName',
+    label: 'Table'
   },
   {
     key: 'step'
   },
   {
-    key: 'requestType'
+    key: 'requestType',
+    label: 'Request'
   },
   {
     key: 'numberStep'
@@ -150,7 +159,7 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 5,
+        limit: 10,
         total: 0
       },
       jobFields: jobFields,
@@ -182,22 +191,8 @@ export default {
     async getDetail () {
       try {
         this.loading = true
-        const res = await getDetailJob(this.id)
-        const resList = await getLogByJob(this.id, this.pagination.page, this.pagination.limit)
-        const resLast = await getLastJobLog(this.id)
-        this.progress = resLast.data.step * 100 / resLast.data.numberStep
-        this.listLogDetail = resList.data
-        this.pagination.total = resList.metaData.totalItem
+        const res = await getJobDetail(this.id)
         this.detail = res.data
-        this.status = res.data.status
-        this.detail.createdDate = moment(this.detail.createdDate).format(
-          'YYYY-MM-DD'
-        )
-        if (this.detail.request.all === true) {
-          this.detail.jobName = this.detail.request.requestType + ' - ' + resLast.data.tableName + ' - All'
-        } else {
-          this.detail.jobName = this.detail.request.requestType + ' - ' + resLast.data.tableName + ' - Not All'
-        }
         if (this.detail.active === true) {
           this.isActive = true
           this.isDeactive = false
@@ -205,10 +200,24 @@ export default {
           this.isActive = false
           this.isDeactive = true
         }
+        this.detail.server = res.data.serverDomain + ' - ' + res.data.serverHost
+        this.detail.createdDate = moment(this.detail.createdDate).format(
+          'YYYY-MM-DD'
+        )
+        const resList = await getLogByJob(this.id, this.pagination.page, this.pagination.limit)
+        this.pagination.total = resList.metaData.totalItem
+        this.listLogDetail = resList.data
         if (this.listLogDetail) {
           this.listLogDetail.forEach((e) => {
             e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
           })
+        }
+        const resLast = await getLastJobLog(this.id)
+        if (resLast.data !== null) {
+          if (resLast.data.step !== null && resLast.data.numberStep !== null) {
+            this.progress = resLast.data.step * 100 / resLast.data.numberStep
+          }
+          this.status = resLast.data.status
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

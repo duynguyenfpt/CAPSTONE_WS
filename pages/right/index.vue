@@ -194,7 +194,7 @@
 </template>
 
 <script>
-import { getList, getRightByAcc, getAll, createRightForAcc } from '@/service/right'
+import { getList, getRightByAcc, getAll, createRightForAcc, deleteRightForAcc, getAllRightByAcc } from '@/service/right'
 import { getListAccount } from '@/service/account'
 
 const rightFields = [
@@ -275,7 +275,8 @@ export default {
     accounts: null,
     accountRight: null,
     opsRight: [],
-    account: null
+    account: null,
+    oldRight: []
   }),
 
   created () {
@@ -326,13 +327,16 @@ export default {
     async showRightByAccount (record) {
       this.loadingAccountRight = true
       try {
+        this.rightUpdate = []
         this.account = record.id
         const res = await getRightByAcc(this.account, this.paginationAccountRight.page, this.paginationAccountRight.limit)
         this.accountRight = res.data
+        const resAll = await getAllRightByAcc(this.account)
         // eslint-disable-next-line array-callback-return
-        this.accountRight.map((item) => {
+        resAll.data.map((item) => {
           this.rightUpdate.push(item.id)
         })
+        this.oldRight = this.rightUpdate
         this.paginationAccountRight.total = res.metaData.totalItem
         const resRight = await getAll()
         this.opsRight = resRight.data.map((item) => {
@@ -350,6 +354,9 @@ export default {
           accountId: this.account,
           rightId: this.rightUpdate
         }
+        console.log('LCC: ', this.oldRight)
+        console.log('LCC: ', this.rightUpdate)
+        await deleteRightForAcc(this.oldRight)
         const res = await createRightForAcc(data)
         if (res.code === '201') {
           this.$notify({

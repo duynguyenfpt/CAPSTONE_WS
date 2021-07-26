@@ -252,7 +252,7 @@ export default {
     accountRightFields: accountRightFields,
     paginationRight: {
       page: 1,
-      limit: 5,
+      limit: 10,
       total: 0
     },
     paginationAccount: {

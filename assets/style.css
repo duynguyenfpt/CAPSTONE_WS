@@ -71,6 +71,7 @@
   padding: 5px 10px;
 }
 
-.inline {
-  display: inline-flexbox;
+.min-width-300 {
+  min-width: 400px;
+  margin-left: 10px;
 }

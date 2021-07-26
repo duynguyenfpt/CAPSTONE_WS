@@ -5,34 +5,67 @@
         <h4>Job Detail</h4>
       </b-col>
       <b-col class="text-right">
-          <span>Lastest Status</span>
-          <b-badge :variant="getLastestStatusVariant(status)" class="text-center badge-status" v-model="status">{{ status }}</b-badge>
+        <span>Lastest Status</span>
+        <b-badge
+          :variant="getLastestStatusVariant(status)"
+          class="text-center badge-status"
+          v-model="status"
+          >{{ status }}</b-badge
+        >
       </b-col>
     </b-row>
     <b-table :fields="jobFields" :items="[detail]">
-        <template #cell(active)>
-          <b-btn size="sm" variant="danger" v-if="isDeactive">
-            <i class="fa fa-power-off" v-if="isDeactive" />
-          </b-btn>
-          <b-btn size="sm" variant="success" v-if="isActive">
-            <i class="fas fa-check" v-if="isActive" />
-          </b-btn>
-        </template>
+      <template #cell(active)>
+        <b-btn size="sm" variant="danger" v-if="isDeactive">
+          <i class="fa fa-power-off" v-if="isDeactive" />
+        </b-btn>
+        <b-btn size="sm" variant="success" v-if="isActive">
+          <i class="fas fa-check" v-if="isActive" />
+        </b-btn>
+      </template>
     </b-table>
 
     <b-row>
-      <b-col cols="5" class="inline">
-        <h4>Job Log</h4>
-        <b-progress :value="progress" v-model="progress" :max="100" show-progress animated></b-progress>
+      <b-col cols="6">
+        <div class="d-flex align-items-center">
+          <h4>Job Log</h4>
+          <b-progress
+            class="min-width-300"
+            :value="progress"
+            v-model="progress"
+            :max="100"
+            show-progress
+            animated
+          ></b-progress>
+        </div>
       </b-col>
       <b-col class="text-right">
         <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
-            <i class="fa fa-sync pr-1" />
-            Refresh
-          </b-btn>
+          <i class="fa fa-sync pr-1" />
+          Refresh
+        </b-btn>
       </b-col>
     </b-row>
-
+    <section name="action">
+      <b-row>
+        <b-col cols="6"></b-col>
+        <b-col cols="6" class="text-right">
+          <b-input-group>
+            <b-input
+              size="sm"
+              placeholder="Search"
+              v-model="textSearch"
+              @keyup.enter="searchDB(textSearch)"
+            />
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="searchDB(textSearch)">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
+    </section>
     <section name="view" class="pt-3">
       <b-table
         responsive
@@ -61,12 +94,12 @@
       />
     </section>
   </div>
-   <div v-else>
-   <content-placeholders class="article-card-block">
+  <div v-else>
+    <content-placeholders class="article-card-block">
       <content-placeholders-text :lines="3" />
       <content-placeholders-text :lines="18" />
     </content-placeholders>
- </div>
+  </div>
 </template>
 
 <script>
@@ -200,11 +233,16 @@ export default {
           this.isActive = false
           this.isDeactive = true
         }
-        this.detail.server = res.data.serverDomain + ' - ' + res.data.serverHost
+        this.detail.server =
+          res.data.serverDomain + ' - ' + res.data.serverHost
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
         )
-        const resList = await getLogByJob(this.id, this.pagination.page, this.pagination.limit)
+        const resList = await getLogByJob(
+          this.id,
+          this.pagination.page,
+          this.pagination.limit
+        )
         this.pagination.total = resList.metaData.totalItem
         this.listLogDetail = resList.data
         if (this.listLogDetail) {
@@ -215,7 +253,7 @@ export default {
         const resLast = await getLastJobLog(this.id)
         if (resLast.data !== null) {
           if (resLast.data.step !== null && resLast.data.numberStep !== null) {
-            this.progress = resLast.data.step * 100 / resLast.data.numberStep
+            this.progress = (resLast.data.step * 100) / resLast.data.numberStep
           }
           this.status = resLast.data.status
         }

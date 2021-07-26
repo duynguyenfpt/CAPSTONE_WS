@@ -352,13 +352,14 @@ export default {
       try {
         const data = {
           accountId: this.account,
-          rightId: this.rightUpdate
+          rightIds: this.rightUpdate
         }
-        console.log('LCC: ', this.oldRight)
-        console.log('LCC: ', this.rightUpdate)
-        await deleteRightForAcc(this.oldRight)
+        const dataDel = {
+          rightIds: this.oldRight
+        }
+        const resDel = await deleteRightForAcc(this.account, dataDel)
         const res = await createRightForAcc(data)
-        if (res.code === '201') {
+        if (res.code === '201' && resDel.code === '200') {
           this.$notify({
             type: 'success',
             text: 'Update right succeeded'

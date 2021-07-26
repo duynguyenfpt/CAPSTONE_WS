@@ -252,7 +252,7 @@ export default {
     accountRightFields: accountRightFields,
     paginationRight: {
       page: 1,
-      limit: 5,
+      limit: 10,
       total: 0
     },
     paginationAccount: {
@@ -354,8 +354,6 @@ export default {
           accountId: this.account,
           rightId: this.rightUpdate
         }
-        console.log('LCC: ', this.oldRight)
-        console.log('LCC: ', this.rightUpdate)
         await deleteRightForAcc(this.oldRight)
         const res = await createRightForAcc(data)
         if (res.code === '201') {

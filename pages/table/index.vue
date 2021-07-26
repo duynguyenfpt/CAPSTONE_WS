@@ -1,5 +1,25 @@
 <template>
  <div>
+   <section name="action">
+      <b-row>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchTable(textSearch)"/>
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="searchTable(textSearch)">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+        <b-col class="text-right">
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload
+          </b-btn>
+        </b-col>
+      </b-row>
+    </section>
    <section name="view" class="pt-3">
     <b-table
       responsive
@@ -84,7 +104,7 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 5,
+        limit: 10,
         total: 0
       },
       tableFields: tableFields,

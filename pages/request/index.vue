@@ -1,10 +1,25 @@
 <template>
   <div>
-    <b-row class="pt-2">
-      <b-col class="text-center">
-        <h2>Request Management</h2>
-      </b-col>
-    </b-row>
+    <section name="action">
+      <b-row>
+        <b-col cols="4" class="text-left">
+          <b-input-group>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchRequest(textSearch)"/>
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="searchRequest(textSearch)">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+        <b-col class="text-right">
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload
+          </b-btn>
+        </b-col>
+      </b-row>
+    </section>
     <section name="view" class="pt-3">
       <b-table
       responsive
@@ -96,7 +111,7 @@ export default {
   data: () => ({
     pagination: {
       page: 1,
-      limit: 5,
+      limit: 10,
       total: 0
     },
     tableFields: tableFields,

@@ -13,7 +13,6 @@
           <b-nav-item v-b-toggle.db :to="{ name: 'db' }">
             <i class="fa fa-database mr-1" /> Databases
           </b-nav-item>
-
           <b-nav-item v-b-toggle.table :to="{ name: 'table' }">
             <i class="fa fa-table mr-1"></i> Tables
             <b-collapse id="table">
@@ -43,6 +42,10 @@
                 Add Request
               </b-nav-item>
             </b-collapse>
+          </b-nav-item>
+          <b-nav-item v-b-toggle.log :to="{ name: 'log' }">
+            <i class="fas fa-notes-medical mr-1" />
+            Logs
           </b-nav-item>
           <hr />
         </b-nav>

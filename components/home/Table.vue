@@ -1,25 +1,114 @@
 <template>
   <div>
-    <b-table striped hover :items="items"></b-table>
+    <b-table
+      responsive
+      hover
+      striped
+      :items="logs"
+      :fields="fields"
+      :busy="loading"
+    >
+      <template #cell(no)="item">
+        {{ countRecord(item.index) }}
+      </template>
+      <template #cell(status)="row">
+        <b-badge :variant="getLastestStatusVariant(row.item.status)">{{row.item.status}}</b-badge>
+      </template>
+    </b-table>
   </div>
 </template>
 
 <script>
+import { getAllJobLog } from '@/service/job'
+import moment from 'moment'
+
+const TableFields = [
+  {
+    key: 'no'
+  },
+  {
+    key: 'host'
+  },
+  {
+    key: 'port'
+  },
+  {
+    key: 'databaseName',
+    label: 'Database'
+  },
+  {
+    key: 'tableName',
+    label: 'Table'
+  },
+  {
+    key: 'step'
+  },
+  {
+    key: 'requestType',
+    label: 'Request'
+  },
+  {
+    key: 'numberStep'
+  },
+  {
+    key: 'message'
+  },
+  {
+    key: 'status'
+  },
+  {
+    key: 'createdTime'
+  }
+]
+
 export default {
+  created () {
+    this.getAllJobLog()
+  },
   data () {
     return {
-      items: [
-        { no: 1, jobId: 'Job_1', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 2, jobId: 'Job_2', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 3, jobId: 'Job_3', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 4, jobId: 'Job_4', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 5, jobId: 'Job_5', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 6, jobId: 'Job_6', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 7, jobId: 'Job_7', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 8, jobId: 'Job_8', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 9, jobId: 'Job_9', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' },
-        { no: 10, jobId: 'Job_10', jobType: 'Sync Table', database: 'test', table: 'test', status: 'fail' }
-      ]
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0
+      },
+      fields: TableFields,
+      loading: false,
+      status: null,
+      logs: []
+    }
+  },
+  methods: {
+    getLastestStatusVariant (status) {
+      switch (status) {
+        case 'success':
+          return 'success'
+        case 'fail':
+          return 'danger'
+        case 'processing':
+          return 'primary'
+        case 'pending':
+          return 'secondary'
+        default:
+          return 'secondary'
+      }
+    },
+    async getAllJobLog () {
+      try {
+        this.loading = true
+        const res = await getAllJobLog(this.pagination.page, this.pagination.limit)
+        this.logs = res.data.sort
+        this.logs.forEach((e) => {
+          e.createdTime = moment(e.createdTime).format('YYYY-MM-DD hh:mm:ss')
+        })
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
+    },
+    countRecord (index) {
+      return (this.pagination.page - 1) * this.pagination.limit + index + 1
     }
   }
 }

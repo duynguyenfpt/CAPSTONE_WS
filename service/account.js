@@ -13,3 +13,10 @@ export const getAccountDetail = (id) => http.get(`api/accounts/${id}`)
 export const createAccount = (data) => http.post('api/accounts/', data)
 export const resetAccount = (id) => http.post(`api/accounts/${id}/reset_password`)
 export const getMe = () => http.get('api/me')
+export const searchAccount = (page, limit, textSearch) => http.get('api/accounts', {
+  params: {
+    page: page,
+    limit: limit,
+    keyword: textSearch
+  }
+})

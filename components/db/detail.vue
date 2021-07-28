@@ -14,7 +14,7 @@
       </b-col>
     </b-row>
 
-    <section namen="view" class="pt-3">
+    <section name="view" class="pt-3">
       <b-table
         responsive
         hover
@@ -146,7 +146,7 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 5,
+        limit: 10,
         total: 0
       },
       dbFields: dbFields,

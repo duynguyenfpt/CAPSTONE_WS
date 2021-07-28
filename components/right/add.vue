@@ -1,0 +1,96 @@
+<template>
+  <div>
+    <b-modal v-model="isVisible" title="Create Right" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col cols="4">
+            <label class="form-lab">Right Code</label>
+          </b-col>
+          <b-col>
+            <b-input size="sm" v-model="code"></b-input>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="text-center">Right Name</label>
+          </b-col>
+          <b-col>
+            <b-form-input
+              size="sm"
+              v-model="name"
+            ></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="text-center pt-3">
+          <b-col class="text-right">
+            <b-button @click="addRight" variant="primary" size="sm"
+              >
+              <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
+              Add right</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
+  </div>
+</template>
+
+<script>
+import { createRight } from '@/service/right'
+export default {
+  props: {
+    database: {}
+  },
+  data: () => ({
+    isLoading: false,
+    code: null,
+    name: null,
+    isVisible: false,
+    isLoadingCreate: false,
+    msg: null
+  }),
+  methods: {
+    async show () {
+      this.isVisible = true
+      this.isLoading = true
+      this.code = null
+      this.name = null
+      this.isLoading = false
+    },
+    onClose () {
+      this.isVisible = false
+    },
+    async addRight () {
+      try {
+        this.isLoadingCreate = true
+        const body = {
+          code: this.code,
+          rightName: this.name
+        }
+        console.log('LCC: ', body)
+        const res = await createRight(body)
+        this.$emit('onAdded')
+        if (res.code === '201') {
+          this.$notify({ type: 'success', text: 'Add right succeeded' })
+        } else {
+          this.$notify({ type: 'error', text: 'Add right failed' })
+        }
+        this.$router.go()
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+        this.isVisible = false
+      }
+    }
+  }
+}
+</script>
+
+<style></style>

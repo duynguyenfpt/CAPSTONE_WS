@@ -13,3 +13,10 @@ export const getServer = (id) => http.get(`api/server_infors/${id}`)
 export const updateServer = (id, data) => http.put(`api/server_infors/${id}`, data)
 export const createServer = (data) => http.post('api/server_infors', data)
 export const deleteServer = (id) => http.delete(`api/server_infors/${id}`)
+export const searchServer = (page, limit, textSearch) => http.get('api/server_infors', {
+  params: {
+    page: page,
+    limit: limit,
+    keyword: textSearch
+  }
+})

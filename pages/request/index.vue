@@ -1,26 +1,22 @@
 <template>
   <div>
-    <b-row class="pt-2">
-      <b-col class="text-center">
-        <h2>Request Management</h2>
-      </b-col>
-    </b-row>
     <section name="action">
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input
-              size="sm"
-              placeholder="Search"
-              v-model="textSearch"
-              @keyup.enter="searchRequest()"
-            />
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchRequest()"/>
             <b-input-group-append>
               <b-btn size="sm" variant="primary" @click="searchRequest()">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
           </b-input-group>
+        </b-col>
+        <b-col class="text-right">
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload
+          </b-btn>
         </b-col>
       </b-row>
     </section>
@@ -36,8 +32,8 @@
           <b-btn @click="edit(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
-          <b-btn size="sm" @click="onAssign()" variant="primary">
-            <i class="fa fa-users" aria-hidden="true"></i>
+          <b-btn size="sm" @click="reset(item.item.id)" variant="danger">
+            <i class="fa fa-power-off" aria-hidden="true"></i>
           </b-btn>
         </template>
         <template #cell(viewLog)="item">
@@ -80,7 +76,7 @@
 </template>
 
 <script>
-import { getRequest, searchReq } from '@/service/request'
+import { getRequest, searchRequest } from '@/service/request'
 import moment from 'moment'
 const tableFields = [
   {
@@ -119,7 +115,7 @@ export default {
   data: () => ({
     pagination: {
       page: 1,
-      limit: 5,
+      limit: 10,
       total: 0
     },
     tableFields: tableFields,
@@ -193,19 +189,20 @@ export default {
     async searchRequest () {
       this.loading = true
       try {
-        const res = await searchReq(
+        this.pagination.page = 1
+        const res = await searchRequest(
           this.pagination.page,
           this.pagination.limit,
           this.textSearch
         )
         this.request = res.data
+        this.pagination.total = res.metaData.totalItem
         this.request.forEach((e) => {
           e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
           e.modifiedDate = moment(this.request.modifiedDate).format(
             'YYYY-MM-DD'
           )
         })
-        this.pagination.total = res.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

@@ -12,7 +12,7 @@
       <div v-for="(note, index) in shortNotes" :key="index">
         <div class="comment my-1">
           <div class="header pl-2 py-1">
-            <span class="font-weight-bold">Linh Nguyễn</span>
+            <span class="font-weight-bold">{{ note.createdBy }}</span>
             <span class="font-italic">commented on {{ format(new Date(note.id.time), `dd-mm-yyyy hh:mm`) }}</span>
           </div>
           <div class="pl-3 py-1">{{ note.content }}</div>

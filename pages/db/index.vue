@@ -4,9 +4,9 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchDB(textSearch)"/>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchDB()"/>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchDB(textSearch)">
+              <b-btn size="sm" variant="primary" @click="searchDB()">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -208,9 +208,10 @@ export default {
     onReload () {
       this.getList()
     },
-    async searchDB (page, limit, textSearch) {
+    async searchDB () {
       this.loading = true
       try {
+        this.pagination.page = 1
         const result = await searchDB(
           this.pagination.page,
           this.pagination.limit,
@@ -219,6 +220,23 @@ export default {
         this.dbs = result.data
         this.dbs.forEach((e) => {
           e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+        })
+        this.dbs.forEach((e) => {
+          if (e.databaseType === 'sql') {
+            e.databaseType = 'SQL-Server'
+          }
+          if (e.databaseType === 'mysql') {
+            e.databaseType = 'My Sql'
+          }
+          if (e.databaseType === 'mogodb') {
+            e.databaseType = 'Mongo DB'
+          }
+          if (e.databaseType === 'postgresql') {
+            e.databaseType = 'PostgreSQL'
+          }
+          if (e.databaseType === 'oracal') {
+            e.databaseType = 'Oracle'
+          }
         })
         this.dbs.forEach((e) => {
           e.createdDate = moment(e.created_date).format('YYYY-MM-DD')

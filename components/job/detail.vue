@@ -1,48 +1,87 @@
 <template>
   <div v-if="detail">
-    <h4>Job detail</h4>
-    <b-table :fields="jobFields" :items="[detail]"></b-table>
-
     <b-row>
-      <b-col cols="10">
-        <h4>Job Log</h4>
+      <b-col cols="6">
+        <h4>Job Detail</h4>
+      </b-col>
+      <b-col class="text-right">
+        <span>Lastest Status</span>
+        <b-badge
+          :variant="getLastestStatusVariant(status)"
+          class="text-center badge-status"
+          v-model="status"
+          >{{ status }}</b-badge
+        >
       </b-col>
     </b-row>
+    <b-table :fields="jobFields" :items="[detail]">
+      <template #cell(active)>
+        <b-btn size="sm" variant="danger" v-if="isDeactive">
+          <i class="fa fa-power-off" v-if="isDeactive" />
+        </b-btn>
+        <b-btn size="sm" variant="success" v-if="isActive">
+          <i class="fas fa-check" v-if="isActive" />
+        </b-btn>
+      </template>
+    </b-table>
 
-    <!-- <section namen="view" class="pt-3">
+    <b-row>
+      <b-col cols="6">
+        <div class="d-flex align-items-center">
+          <h4>Job Log</h4>
+          <b-progress
+            class="min-width-300"
+            :value="progress"
+            v-model="progress"
+            :max="100"
+            show-progress
+            animated
+          ></b-progress>
+        </div>
+      </b-col>
+      <b-col class="text-right">
+        <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
+          <i class="fa fa-sync pr-1" />
+          Refresh
+        </b-btn>
+      </b-col>
+    </b-row>
+    <section name="action">
+      <b-row>
+        <b-col cols="6"></b-col>
+        <b-col cols="6" class="text-right">
+          <b-input-group>
+            <b-input
+              size="sm"
+              placeholder="Search"
+              v-model="textSearch"
+              @keyup.enter="searchDB(textSearch)"
+            />
+            <b-input-group-append>
+              <b-btn size="sm" variant="primary" @click="searchDB(textSearch)">
+                <i class="fas fa-search" />
+              </b-btn>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
+    </section>
+    <section name="view" class="pt-3">
       <b-table
         responsive
         hover
         striped
-        :items="listTableDetail"
-        :fields="tbFields"
+        :items="listLogDetail"
+        :fields="logFields"
         :busy="loading"
       >
         <template #cell(no)="item">
           {{ countRecord(item.index) }}
         </template>
-
-        <template #cell(action)="item">
-          <b-btn
-            :to="{ name: 'table-id', params: { id: item.item.id } }"
-            size="sm"
-            variant="success"
-          >
-            <i class="fa fa-eye" />
-          </b-btn>
-          <b-btn
-            size="sm"
-            variant="danger"
-            @click="deleteTableDetail(item.item.id)"
-          >
-            <i class="fa fa-trash" />
-          </b-btn>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>
-            <strong>Loading...</strong>
-          </div>
+        <template #cell(status)="row">
+          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{
+            row.item.status
+          }}</b-badge>
         </template>
       </b-table>
       <b-pagination
@@ -54,76 +93,89 @@
         @input="getDetail"
       />
     </section>
-    <section name="popup">
-      <table-component-addTable ref="add" @onAdded="onReload"/>
-    </section>
-    <section name="popup">
-      <table-component-deleteTable ref="delete" @onDeleted="onReload" />
-    </section> -->
   </div>
-   <div v-else>
-   <content-placeholders class="article-card-block">
+  <div v-else>
+    <content-placeholders class="article-card-block">
       <content-placeholders-text :lines="3" />
       <content-placeholders-text :lines="18" />
     </content-placeholders>
- </div>
+  </div>
 </template>
 
 <script>
-import { getDetailJob } from '@/service/job'
+import { getJobDetail, getLogByJob, getLastJobLog } from '@/service/job'
 import moment from 'moment'
 
 const jobFields = [
   {
-    key: 'jobName'
+    key: 'server'
   },
   {
-    key: 'createdBy'
+    key: 'port'
+  },
+  {
+    key: 'port'
+  },
+  {
+    key: 'database'
+  },
+  {
+    key: 'table'
   },
   {
     key: 'createdDate'
   },
   {
-    key: 'modifiedBy'
+    key: 'maxRetries'
   },
   {
-    key: 'modifiedDate'
+    key: 'numberRetries'
   },
   {
-    key: 'executedById'
-  },
-  {
-    key: 'jobSchedule'
-  },
-  {
-    key: 'maxRetry'
+    key: 'executedBy',
+    label: 'Executed By'
   },
   {
     key: 'active'
   }
 ]
 
-const tbFields = [
+const logFields = [
   {
     key: 'no'
   },
   {
-    key: 'tableName'
+    key: 'host'
   },
   {
-    key: 'createdBy'
+    key: 'port'
   },
   {
-    key: 'createDate'
+    key: 'databaseName',
+    label: 'Database'
   },
   {
-    key: 'modifiedBy'
+    key: 'tableName',
+    label: 'Table'
   },
   {
-    key: 'modifiedDate'
+    key: 'step'
   },
   {
-    key: 'action'
+    key: 'requestType',
+    label: 'Request'
+  },
+  {
+    key: 'numberStep'
+  },
+  {
+    key: 'message'
+  },
+  {
+    key: 'status'
+  },
+  {
+    key: 'createdAt'
   }
 ]
 
@@ -140,38 +192,70 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 5,
+        limit: 10,
         total: 0
       },
       jobFields: jobFields,
-      tbFields: tbFields,
+      logFields: logFields,
       detail: null,
-      listTableDetail: null,
-      loading: false
+      listLogDetail: null,
+      loading: false,
+      status: null,
+      isActive: false,
+      isDeactive: false,
+      progress: 0
     }
   },
   methods: {
+    getLastestStatusVariant (status) {
+      switch (status) {
+        case 'success':
+          return 'success'
+        case 'fail':
+          return 'danger'
+        case 'processing':
+          return 'primary'
+        case 'pending':
+          return 'secondary'
+        default:
+          return 'secondary'
+      }
+    },
     async getDetail () {
       try {
         this.loading = true
-        const res = await getDetailJob(this.id)
-        this.listTableDetail = res.data
-        // this.pagination.total = resList.metaData.totalItem
-        console.log(this.pagination)
+        const res = await getJobDetail(this.id)
         this.detail = res.data
+        if (this.detail.active === true) {
+          this.isActive = true
+          this.isDeactive = false
+        } else {
+          this.isActive = false
+          this.isDeactive = true
+        }
+        this.detail.server =
+          res.data.serverDomain + ' - ' + res.data.serverHost
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
         )
-        this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
-          'YYYY-MM-DD'
+        const resList = await getLogByJob(
+          this.id,
+          this.pagination.page,
+          this.pagination.limit
         )
-        if (this.detail.tables) {
-          this.detail.tables.forEach((e) => {
-            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+        this.pagination.total = resList.metaData.totalItem
+        this.listLogDetail = resList.data
+        if (this.listLogDetail) {
+          this.listLogDetail.forEach((e) => {
+            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
           })
-          this.detail.tables.forEach((e) => {
-            e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
-          })
+        }
+        const resLast = await getLastJobLog(this.id)
+        if (resLast.data !== null) {
+          if (resLast.data.step !== null && resLast.data.numberStep !== null) {
+            this.progress = (resLast.data.step * 100) / resLast.data.numberStep
+          }
+          this.status = resLast.data.status
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -179,14 +263,8 @@ export default {
         this.loading = false
       }
     },
-    async deleteTableDetail (id) {
-      this.$refs.delete.show(id)
-    },
-    onReload () {
+    onRefresh () {
       this.getDetail()
-    },
-    addTb (id) {
-      this.$refs.add.show(id)
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1

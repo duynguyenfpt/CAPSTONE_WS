@@ -13,3 +13,10 @@ export const getTableSchema = (id) => http.get(`api/tables/${id}/current_table_s
 export const getTableByDb = (db, page, limit) => http.get(`api/database_infors/${db}/tables`, { params: { page, limit } })
 export const getSchemaByTableId = (id, page, limit) => http.get(`api/tables/${id}/current_table_schemas`, { params: { page, limit } })
 export const getColumnByTable = (id) => http.get(`api/tables/${id}/columns`, { id })
+export const searchTable = (page, limit, textSearch) => http.get('api/tables', {
+  params: {
+    page: page,
+    limit: limit,
+    keyword: textSearch
+  }
+})

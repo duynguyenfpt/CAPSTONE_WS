@@ -4,18 +4,19 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input
-              size="sm"
-              placeholder="Search"
-              v-model="textSearch"
-              @keyup.enter="searchTable()"
-            />
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchTable(textSearch)"/>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchTable()">
+              <b-btn size="sm" variant="primary" @click="searchTable(textSearch)">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
           </b-input-group>
+        </b-col>
+        <b-col class="text-right">
+          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+            <i class="fa fa-sync pr-1" />
+            Reload
+          </b-btn>
         </b-col>
       </b-row>
     </section>
@@ -71,9 +72,8 @@
 </template>
 
 <script>
-import { getListTable } from '@/service/table.service'
+import { getListTable, searchTable } from '@/service/table.service'
 import moment from 'moment'
-import { } from '@/components/table-component/deleteTable.vue'
 const tableFields = [
   {
     key: 'no'
@@ -103,7 +103,7 @@ export default {
     return {
       pagination: {
         page: 1,
-        limit: 5,
+        limit: 10,
         total: 0
       },
       tableFields: tableFields,
@@ -145,8 +145,26 @@ export default {
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
     },
-    searchTable () {
-      console.log(this.textSearch)
+    async searchTable () {
+      this.loading = true
+      try {
+        this.pagination.page = 1
+        const res = await searchTable(this.pagination.page, this.pagination.limit, this.textSearch)
+        this.tableList = res.data
+        this.pagination.total = res.metaData.totalItem
+        this.tableList.forEach((e) => {
+          e.createdDate = moment(this.tableList.createdDate).format(
+            'YYYY-MM-DD'
+          )
+          e.modifiedDate = moment(this.tableList.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        })
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

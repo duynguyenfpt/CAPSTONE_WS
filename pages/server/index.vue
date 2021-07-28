@@ -97,7 +97,7 @@
 </template>
 
 <script>
-import { getListServer } from '@/service/server'
+import { getListServer, searchServer } from '@/service/server'
 import moment from 'moment'
 
 const serverFields = [
@@ -136,7 +136,7 @@ export default {
     textSearch: null,
     pagination: {
       page: 1,
-      limit: 5,
+      limit: 10,
       total: 0
     },
     loading: false,
@@ -190,8 +190,26 @@ export default {
     deleteServer (id) {
       this.$refs.delete.show(id)
     },
-    searchServer () {
-      console.log(this.textSearch)
+    async searchServer () {
+      this.loading = true
+      try {
+        this.pagination.page = 1
+        const res = await searchServer(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.servers = res.data
+        this.servers.forEach((e) => {
+          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+          e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+        })
+        this.pagination.total = res.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

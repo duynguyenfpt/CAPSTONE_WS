@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import { getListAccount } from '@/service/account'
+import { getListAccount, searchAccount } from '@/service/account'
 
 const accountFields = [
   {
@@ -135,7 +135,7 @@ export default {
     textSearch: null,
     pagination: {
       page: 1,
-      limit: 5,
+      limit: 10,
       total: 0
     },
     loading: false,
@@ -187,6 +187,22 @@ export default {
     },
     activeAccount (id) {
       this.$refs.active.show(id)
+    },
+    async searchAccount (page, limit, textSearch) {
+      this.loading = true
+      try {
+        const result = await searchAccount(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.accounts = result.data
+        this.pagination.total = result.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

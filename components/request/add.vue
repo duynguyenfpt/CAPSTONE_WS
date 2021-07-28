@@ -2,26 +2,11 @@
   <div>
     <b-row>
       <b-col class="text-center">
-        <h1>Create Request</h1>
+        <h1>Create Synchronized Request</h1>
       </b-col>
     </b-row>
 
     <div>
-      <!--RequestType-->
-      <b-row>
-        <b-col sm="2"></b-col>
-        <b-col sm="4">
-          <label>Request Type</label>
-          <b-form-select
-            v-model="request.type"
-            :options="opsType"
-            size="sm"
-            @change="showRequest"
-          >
-          </b-form-select>
-          <p class="msg-error" v-if="msg.type">{{ msg.type }}</p>
-        </b-col>
-      </b-row>
       <!-- Database -->
       <b-row class="pt-2">
         <b-col sm="2"></b-col>
@@ -51,7 +36,7 @@
           </b-form-select>
           <p class="msg-error" v-if="msg.table">{{ msg.table }}</p>
         </b-col>
-        <b-col sm="4" class="pt-2" v-if="isSync">
+        <b-col sm="4" class="pt-2">
           <label></label>
           <b-form-checkbox
             v-model="request.isAll"
@@ -64,7 +49,7 @@
           </b-form-checkbox>
         </b-col>
       </b-row>
-      <b-row class="pt-2" v-if="isSync">
+      <b-row class="pt-2">
         <b-col sm="2"></b-col>
         <b-col sm="4">
           <label>Unique key</label>
@@ -86,7 +71,7 @@
           </div>
         </b-col>
       </b-row>
-      <b-row class="pt-2" v-if="isSync">
+      <b-row class="pt-2">
         <b-col sm="2"></b-col>
         <b-col sm="4">
           <label>Partition By</label>
@@ -108,7 +93,7 @@
           </div>
         </b-col>
       </b-row>
-      <b-row class="pt-2" v-if="isSync">
+      <b-row class="pt-2">
         <b-col sm="2"></b-col>
         <b-col sm="4">
           <label for="example-datepicker">From date</label>
@@ -143,88 +128,6 @@
           <p class="msg-error" v-if="msg.toDate">{{ msg.toDate }}</p>
         </b-col>
       </b-row>
-      <b-row class="pt-2" v-if="isAdd">
-        <b-col sm="2"></b-col>
-        <b-col sm="8">
-          <table
-            :items="rows"
-            class="table table-striped table-bordered table-sm"
-          >
-            <thead>
-              <td class="text-center">No</td>
-              <td class="text-center">Column</td>
-              <td class="text-center">Type</td>
-              <td class="text-center">Default Value</td>
-              <td class="text-center">Action</td>
-            </thead>
-            <tbody>
-              <tr v-for="(row, k) in rows" :key="k">
-                <td class="text-center">
-                  {{ k + 1 }}
-                </td>
-                <td>
-                  <v-select
-                    class="select-sm"
-                    :reduce="(text) => text.value"
-                    label="text"
-                    :options="opsName"
-                    v-model="row.name"
-                    size="sm"
-                    @input="fillRow(k)"
-                  ></v-select>
-                </td>
-                <td>
-                  <b-form-input
-                    disabled
-                    size="sm"
-                    v-model="row.type"
-                  ></b-form-input>
-                </td>
-                <td>
-                  <b-form-input
-                    disabled
-                    size="sm"
-                    v-model="row.value"
-                  ></b-form-input>
-                </td>
-                <td scope="row" class="text-center">
-                  <b-btn
-                    class="btn btn-sm"
-                    size="sm"
-                    variant="danger"
-                    @click="deleteRow(k, row)"
-                  >
-                    <i class="fa fa-trash"></i>
-                  </b-btn>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="text-right">
-            <b-btn
-              type="button"
-              class="btn btn-success"
-              @click="addNewRow"
-              size="sm"
-            >
-              <i class="fa fa-plus"></i>
-              Add
-            </b-btn>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row  v-if="isETL">
-        <b-col sm="2"></b-col>
-        <b-col sm="8">
-          <label>Query</label>
-          <b-form-textarea
-            id="textarea-small"
-            size="sm"
-            placeholder="Query..."
-            v-model="request.query"
-          ></b-form-textarea>
-        </b-col>
-      </b-row>
       <b-row class="pt-2">
         <b-col sm="2"></b-col>
         <b-col sm="8" class="text-center">
@@ -250,8 +153,7 @@
 <script>
 import { getAllDbType } from '@/service/db'
 import { getAllTableByDb, getColumnByTable } from '~/service/table.service'
-import { createRequestSync, createRequestAddColumn } from '~/service/request'
-import { getSchemaById } from '@/service/schema'
+import { createRequestSync } from '~/service/request'
 import Vue from 'vue'
 import vSelect from 'vue-select'
 
@@ -260,7 +162,6 @@ export default {
   data () {
     return {
       request: {
-        type: null,
         database: null,
         table: null,
         fromDate: null,
@@ -270,31 +171,14 @@ export default {
         partition: []
       },
       status: 'not_chosen',
-      opsType: [
-        { value: null, text: 'Please select an option' },
-        { value: 'SyncTable', text: 'Synchronized' },
-        { value: 'AddColumn', text: 'Add Columns' },
-        { value: 'ETL', text: 'ETL' }
-      ],
       opsDb: [{ value: null, text: 'Please select an option' }],
       opsTb: [{ value: null, text: 'Please select an option' }],
       min: null,
       opsUniqueKey: [],
       opsPartitionKey: [],
       opsName: [{ value: null, text: 'Please select an option' }],
-      rows: [
-        {
-          name: null,
-          type: null,
-          value: null
-        }
-      ],
-      isSync: false,
-      isAdd: false,
-      isETL: false,
       isLoadingCreate: false,
       msg: {
-        type: null,
         database: null,
         table: null,
         toDate: null,
@@ -313,19 +197,6 @@ export default {
     dateDisabled () {
       this.min = this.request.fromDate
     },
-    addNewRow () {
-      this.rows.push({
-        name: null,
-        type: null,
-        value: null
-      })
-    },
-    deleteRow (index, row) {
-      const idx = this.rows.indexOf(row)
-      if (idx > -1) {
-        this.rows.splice(idx, 1)
-      }
-    },
     chooseDateTo () {
       if (this.request.toDate === null) {
         this.msg.toDate = 'Please select a date'
@@ -341,7 +212,6 @@ export default {
       }
     },
     chooseIsAll () {
-      console.log('LCC: ', this.request.isAll)
       if (this.request.isAll === 'chosen') {
         this.msg.fromDate = ''
         this.msg.toDate = ''
@@ -350,38 +220,7 @@ export default {
         this.msg.toDate = 'Please select a date'
       }
     },
-    showRequest () {
-      if (this.request.type === 'SyncTable') {
-        this.isSync = true
-        this.isAdd = false
-        this.isETL = false
-        this.msg.type = ''
-        this.msg.toDate = ''
-        this.msg.fromDate = ''
-      } else if (this.request.type === 'AddColumn') {
-        this.isSync = false
-        this.isAdd = true
-        this.isETL = false
-        this.msg.type = ''
-      } else if (this.request.type === 'ETL') {
-        this.isSync = false
-        this.isAdd = true
-        this.isETL = true
-        this.msg.type = ''
-      } else {
-        this.isSync = false
-        this.isAdd = false
-        this.msg.type = 'Please select type'
-      }
-    },
     async fillData () {
-      this.rows = [
-        {
-          name: null,
-          type: null,
-          value: null
-        }
-      ]
       const id = this.request.database
       if (id !== null) {
         const res = await getAllTableByDb(id, 1, 1000)
@@ -398,19 +237,9 @@ export default {
       }
     },
     async fillTable () {
-      this.rows = [
-        {
-          name: null,
-          type: null,
-          value: null
-        }
-      ]
       const id = this.request.table
       if (id !== null) {
         const res = await getColumnByTable(id)
-        this.opsName = res.data.map((item) => {
-          return { value: item.id, text: item.rowName }
-        })
         this.opsUniqueKey = res.data.map((item) => {
           return { value: item, label: item }
         })
@@ -420,14 +249,6 @@ export default {
         this.msg.table = ''
       } else {
         this.msg.table = 'Please select table'
-      }
-    },
-    async fillRow (index) {
-      const id = this.rows[index].name
-      if (id !== null) {
-        const res = await getSchemaById(id)
-        this.rows[index].type = res.data.rowType
-        this.rows[index].value = res.data.defaultValue
       }
     },
     async addRequest () {
@@ -441,7 +262,6 @@ export default {
         this.msg.table = 'Please select table'
       }
       if (
-        this.msg.type === '' &&
         this.msg.database === '' &&
         this.msg.table === ''
       ) {
@@ -454,79 +274,48 @@ export default {
           this.msg.toDate = ''
           this.msg.fromDate = ''
         }
-        if (this.isSync) {
-          if (this.request.isAll === false) {
-            if (this.request.toDate === null) {
-              this.msg.toDate = 'Please select a date'
-            }
-            if (this.request.fromDate === null) {
-              this.msg.fromDate = 'Please select a date'
-            }
-          } else {
-            this.msg.toDate = ''
-            this.msg.fromDate = ''
+        if (this.request.isAll === false) {
+          if (this.request.toDate === null) {
+            this.msg.toDate = 'Please select a date'
           }
-          if (this.msg.toDate === '' && this.msg.fromDate === '') {
-            try {
-              this.isLoadingCreate = true
-              const today = new Date()
-              const time =
+          if (this.request.fromDate === null) {
+            this.msg.fromDate = 'Please select a date'
+          }
+        } else {
+          this.msg.toDate = ''
+          this.msg.fromDate = ''
+        }
+        if (this.msg.toDate === '' && this.msg.fromDate === '') {
+          try {
+            this.isLoadingCreate = true
+            const today = new Date()
+            const time =
               today.getHours() +
               ':' +
               today.getMinutes() +
               ':' +
               today.getSeconds()
-              let partitions = this.request.partition[0]
-              const lenPart = this.request.partition.length
-              for (let i = 1; i < lenPart; i++) {
-                partitions += ', ' + this.request.partition[i]
-              }
-              let identities = this.request.unique[0]
-              const lenIden = this.request.unique.length
-              for (let i = 1; i < lenIden; i++) {
-                identities += ', ' + this.request.unique[i]
-              }
-              const req = {
-                requestType: this.request.type,
-                tableId: this.request.table,
-                isAll: this.request.isAll,
-                fromDate: this.request.fromDate,
-                toDate: this.request.toDate,
-                timeRequest: time,
-                partitionBy: partitions,
-                identityId: identities
-              }
-              const res = await createRequestSync(req)
-              if (res.code === '201') {
-                this.$notify({
-                  type: 'success',
-                  text: 'Create request succeeded'
-                })
-                this.resetData()
-              } else {
-                this.$notify({ type: 'error', text: 'Create request failed' })
-              }
-            } catch (e) {
-              this.$notify({ type: 'error', text: e.message })
-            } finally {
-              this.isLoadingCreate = false
+            let partitions = this.request.partition[0]
+            const lenPart = this.request.partition.length
+            for (let i = 1; i < lenPart; i++) {
+              partitions += ', ' + this.request.partition[i]
             }
-          }
-        }
-        if (this.isAdd && !this.isETL) {
-          try {
-            this.isLoadingCreate = true
-            const rows = []
-            this.rows.forEach((element) => {
-              rows.push(element.name)
-            })
+            let identities = this.request.unique[0]
+            const lenIden = this.request.unique.length
+            for (let i = 1; i < lenIden; i++) {
+              identities += ', ' + this.request.unique[i]
+            }
             const req = {
-              requestType: this.request.type,
-              rowIds: rows,
-              tableId: this.request.table
+              requestType: 'SyncTable',
+              tableId: this.request.table,
+              isAll: this.request.isAll,
+              fromDate: this.request.fromDate,
+              toDate: this.request.toDate,
+              timeRequest: time,
+              partitionBy: partitions,
+              identityId: identities
             }
-            const res = await createRequestAddColumn(req)
-            this.isLoadingCreate = false
+            const res = await createRequestSync(req)
             if (res.code === '201') {
               this.$notify({
                 type: 'success',
@@ -545,7 +334,6 @@ export default {
       }
     },
     resetData () {
-      this.request.type = null
       this.request.database = null
       this.request.table = null
       this.request.isAll = 'not_chosen'
@@ -553,13 +341,6 @@ export default {
       this.request.toDate = null
       this.request.unique = null
       this.request.partition = null
-      this.rows = [
-        {
-          name: null,
-          type: null,
-          value: null
-        }
-      ]
     }
   }
 }

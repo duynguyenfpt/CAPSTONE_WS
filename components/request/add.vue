@@ -74,6 +74,7 @@
               multiple
               filterable
               no-match-text="Data search not found"
+              no-data-text="No data"
               placeholder="Choose unique key">
               <el-option
                 v-for="item in opsUniqueKey"
@@ -95,6 +96,7 @@
               multiple
               filterable
               no-match-text="Data search not found"
+              no-data-text="No data"
               placeholder="Choose partition key">
               <el-option
                 v-for="item in opsPartitionKey"

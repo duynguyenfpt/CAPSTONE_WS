@@ -8,13 +8,13 @@
               size="sm"
               placeholder="Search"
               v-model="textSearch"
-              @keyup.enter="searchServer(textSearch)"
+              @keyup.enter="searchServer()"
             />
             <b-input-group-append>
               <b-btn
                 size="sm"
                 variant="primary"
-                @click="searchServer(textSearch)"
+                @click="searchServer()"
               >
                 <i class="fas fa-search" />
               </b-btn>

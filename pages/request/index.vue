@@ -32,6 +32,9 @@
           <b-btn @click="edit(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
+          <b-btn size="sm" @click="reset(item.item.id)" variant="danger">
+            <i class="fa fa-power-off" aria-hidden="true"></i>
+          </b-btn>
         </template>
         <template #cell(viewLog)="item">
           <b-btn @click="log(item.item.id)" size="sm" variant="primary">
@@ -64,6 +67,7 @@
     </section>
     <section name="popup">
       <request-edit ref="edit" @onUpdated="refreshData" />
+      <request-assign ref="assign" />
     </section>
     <section name="popup">
       <request-log ref="log" @onUpdated="refreshData"/>
@@ -158,6 +162,9 @@ export default {
     },
     edit (id) {
       this.$refs.edit.show(id)
+    },
+    onAssign () {
+      this.$refs.assign.onShow()
     },
     log (id) {
       this.$refs.log.show(id)

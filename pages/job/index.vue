@@ -71,6 +71,9 @@
           <b-btn @click="editJob(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
+          <b-btn size="sm" variant="warning">
+            <i class="fa fa-retweet"></i>
+          </b-btn>
         </template>
         <template #table-busy>
           <div class="text-center text-danger my-2">

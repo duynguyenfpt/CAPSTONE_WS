@@ -47,6 +47,10 @@
             <i class="fas fa-notes-medical mr-1" />
             Logs
           </b-nav-item>
+          <b-nav-item v-b-toggle.etl :to="{ name: 'etl' }">
+            <i class="fas fa-cogs"></i>
+            ETL
+          </b-nav-item>
           <hr />
         </b-nav>
       </b-col>

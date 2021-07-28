@@ -4,9 +4,9 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchRequest(textSearch)"/>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchRequest()"/>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchRequest(textSearch)">
+              <b-btn size="sm" variant="primary" @click="searchRequest()">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { getRequest } from '@/service/request'
+import { getRequest, searchRequest } from '@/service/request'
 import moment from 'moment'
 const tableFields = [
   {
@@ -116,7 +116,8 @@ export default {
     },
     tableFields: tableFields,
     request: null,
-    loading: false
+    loading: false,
+    textSearch: null
   }),
   created () {
     this.getList()
@@ -177,6 +178,29 @@ export default {
       } else if (status === '2') {
         return 'Rejected'
       } return null
+    },
+    async searchRequest () {
+      this.loading = true
+      try {
+        this.pagination.page = 1
+        const res = await searchRequest(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.request = res.data
+        this.pagination.total = res.metaData.totalItem
+        this.request.forEach((e) => {
+          e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+          e.modifiedDate = moment(this.request.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        })
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

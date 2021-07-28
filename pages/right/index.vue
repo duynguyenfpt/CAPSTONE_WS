@@ -194,7 +194,7 @@
 </template>
 
 <script>
-import { getList, getRightByAcc, getAll, createRightForAcc, deleteRightForAcc, getAllRightByAcc } from '@/service/right'
+import { getList, getRightByAcc, getAll, createRightForAcc, deleteRightForAcc, getAllRightByAcc, searchRight } from '@/service/right'
 import { getListAccount } from '@/service/account'
 
 const rightFields = [
@@ -369,7 +369,7 @@ export default {
         }
         this.loadingAccountRight = true
         try {
-          const res = await getRightByAcc(this.account, this.paginationAccountRight.page, this.paginationAccountRight.limit)
+          const res = await searchRight(this.account, this.paginationAccountRight.page, this.paginationAccountRight.limit)
           this.accountRight = res.data
           this.paginationAccountRight.total = res.metaData.totalItem
           const resRight = await getAll()
@@ -385,6 +385,19 @@ export default {
         this.$notify({ type: 'error', text: e.message })
       } finally {
         this.rightUpdate = null
+      }
+    },
+    async searchRight () {
+      this.loadingRight = true
+      try {
+        this.paginationRight.page = 1
+        const resRight = await getList(this.paginationRight.page, this.paginationRight.limit, this.rightSearch)
+        this.rights = resRight.data
+        this.paginationRight.total = resRight.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loadingRight = false
       }
     }
   }

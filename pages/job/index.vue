@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import { getListJob } from '@/service/job'
+import { getListJob, searchJob } from '@/service/job'
 const jobFields = [
   {
     key: 'no'
@@ -221,6 +221,35 @@ export default {
     },
     onReload () {
       this.getList()
+    },
+    async searchJob () {
+      this.loading = true
+      try {
+        this.pagination.page = 1
+        const res = await searchJob(
+          this.pagination.page,
+          this.pagination.limit,
+          this.textSearch
+        )
+        this.jobs = res.data
+        this.jobs.forEach((e) => {
+          e.excutedBy = e.excutedBy.username
+        })
+        this.jobs.forEach((e) => {
+          if (e.active === true) {
+            this.isActive = true
+            this.isDeactive = false
+          } else {
+            this.isActive = false
+            this.isDeactive = true
+          }
+        })
+        this.pagination.total = res.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

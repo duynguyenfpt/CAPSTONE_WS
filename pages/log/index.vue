@@ -86,10 +86,13 @@ const TableFields = [
     key: 'path'
   },
   {
+    key: 'requestMethod'
+  },
+  {
     key: 'bodyRequest'
   },
   {
-    key: 'response'
+    key: 'statusCode'
   },
   {
     key: 'createdAt'

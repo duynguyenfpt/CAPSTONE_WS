@@ -217,6 +217,8 @@ export default {
           return 'primary'
         case 'pending':
           return 'secondary'
+        case 'waiting for retrying':
+          return 'warning'
         default:
           return 'secondary'
       }

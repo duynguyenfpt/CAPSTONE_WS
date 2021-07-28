@@ -1,6 +1,6 @@
 import { http } from './common'
 
-export const getRequest = (page, limit) => http.get('api/requests', { params: { page, limit } })
+export const getRequest = (page, limit) => http.get('api/requests', { params: { page, limit, status: '1' } })
 export const deleteRequest = (id) => http.delete(`api/requests/${id}`)
 export const getDetailRequest = (id) => http.get(`api/requests/${id}`)
 export const createRequest = (requests) => http.post('api/requests', requests)
@@ -16,6 +16,7 @@ export const searchRequest = (page, limit, textSearch) => http.get('api/requests
   params: {
     page: page,
     limit: limit,
+    status: '1',
     keyword: textSearch
   }
 })

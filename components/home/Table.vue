@@ -97,7 +97,7 @@ export default {
       try {
         this.loading = true
         const res = await getAllJobLog(this.pagination.page, this.pagination.limit)
-        this.logs = res.data.sort
+        this.logs = res.data
         this.logs.forEach((e) => {
           e.createdTime = moment(e.createdTime).format('YYYY-MM-DD hh:mm:ss')
         })

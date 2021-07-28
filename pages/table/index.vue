@@ -72,9 +72,8 @@
 </template>
 
 <script>
-import { getListTable } from '@/service/table.service'
+import { getListTable, searchTable } from '@/service/table.service'
 import moment from 'moment'
-import { } from '@/components/table-component/deleteTable.vue'
 const tableFields = [
   {
     key: 'no'
@@ -109,7 +108,8 @@ export default {
       },
       tableFields: tableFields,
       tableList: null,
-      loading: false
+      loading: false,
+      textSearch: null
     }
   },
   created () {
@@ -144,6 +144,27 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    async searchTable () {
+      this.loading = true
+      try {
+        this.pagination.page = 1
+        const res = await searchTable(this.pagination.page, this.pagination.limit, this.textSearch)
+        this.tableList = res.data
+        this.pagination.total = res.metaData.totalItem
+        this.tableList.forEach((e) => {
+          e.createdDate = moment(this.tableList.createdDate).format(
+            'YYYY-MM-DD'
+          )
+          e.modifiedDate = moment(this.tableList.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        })
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

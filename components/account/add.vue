@@ -75,7 +75,7 @@
             :filter-method="filterMethod"
             filter-placeholder="Search right"
             v-model="value"
-            :data="data"
+            :data="dataArr"
             :titles="['Select', 'Selected']"
           >
           </el-transfer>
@@ -117,6 +117,7 @@
 
 <script>
 import { getAllAccount, createAccount } from '@/service/account'
+import { getAll } from '@/service/right'
 import Vue from 'vue'
 import vSelect from 'vue-select'
 
@@ -124,27 +125,6 @@ Vue.component('v-select', vSelect)
 
 export default {
   data () {
-    const generateData = (_) => {
-      const data = []
-      const states = [
-        'Create Account',
-        'Create Database',
-        'Create Table',
-        'Creat Job',
-        'Creat Request',
-        'Create Server',
-        'Edit Database '
-      ]
-      const initials = ['CA', 'IL', 'MD', 'TX', 'FL', 'CO', 'CT']
-      states.forEach((city, index) => {
-        data.push({
-          label: city,
-          key: index,
-          initial: initials[index]
-        })
-      })
-      return data
-    }
     return {
       username: null,
       email: null,
@@ -168,7 +148,7 @@ export default {
       opsAccount: [{ value: null, text: 'Please select an account' }],
       isCopied: false,
       isSelected: false,
-      data: generateData(),
+      dataArr: [],
       titles: ['LinhCancer', 'Linh Ham'],
       value: [],
       msg: {
@@ -301,6 +281,22 @@ export default {
     onClose () {
       this.isVisible = false
     }
+  },
+  async mounted () {
+    const res = await getAll()
+    const states = res.data.map(item => {
+      return item.rightName
+    })
+    const initials = res.data.map(item => {
+      return item.code
+    })
+    states.forEach((city, index) => {
+      this.dataArr.push({
+        label: city,
+        key: index,
+        initial: initials[index]
+      })
+    })
   }
 }
 </script>

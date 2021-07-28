@@ -36,7 +36,7 @@
         <p class="msg-error" v-if="msg.confirm">{{ msg.confirm }}</p>
       </b-form-group>
       <b-form-group class="text-center">
-        <b-button type="submit" variant="primary" @click="onChange">
+        <b-button variant="primary" @click="onChange">
           <b-spinner v-if="isLoading" variant="primary" small></b-spinner>
           Change</b-button>
       </b-form-group>
@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import { changePassword } from '@/service/authen'
 export default {
   data () {
     return {
@@ -95,8 +96,37 @@ export default {
         this.msg.confirm = 'Password mismatch'
       }
     },
-    onChange () {
-
+    async onChange () {
+      if (this.currentPass === '') {
+        this.msg.current = 'Invalid password'
+      }
+      if (this.newPass === '') {
+        this.msg.new = 'Invalid password'
+      }
+      if (this.confirmPass === '') {
+        this.msg.confirm = 'Password mismatch'
+      }
+      if (this.msg.current === '' && this.msg.new === '' && this.msg.confirm === '') {
+        const data = {
+          oldPassword: this.currentPass,
+          newPassword: this.newPass
+        }
+        try {
+          this.isLoading = true
+          const res = await changePassword(data)
+          if (res.code === '200') {
+            this.$store.dispatch('auth/logout')
+            this.$router.push('/login')
+            this.$notify({ type: 'success', text: 'Change password succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Change password failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoading = false
+        }
+      }
     }
   }
 }

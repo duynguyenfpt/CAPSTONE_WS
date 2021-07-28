@@ -95,6 +95,9 @@ const TableFields = [
     key: 'statusCode'
   },
   {
+    key: 'response'
+  },
+  {
     key: 'createdAt'
   }
 ]

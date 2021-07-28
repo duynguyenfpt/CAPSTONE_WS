@@ -391,7 +391,7 @@ export default {
       this.loadingRight = true
       try {
         this.paginationRight.page = 1
-        const resRight = await getList(this.paginationRight.page, this.paginationRight.limit, this.rightSearch)
+        const resRight = await searchRight(this.paginationRight.page, this.paginationRight.limit, this.rightSearch)
         this.rights = resRight.data
         this.paginationRight.total = resRight.metaData.totalItem
       } catch (e) {

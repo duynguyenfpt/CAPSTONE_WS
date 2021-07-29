@@ -158,9 +158,13 @@ export default {
       } else {
         this.msg.request = ''
         const index = this.request
-        if (this.requests[index].text.includes('SyncTable')) {
+        const result = this.requests.find(request => request.value === index)
+        if (result.text.includes('SyncTable')) {
           this.jobSchedule = null
           this.isSync = true
+        } else {
+          this.jobSchedule = null
+          this.isSync = false
         }
       }
     },

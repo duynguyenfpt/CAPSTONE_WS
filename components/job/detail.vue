@@ -211,13 +211,15 @@ export default {
       switch (status) {
         case 'success':
           return 'success'
+        case 'failed':
+          return 'danger'
         case 'fail':
           return 'danger'
         case 'processing':
           return 'primary'
         case 'pending':
           return 'secondary'
-        case 'waiting for retrying':
+        case 'retrying':
           return 'warning'
         default:
           return 'secondary'

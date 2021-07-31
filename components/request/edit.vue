@@ -53,11 +53,7 @@ export default {
       status: null,
       account: null
     },
-    opsStatus: [
-      { value: '0', text: 'Pending' },
-      { value: '2', text: 'Rejected' },
-      { value: '1', text: 'Approved' }
-    ],
+    opsStatus: [],
     opsAccount: [{ value: null, text: 'Please select an approver' }],
     isLoading: false,
     isVisible: false,
@@ -88,6 +84,24 @@ export default {
         this.request.requestType = res.data.requestType
         this.request.status = res.data.status
         this.request.account = res.data.approvedBy
+        if (this.request.status === '0') {
+          this.opsStatus = [
+            { value: '0', text: 'Pending' },
+            { value: '2', text: 'Rejected' },
+            { value: '1', text: 'Approved' }
+          ]
+        }
+        if (this.request.status === '1') {
+          this.opsStatus = [
+            { value: '1', text: 'Approved' }
+          ]
+        }
+        if (this.request.status === '2') {
+          this.opsStatus = [
+            { value: '2', text: 'Rejected' },
+            { value: '1', text: 'Approved' }
+          ]
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

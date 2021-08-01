@@ -2,6 +2,13 @@
   <div v-if="detail">
     <b-row>
       <b-col cols="6">
+        <h4>Request Detail</h4>
+      </b-col>
+    </b-row>
+    <b-table :fields="requestFields" :items="requestDetail">
+    </b-table>
+    <b-row>
+      <b-col cols="6">
         <h4>Job Detail</h4>
       </b-col>
       <b-col class="text-right">
@@ -24,7 +31,6 @@
         </b-btn>
       </template>
     </b-table>
-
     <b-row>
       <b-col cols="6">
         <div class="d-flex align-items-center">
@@ -104,6 +110,7 @@
 
 <script>
 import { getJobDetail, getLogByJob, getLastJobLog } from '@/service/job'
+import { getDetailRequest } from '@/service/request'
 import moment from 'moment'
 
 const jobFields = [
@@ -139,7 +146,29 @@ const jobFields = [
     key: 'active'
   }
 ]
-
+const requestFields = [
+  {
+    key: 'requestType'
+  },
+  {
+    key: 'createdBy',
+    label: 'Creator'
+  },
+  {
+    key: 'approvedBy',
+    label: 'Approver'
+  },
+  {
+    key: 'status',
+    variant: 'denger'
+  },
+  {
+    key: 'createdDate'
+  },
+  {
+    key: 'modifiedDate'
+  }
+]
 const logFields = [
   {
     key: 'no'
@@ -197,8 +226,10 @@ export default {
       },
       jobFields: jobFields,
       logFields: logFields,
+      requestFields: requestFields,
       detail: null,
       listLogDetail: null,
+      requestDetail: [],
       loading: false,
       status: null,
       isActive: false,
@@ -249,6 +280,16 @@ export default {
         )
         this.pagination.total = resList.metaData.totalItem
         this.listLogDetail = resList.data
+
+        const requestId = this.listLogDetail[0].requestId
+        const resRequest = await getDetailRequest(requestId)
+        resRequest.data.createdDate = moment(this.requestDetail.createdDate).format(
+          'YYYY-MM-DD'
+        )
+        resRequest.data.modifiedDate = moment(this.requestDetail.modifiedDate).format(
+          'YYYY-MM-DD'
+        )
+        this.requestDetail.push(resRequest.data)
         if (this.listLogDetail) {
           this.listLogDetail.forEach((e) => {
             e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')

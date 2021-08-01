@@ -89,7 +89,7 @@
 
 <script>
 import { getAllAccount } from '@/service/account'
-import { getAllRequest } from '@/service/request'
+import { getAllRequestApproved } from '@/service/request'
 import { createJob } from '@/service/job'
 export default {
   data () {
@@ -122,7 +122,7 @@ export default {
     resAcc.data.map(item => {
       this.executedBys.push({ value: item.id, text: item.username })
     })
-    const resReq = await getAllRequest()
+    const resReq = await getAllRequestApproved()
     // eslint-disable-next-line array-callback-return
     resReq.data.map(item => {
       this.requests.push({ value: item.id, text: item.requestType + ' - ' + item.id })

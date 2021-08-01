@@ -155,6 +155,7 @@
               <b-btn
                 size="sm"
                 variant="success"
+                :disabled= "isChoseAcc"
                 @click="addRightByAccount"
               >Update
               </b-btn>
@@ -276,7 +277,8 @@ export default {
     accountRight: null,
     opsRight: [],
     account: null,
-    oldRight: []
+    oldRight: [],
+    isChoseAcc: true
   }),
 
   created () {
@@ -342,6 +344,7 @@ export default {
         this.opsRight = resRight.data.map((item) => {
           return { value: item.id, label: item.rightName }
         })
+        this.isChoseAcc = false
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -385,6 +388,7 @@ export default {
         this.$notify({ type: 'error', text: e.message })
       } finally {
         this.rightUpdate = null
+        this.isChoseAcc = true
       }
     },
     async searchRight () {

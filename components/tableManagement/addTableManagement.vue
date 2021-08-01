@@ -14,31 +14,31 @@
       </b-col>
       <b-col>
         <label>Database Name</label>
-        <b-input size="sm" v-model="dbName"></b-input>
+        <b-input size="sm" v-model="dbName" :disabled= "isChoseDb"></b-input>
         <p class="msg-error" v-if="msg.db">{{ msg.db }}</p>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label>Host</label>
-        <b-form-select size="sm" v-model="host" :options="opsHost" @change="chooseHost"></b-form-select>
+        <b-form-select size="sm" v-model="host" :options="opsHost" @change="chooseHost" :disabled= "isChoseDb"></b-form-select>
         <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
       </b-col>
       <b-col>
         <label>Port</label>
-        <b-input size="sm" v-model="port"></b-input>
+        <b-input size="sm" v-model="port" :disabled= "isChoseDb"></b-input>
         <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
         <label>Username</label>
-        <b-input size="sm" v-model="username"></b-input>
+        <b-input size="sm" v-model="username" :disabled= "isChoseDb"></b-input>
         <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
       </b-col>
       <b-col>
         <label>Password</label>
-        <b-input size="sm" type="password" v-model="password"></b-input>
+        <b-input size="sm" type="password" v-model="password" :disabled= "isChoseDb"></b-input>
         <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
       </b-col>
     </b-row>
@@ -50,7 +50,7 @@
       </b-col>
       <b-col>
         <label>Database Type</label>
-        <b-form-select v-model="dbType" :options="opsDbType" size="sm" @change="chooseType">
+        <b-form-select v-model="dbType" :options="opsDbType" size="sm" @change="chooseType" :disabled= "isChoseDb">
         </b-form-select>
         <p class="msg-error" v-if="msg.dbType">{{ msg.dbType }}</p>
       </b-col>
@@ -104,6 +104,7 @@ export default {
     isLoadingCreate: false,
     isLoadingFill: false,
     isLoadingCheck: false,
+    isChoseDb: false,
     msg: {
       db: '',
       tb: '',
@@ -161,7 +162,7 @@ export default {
       }
     },
     validateTableName (value) {
-      if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
         this.msg.tb = ''
       } else {
         this.msg.tb = 'Invalid table name'
@@ -259,8 +260,10 @@ export default {
         this.username = res.data.username
         this.password = res.data.password
         this.dbType = res.data.databaseType
+        this.isChoseDb = true
       } else {
         this.resetData()
+        this.isChoseDb = false
       }
     },
     async createTable () {

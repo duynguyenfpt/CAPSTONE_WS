@@ -4,7 +4,11 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-    <h1>Add table</h1>
+    <b-row>
+      <b-col class="text-center">
+        <h1>Add Table</h1>
+      </b-col>
+    </b-row>
      <b-row>
       <b-col>
         <label>Select Database</label>

@@ -1,5 +1,10 @@
 <template>
   <div>
+    <b-row>
+      <b-col class="text-center">
+        <h1>Database Management</h1>
+      </b-col>
+    </b-row>
     <section name="action">
       <b-row>
         <b-col cols="4" class="text-left">

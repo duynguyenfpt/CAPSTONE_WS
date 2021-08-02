@@ -1,4 +1,10 @@
 <template>
+  <div>
+  <b-row>
+      <b-col class="text-center">
+        <h1>Right Management</h1>
+      </b-col>
+  </b-row>
   <b-row>
     <b-col cols="6">
       <section name="action">
@@ -192,6 +198,7 @@
       </section>
     </b-col>
   </b-row>
+  </div>
 </template>
 
 <script>

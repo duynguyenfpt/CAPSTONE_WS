@@ -2,7 +2,7 @@
   <div v-if="schemaChanges">
     <b-row>
       <b-col sm="10" class="text-center">
-        <h3>Table schema change log</h3>
+        <h1>Table schema change log</h1>
       </b-col>
       <b-col sm="2" class="text-right">
         <b-btn @click="onReload" size="sm" class="ml-2" variant="success">

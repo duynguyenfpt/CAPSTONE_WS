@@ -35,8 +35,16 @@
             v-model="databaseType"
             :options="dbTypes"
             size="sm"
+            @change="chooseDbType"
           ></b-form-select>
         </b-col>
+      </b-row>
+      <b-row v-if="isOracle">
+      <b-col>
+        <label class="form-label">SID</label>
+        <b-input size="sm" v-model="sid" type="sid" />
+        <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
+      </b-col>
       </b-row>
       <b-row class="pt-3">
         <b-col class="text-right">
@@ -60,7 +68,6 @@ export default {
     options: [],
     dbTypes: [
       { value: 'mysql', text: 'My Sql' },
-      { value: 'mogodb', text: 'Mongo DB' },
       { value: 'postgresql', text: 'PostgreSQL' },
       { value: 'sql', text: 'SQL-Sever' },
       { value: 'oracal', text: 'Oracle' }
@@ -71,15 +78,18 @@ export default {
     username: null,
     password: null,
     databaseType: null,
+    sid: null,
     isVisible: false,
     idItem: 0,
     isLoading: false,
     isLoadingUpdate: false,
+    isOracle: false,
     msg: {
       databaseName: null,
       port: null,
       username: null,
-      password: null
+      password: null,
+      sid: null
     }
   }),
 
@@ -108,6 +118,10 @@ export default {
     password (value) {
       this.password = value
       this.validatePassword(value)
+    },
+    sid (value) {
+      this.sid = value
+      this.validateSid(value)
     }
   },
 
@@ -123,11 +137,19 @@ export default {
       this.username = res.data.username
       this.password = res.data.password
       this.databaseType = res.data.databaseType
+      if (this.databaseType === 'oracal') {
+        this.isOracle = true
+        this.sid = res.data.sid
+      } else {
+        this.isOracle = false
+        this.sid = ''
+      }
       this.isLoading = false
-      this.msg.databaseName = null
-      this.msg.port = null
-      this.msg.username = null
-      this.msg.password = null
+      this.msg.databaseName = ''
+      this.msg.port = ''
+      this.msg.username = ''
+      this.msg.password = ''
+      this.msg.sid = ''
     },
     validateDBName (value) {
       if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
@@ -151,10 +173,25 @@ export default {
       }
     },
     validatePassword (value) {
-      if (/^[\w#@]{6,127}$/.test(value)) {
+      if (/^[\w#@]{6,127}$/.test(value) || value === null || value === '') {
         this.msg.password = ''
       } else {
         this.msg.password = 'Invalid password'
+      }
+    },
+    validateSid (value) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+        this.msg.sid = ''
+      } else {
+        this.msg.sid = 'Invalid sid'
+      }
+    },
+    chooseDbType () {
+      if (this.databaseType === 'oracal') {
+        this.isOracle = true
+        this.msg.sid = ''
+      } else {
+        this.isOracle = false
       }
     },
     onClose () {
@@ -171,7 +208,10 @@ export default {
       if (this.username === null) {
         this.msg.username = 'Invalid username'
       }
-      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '') {
+      if ((this.sid === null || this.sid === '') && this.isOracle === true) {
+        this.msg.sid = 'Invalid sid'
+      }
+      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '') {
         try {
           this.isLoadingUpdate = true
           const config = {
@@ -180,7 +220,8 @@ export default {
             password: this.password,
             databaseName: this.databaseName,
             databaseType: this.databaseType,
-            serverInforId: this.serverInforId
+            serverInforId: this.serverInforId,
+            sid: this.sid
           }
           const data = await updateDatabase(this.idItem, config)
           this.isLoadingUpdate = false

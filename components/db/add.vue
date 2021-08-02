@@ -47,6 +47,13 @@
         <p class="msg-error" v-if="msg.databaseType">{{ msg.databaseType }}</p>
       </b-col>
     </b-row>
+    <b-row v-if="isOracle">
+      <b-col>
+        <label class="form-label">SID</label>
+        <b-input size="sm" v-model="sid" type="sid" />
+        <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
+      </b-col>
+    </b-row>
     <b-row class="pt-3">
       <b-col>
           <b-button size="sm" variant="outline-primary" @click="checkConnectionStatus">
@@ -79,7 +86,6 @@ export default {
     dbTypes: [
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
-      { value: 'mogodb', text: 'Mongo DB' },
       { value: 'postgresql', text: 'PostgreSQL' },
       { value: 'sql', text: 'SQL-Sever' },
       { value: 'oracal', text: 'Oracle' }
@@ -90,18 +96,21 @@ export default {
     username: null,
     password: null,
     databaseType: null,
+    sid: null,
     isLoading: false,
     isLoadingCreate: false,
     isLoadingCheck: false,
     isConnected: false,
     isVisible: false,
+    isOracle: false,
     msg: {
       databaseName: null,
       port: null,
       username: null,
       password: null,
       serverInforId: null,
-      databaseType: null
+      databaseType: null,
+      sid: null
     }
   }),
 
@@ -131,6 +140,10 @@ export default {
     password (value) {
       this.password = value
       this.validatePassword(value)
+    },
+    sid (value) {
+      this.sid = value
+      this.validateSid(value)
     }
   },
 
@@ -143,12 +156,15 @@ export default {
       this.databaseName = null
       this.databaseType = null
       this.serverInforId = null
-      this.msg.databaseName = null
-      this.msg.port = null
-      this.msg.username = null
-      this.msg.password = null
-      this.msg.serverInforId = null
-      this.msg.databaseType = null
+      this.sid = null
+      this.isOracle = false
+      this.msg.databaseName = ''
+      this.msg.port = ''
+      this.msg.username = ''
+      this.msg.password = ''
+      this.msg.serverInforId = ''
+      this.msg.databaseType = ''
+      this.msg.sid = ''
     },
     validateDBName (value) {
       if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
@@ -172,10 +188,17 @@ export default {
       }
     },
     validatePassword (value) {
-      if (/^[\w#@]{6,127}$/.test(value)) {
+      if (/^[\w#@]{6,127}$/.test(value) || value === null || value === '') {
         this.msg.password = ''
       } else {
         this.msg.password = 'Invalid password'
+      }
+    },
+    validateSid (value) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+        this.msg.sid = ''
+      } else {
+        this.msg.sid = 'Invalid sid'
       }
     },
     chooseHost () {
@@ -191,6 +214,11 @@ export default {
       } else {
         this.msg.databaseType = ''
       }
+      if (this.databaseType === 'oracal') {
+        this.isOracle = true
+      } else {
+        this.isOracle = false
+      }
     },
     async createDatabaseInfo () {
       this.validateDBName(this.databaseName)
@@ -203,13 +231,16 @@ export default {
       if (this.username === null) {
         this.msg.username = 'Invalid username'
       }
+      if ((this.sid === null || this.sid === '') && this.isOracle === true) {
+        this.msg.sid = 'Invalid sid'
+      }
       if (this.serverInforId === null) {
         this.msg.serverInforId = 'Please select host'
       }
       if (this.databaseType === null) {
         this.msg.databaseType = 'Please select type database'
       }
-      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.serverInforId === '' && this.msg.databaseType === '') {
+      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.serverInforId === '' && this.msg.databaseType === '' && this.msg.sid === '') {
         try {
           this.isLoadingCreate = true
           const config = {
@@ -218,7 +249,8 @@ export default {
             password: this.password,
             databaseName: this.databaseName,
             databaseType: this.databaseType,
-            serverInforId: this.serverInforId
+            serverInforId: this.serverInforId,
+            sid: this.sid
           }
           const res = await createDatabase(config)
           this.isLoadingCreate = false
@@ -237,9 +269,16 @@ export default {
     async checkConnectionStatus () {
       try {
         this.isLoadingCheck = true
-        const res = await checkConnection
-        this.isConnected = res.success
-        if (this.isConnected) {
+        const data = {
+          serverInforId: this.serverInforId,
+          port: this.port,
+          username: this.username,
+          password: this.password,
+          database_name: this.databaseName,
+          database_type: this.databaseType
+        }
+        const res = await checkConnection(data)
+        if (res.code === '200') {
           this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {
           this.$notify({ type: 'error', text: 'Test connection failed' })

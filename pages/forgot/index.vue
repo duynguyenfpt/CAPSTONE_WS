@@ -4,42 +4,28 @@
       <div class="container">
         <div class="row">
           <div class="col-md-4 login-sec">
-            <h2 class="text-center">Login Now</h2>
+            <h2 class="text-center">Forgot Password</h2>
             <div class="login-form">
               <div class="form-group">
-                <label for="exampleInputEmail1" class="text-uppercase"
-                  >Username</label
+                <label for="exampleInputEmail1"
+                  >Email</label
                 >
                 <input
-                  type="text"
+                  type="email"
                   class="form-control"
                   placeholder=""
-                  v-model="username"
+                  v-model="email"
                 />
-                <span class="msg-error">{{ error_mgs.username }}</span>
+                <span class="msg-error">{{ error_mgs.email }}</span>
               </div>
-              <div class="form-group">
-                <label for="exampleInputPassword1" class="text-uppercase"
-                  >Password</label
-                >
-                <input
-                  type="password"
-                  class="form-control"
-                  placeholder=""
-                  v-model="password"
-                />
-                <span class="msg-error">{{ error_mgs.password }}</span>
-              </div>
-
-              <div>
-                <b-link to="forgot">Forgot password?</b-link>
-                <button class="btn btn-login float-right" @click="onLogin" :disabled="isLoading">
+              <div class="text-center">
+                <button class="btn btn-login float-center" @click="onForgot" :disabled="isLoading">
                   <b-spinner
                     v-if="isLoading"
                     variant="primary"
                     small
                   ></b-spinner>
-                  Login
+                  Send My Password
                 </button>
               </div>
             </div>
@@ -107,43 +93,14 @@
 export default {
   layout: 'auth',
   data: () => ({
-    username: null,
-    password: null,
+    email: null,
     isLoading: false,
     error_mgs: {
-      username: '',
-      password: ''
+      email: ''
     }
   }),
   methods: {
-    async onLogin () {
-      let isError = false
-      if (!this.username) {
-        isError = true
-        this.error_mgs.username = 'Please fill username'
-      } else {
-        this.error_mgs.username = ''
-      }
-      if (!this.username) {
-        isError = true
-        this.error_mgs.password = 'Please fill password'
-      } else {
-        this.error_mgs.password = ''
-      }
-      if (!isError) {
-        this.isLoading = true
-        const user = {
-          username: this.username,
-          password: this.password
-        }
-        const data = await this.$store.dispatch('auth/login', user)
-        this.isLoading = false
-        if (data) {
-          this.$router.push('/')
-        } else {
-          this.$notify({ type: 'error', text: 'Login failed' })
-        }
-      }
+    async onForgot () {
     }
   }
 }

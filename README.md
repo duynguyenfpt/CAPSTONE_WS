@@ -18,3 +18,9 @@ $ yarn generate
 ```
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+
+cd CAPSTONE_WS/
+sudo -s
+12345678
+git pull origin main
+npm run build

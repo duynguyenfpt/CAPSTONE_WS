@@ -149,7 +149,7 @@ export default {
       isCopied: false,
       isSelected: false,
       dataArr: [],
-      titles: ['LinhCancer', 'Linh Ham'],
+      titles: [],
       value: [],
       msg: {
         username: null,
@@ -183,6 +183,8 @@ export default {
       this.username = null
       this.phone = null
       this.role = null
+      this.account = null
+      this.value = []
       this.isCopied = false
       this.isSelected = false
       this.msg.username = null
@@ -257,11 +259,26 @@ export default {
       ) {
         try {
           this.isLoadingCreate = true
-          const data = {
+          const acc = {
             username: this.username,
             email: this.email,
             role: this.role,
             phone: this.phone
+          }
+          let data
+          if (this.isCopied) {
+            data = {
+              account: acc,
+              copyRight: true,
+              accountId: this.account
+            }
+          }
+          if (this.isSelected) {
+            data = {
+              account: acc,
+              copyRight: false,
+              rightIds: this.value
+            }
           }
           const res = await createAccount(data)
           this.$emit('onAdded')
@@ -285,15 +302,15 @@ export default {
   async mounted () {
     const res = await getAll()
     const states = res.data.map(item => {
-      return item.rightName
+      return { id: item.id, name: item.rightName }
     })
     const initials = res.data.map(item => {
       return item.code
     })
-    states.forEach((city, index) => {
+    states.forEach((right, index) => {
       this.dataArr.push({
-        label: city,
-        key: index,
+        label: right.name,
+        key: right.id,
         initial: initials[index]
       })
     })

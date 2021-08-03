@@ -94,7 +94,8 @@ const TableFields = [
     key: 'requestMethod'
   },
   {
-    key: 'bodyRequest'
+    key: 'bodyRequest',
+    tdClass: 'max-width-300'
   },
   {
     key: 'statusCode'
@@ -158,4 +159,10 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.max-width-300 {
+  max-width: 300px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+</style>

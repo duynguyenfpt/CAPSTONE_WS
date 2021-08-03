@@ -46,6 +46,13 @@
           <i class="fa fa-eye" />
         </b-btn>
         <b-btn
+            @click="editTb(item.item.id)"
+            size="sm"
+            variant="info"
+          >
+            <i class="fa fa-pen" />
+          </b-btn>
+        <b-btn
           v-b-tooltip="`Delete table config`"
           size="sm"
           variant="danger"
@@ -72,6 +79,9 @@
    </section>
       <section name="popup">
       <table-component-deleteTable ref="delete" @onDeleted="onReload"/>
+    </section>
+    <section name="popup">
+      <table-component-editTable ref="edit" @onUpdated="onReload" />
     </section>
   </div>
 </template>
@@ -143,6 +153,9 @@ export default {
     },
     deleteTb (id) {
       this.$refs.delete.show(id)
+    },
+    editTb (id) {
+      this.$refs.edit.show(id)
     },
     onReload () {
       this.getListTable()

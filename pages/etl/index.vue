@@ -1,14 +1,37 @@
 <template>
   <div>
     <b-row>
-      <b-col class="text-center">
+      <b-col sm="1"></b-col>
+      <b-col sm="8" class="text-center">
         <h1>ETL Request</h1>
       </b-col>
     </b-row>
+    <b-row>
+      <b-col sm="9" class="text-right">
+        <b-button v-b-toggle.sidebar-right>Suggestion</b-button>
+      </b-col>
+      <b-sidebar id="sidebar-right" title="Suggestion" right shadow>
+        <div class="px-2 py-2">
+          <b-list-group>
+            <b-list-group-item href="#" class="flex-column align-items-start">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Select All</h5>
+                <small class="text-muted">2021/08/01</small>
+              </div>
 
+              <p class="mb-1">
+                select :test.test: from :test:
+              </p>
+
+              <small class="text-muted">longvt</small>
+            </b-list-group-item>
+          </b-list-group>
+        </div>
+      </b-sidebar>
+    </b-row>
     <div>
       <b-row class="pt-2">
-        <b-col sm="2"></b-col>
+        <b-col sm="1"></b-col>
         <b-col sm="8" class="position-relative">
           <b-form-textarea
             class="autocomplete-input "
@@ -42,14 +65,17 @@
         </b-col>
       </b-row>
       <b-row class="pt-2">
-        <b-col sm="2"></b-col>
+        <b-col sm="1"></b-col>
         <b-col sm="8">
           <b-form-checkbox>Is Repetitive</b-form-checkbox>
         </b-col>
       </b-row>
       <b-row class="pt-2">
-        <b-col sm="2"></b-col>
+        <b-col sm="1"></b-col>
         <b-col sm="8" class="text-right">
+          <b-btn size="sm" variant="success" class="btn-add-request">
+            Save
+          </b-btn>
           <b-btn size="sm" variant="primary" class="btn-add-request">
             Summit
           </b-btn>

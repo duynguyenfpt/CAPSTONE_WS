@@ -87,8 +87,7 @@ export default {
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
       { value: 'postgresql', text: 'PostgreSQL' },
-      { value: 'sql', text: 'SQL-Sever' },
-      { value: 'oracal', text: 'Oracle' }
+      { value: 'oracle', text: 'Oracle' }
     ],
     serverInforId: null,
     port: null,
@@ -214,7 +213,7 @@ export default {
       } else {
         this.msg.databaseType = ''
       }
-      if (this.databaseType === 'oracal') {
+      if (this.databaseType === 'oracle') {
         this.isOracle = true
       } else {
         this.isOracle = false

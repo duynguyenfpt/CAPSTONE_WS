@@ -165,19 +165,13 @@ export default {
         this.listTableDetail = resList.data
         this.pagination.total = resList.metaData.totalItem
         this.detail = res.data
-        if (res.data.databaseType === 'sql') {
-          this.detail.databaseType = 'SQL-Server'
-        }
         if (res.data.databaseType === 'mysql') {
           this.detail.databaseType = 'My Sql'
-        }
-        if (res.data.databaseType === 'mogodb') {
-          this.detail.databaseType = 'Mongo DB'
         }
         if (res.data.databaseType === 'postgresql') {
           this.detail.databaseType = 'PostgreSQL'
         }
-        if (res.data.databaseType === 'oracal') {
+        if (res.data.databaseType === 'oracle') {
           this.detail.databaseType = 'Oracle'
         }
         this.detail.createdDate = moment(this.detail.createdDate).format(

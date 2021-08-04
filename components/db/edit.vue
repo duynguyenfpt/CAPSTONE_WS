@@ -69,8 +69,7 @@ export default {
     dbTypes: [
       { value: 'mysql', text: 'My Sql' },
       { value: 'postgresql', text: 'PostgreSQL' },
-      { value: 'sql', text: 'SQL-Sever' },
-      { value: 'oracal', text: 'Oracle' }
+      { value: 'oracle', text: 'Oracle' }
     ],
     serverInforId: 0,
     port: null,
@@ -137,7 +136,7 @@ export default {
       this.username = res.data.username
       this.password = res.data.password
       this.databaseType = res.data.databaseType
-      if (this.databaseType === 'oracal') {
+      if (this.databaseType === 'oracle') {
         this.isOracle = true
         this.sid = res.data.sid
       } else {
@@ -187,7 +186,7 @@ export default {
       }
     },
     chooseDbType () {
-      if (this.databaseType === 'oracal') {
+      if (this.databaseType === 'oracle') {
         this.isOracle = true
         this.msg.sid = ''
       } else {

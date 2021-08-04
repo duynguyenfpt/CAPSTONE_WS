@@ -8,22 +8,25 @@
     </b-row>
     <b-row>
       <b-col sm="9" class="text-right">
-        <b-button v-b-toggle.sidebar-right>Suggestion</b-button>
+        <b-button size="sm" v-b-toggle.sidebar-right variant="success">Old Result</b-button>
       </b-col>
-      <b-sidebar id="sidebar-right" title="Suggestion" right shadow>
+      <b-sidebar id="sidebar-right" title="Old Result" right shadow>
         <div class="px-2 py-2">
           <b-list-group>
-            <b-list-group-item href="#" class="flex-column align-items-start">
+            <b-list-group-item class="flex-column align-items-start" v-for="(item, index) in results" :key="index">
+              <div style="cursor: pointer" @click="showResult(item.id)">
               <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">Select All</h5>
-                <small class="text-muted">2021/08/01</small>
+                <h5 class="mb-1">{{ item.name }}</h5>
+                <small class="text-muted">{{ item.createdDate }}</small>
               </div>
-
               <p class="mb-1">
-                select :test.test: from :test:
+                {{ item.content }}
               </p>
-
-              <small class="text-muted">longvt</small>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">{{ item.createdBy }}</small>
+                <b-button class="text-right" variant="primary" size="sm" @click="shareResult(item.id)">Share</b-button>
+              </div>
             </b-list-group-item>
           </b-list-group>
         </div>
@@ -73,15 +76,18 @@
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
         <b-col sm="8" class="text-right">
-          <b-btn size="sm" variant="success" class="btn-add-request">
-            Save
-          </b-btn>
           <b-btn size="sm" variant="primary" class="btn-add-request">
             Summit
           </b-btn>
         </b-col>
       </b-row>
     </div>
+    <section name="popup">
+      <etl-result ref="result" />
+    </section>
+    <section name="popup">
+      <etl-share ref="share" />
+    </section>
   </div>
 </template>
 <script>
@@ -104,10 +110,22 @@ export default {
       searchMatch: [],
       selectedIndex: 0,
       clickedChooseItem: false,
-      wordIndex: 0
+      wordIndex: 0,
+      results: [
+        { id: 1, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-03' },
+        { id: 2, name: 'Select All', content: 'Select * from database', createdBy: 'lcc', createdDate: '2021-08-04' },
+        { id: 3, name: 'Select All', content: 'Select * from database', createdBy: 'linhcancer', createdDate: '2021-08-02' },
+        { id: 4, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-04' }
+      ]
     }
   },
   methods: {
+    showResult (id) {
+      this.$refs.result.show(id)
+    },
+    shareResult (id) {
+      this.$refs.share.show(id)
+    },
     highlightWord (word) {
       const regex = new RegExp('(' + this.currentWord + ')', 'g')
       return word.replace(regex, '<mark>$1</mark>')

@@ -1,0 +1,80 @@
+<template>
+  <b-modal v-model="isVisibleShare" title="Share" hide-footer>
+    <div v-if="isLoading" class="text-center">
+      <b-spinner variant="primary" label="Text Centered"></b-spinner>
+    </div>
+    <div v-else>
+      <b-row>
+        <b-col>
+          <label>Account</label>
+          <div>
+            <el-select class="w-100"
+              v-model="accounts"
+              multiple
+              filterable
+              no-match-text="Data search not found"
+              no-data-text="No data"
+              placeholder="Choose account you want to share">
+              <el-option
+                v-for="item in opsAccount"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
+        </b-col>
+      </b-row>
+      <b-row class="pt-3">
+        <b-col class="text-right">
+          <b-button size="sm" variant="primary" @click="onShare">
+            Share
+          </b-button>
+          <b-button size="sm" variant="light" @click="onClose">
+            Close
+          </b-button>
+        </b-col>
+      </b-row>
+    </div>
+  </b-modal>
+</template>
+
+<script>
+import { getAllAccount } from '@/service/account'
+import Vue from 'vue'
+import vSelect from 'vue-select'
+Vue.component('v-select', vSelect)
+
+export default {
+  data: () => ({
+    isVisibleShare: false,
+    idItem: 0,
+    isLoading: false,
+    opsAccount: [],
+    accounts: []
+  }),
+
+  methods: {
+    async show (id) {
+      this.idItem = id
+      this.isVisibleShare = true
+      this.isLoading = true
+      this.accounts = []
+      const res = await getAllAccount()
+      this.config = res.data
+      this.opsAccount = res.data.map((item) => {
+        return { value: item.id, label: item.username }
+      })
+      this.isLoading = false
+    },
+    onClose () {
+      this.isVisibleShare = false
+    },
+    onShare () {
+      console.log('LCC: ', this.accounts)
+    }
+  }
+}
+</script>
+
+<style></style>

@@ -146,7 +146,8 @@ export default {
       total: 0
     },
     loading: false,
-    dbs: []
+    dbs: [],
+    keyword: null
   }),
 
   created () {
@@ -164,19 +165,13 @@ export default {
         this.dbs = res.data
         console.log(res.data)
         this.dbs.forEach((e) => {
-          if (e.databaseType === 'sql') {
-            e.databaseType = 'SQL-Server'
-          }
           if (e.databaseType === 'mysql') {
             e.databaseType = 'My Sql'
-          }
-          if (e.databaseType === 'mogodb') {
-            e.databaseType = 'Mongo DB'
           }
           if (e.databaseType === 'postgresql') {
             e.databaseType = 'PostgreSQL'
           }
-          if (e.databaseType === 'oracal') {
+          if (e.databaseType === 'oracle') {
             e.databaseType = 'Oracle'
           }
         })
@@ -205,6 +200,7 @@ export default {
     refreshData (data) {
       if (data) {
         this.textSearch = null
+        this.keyword = null
         this.getList()
       }
     },
@@ -213,6 +209,7 @@ export default {
     },
     onReload () {
       this.textSearch = null
+      this.keyword = null
       this.getList()
     },
     async searchDB () {
@@ -221,26 +218,20 @@ export default {
         const result = await searchDB(
           this.pagination.page,
           this.pagination.limit,
-          this.textSearch
+          this.keyword
         )
         this.dbs = result.data
         this.dbs.forEach((e) => {
           e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
         })
         this.dbs.forEach((e) => {
-          if (e.databaseType === 'sql') {
-            e.databaseType = 'SQL-Server'
-          }
           if (e.databaseType === 'mysql') {
             e.databaseType = 'My Sql'
-          }
-          if (e.databaseType === 'mogodb') {
-            e.databaseType = 'Mongo DB'
           }
           if (e.databaseType === 'postgresql') {
             e.databaseType = 'PostgreSQL'
           }
-          if (e.databaseType === 'oracal') {
+          if (e.databaseType === 'oracle') {
             e.databaseType = 'Oracle'
           }
         })
@@ -256,6 +247,7 @@ export default {
     },
     onSearchDB () {
       this.pagination.page = 1
+      this.keyword = this.textSearch
       this.searchDB()
     }
   }

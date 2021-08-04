@@ -5,7 +5,7 @@
         <h4>Request Detail</h4>
       </b-col>
     </b-row>
-    <b-table :fields="requestFields" :items="requestDetail">
+    <b-table :fields="requestFields" :items="[requestDetail]">
     </b-table>
     <b-row>
       <b-col cols="6">
@@ -273,15 +273,7 @@ export default {
         this.detail.createdDate = moment(this.detail.createdDate).format(
           'YYYY-MM-DD'
         )
-        const resList = await getLogByJob(
-          this.id,
-          this.pagination.page,
-          this.pagination.limit
-        )
-        this.pagination.total = resList.metaData.totalItem
-        this.listLogDetail = resList.data
-
-        const requestId = this.listLogDetail[0].requestId
+        const requestId = this.detail.requestId
         const resRequest = await getDetailRequest(requestId)
         resRequest.data.createdDate = moment(this.requestDetail.createdDate).format(
           'YYYY-MM-DD'
@@ -289,12 +281,19 @@ export default {
         resRequest.data.modifiedDate = moment(this.requestDetail.modifiedDate).format(
           'YYYY-MM-DD'
         )
-        this.requestDetail.push(resRequest.data)
+        this.requestDetail = resRequest.data
         if (this.listLogDetail) {
           this.listLogDetail.forEach((e) => {
             e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
           })
         }
+        const resList = await getLogByJob(
+          this.id,
+          this.pagination.page,
+          this.pagination.limit
+        )
+        this.pagination.total = resList.metaData.totalItem
+        this.listLogDetail = resList.data
         const resLast = await getLastJobLog(this.id)
         if (resLast.data !== null) {
           if (resLast.data.step !== null && resLast.data.numberStep !== null) {

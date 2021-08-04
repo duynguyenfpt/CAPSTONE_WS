@@ -124,7 +124,8 @@ export default {
       tableFields: tableFields,
       tableList: null,
       loading: false,
-      textSearch: null
+      textSearch: null,
+      keyword: null
     }
   },
   created () {
@@ -159,6 +160,7 @@ export default {
     },
     onReload () {
       this.textSearch = null
+      this.keyword = null
       this.getListTable()
     },
     countRecord (index) {
@@ -167,7 +169,7 @@ export default {
     async searchTable () {
       this.loading = true
       try {
-        const res = await searchTable(this.pagination.page, this.pagination.limit, this.textSearch)
+        const res = await searchTable(this.pagination.page, this.pagination.limit, this.keyword)
         this.tableList = res.data
         this.pagination.total = res.metaData.totalItem
         this.tableList.forEach((e) => {
@@ -186,6 +188,7 @@ export default {
     },
     onSearchTable () {
       this.pagination.page = 1
+      this.keyword = this.textSearch
       this.searchTable()
     }
   }

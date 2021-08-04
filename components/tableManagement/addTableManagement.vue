@@ -99,8 +99,7 @@ export default {
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
       { value: 'postgresql', text: 'PostgreSQL' },
-      { value: 'sql', text: 'SQL-Sever' },
-      { value: 'oracal', text: 'Oracle' }
+      { value: 'oracle', text: 'Oracle' }
     ],
     db: null,
     dbName: null,
@@ -193,7 +192,6 @@ export default {
       }
     },
     validateUsername (value) {
-      console.log('User: ', value)
       if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
         this.msg.username = ''
       } else {
@@ -201,7 +199,6 @@ export default {
       }
     },
     validatePassword (value) {
-      console.log('Pass: ', value)
       if (/^[\w#@]{6,127}$/.test(value) || value === null || value === '') {
         this.msg.password = ''
       } else {
@@ -228,7 +225,7 @@ export default {
       } else {
         this.msg.dbType = ''
       }
-      if (this.dbType === 'oracal') {
+      if (this.dbType === 'oracle') {
         this.isOracle = true
       } else {
         this.isOracle = false
@@ -293,7 +290,7 @@ export default {
         this.username = res.data.username
         this.password = res.data.password
         this.dbType = res.data.databaseType
-        if (this.dbType === 'oracal') {
+        if (this.dbType === 'oracle') {
           this.isOracle = true
           this.sid = res.data.sid
         } else {
@@ -336,6 +333,8 @@ export default {
       }
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
+      } else {
+        this.msg.sid = ''
       }
       if (id !== null) {
         if (this.msg.db === '' && this.msg.tb === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.host === '' && this.msg.dbType === '' && this.msg.sid === '') {

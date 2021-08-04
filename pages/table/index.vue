@@ -9,9 +9,9 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchTable(textSearch)"/>
+            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="onSearchTable(textSearch)"/>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchTable(textSearch)">
+              <b-btn size="sm" variant="primary" @click="onSearchTable(textSearch)">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -67,7 +67,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getListTable"
+        @input="searchTable"
       />
    </section>
       <section name="popup">
@@ -145,6 +145,7 @@ export default {
       this.$refs.delete.show(id)
     },
     onReload () {
+      this.textSearch = null
       this.getListTable()
     },
     countRecord (index) {
@@ -153,7 +154,6 @@ export default {
     async searchTable () {
       this.loading = true
       try {
-        this.pagination.page = 1
         const res = await searchTable(this.pagination.page, this.pagination.limit, this.textSearch)
         this.tableList = res.data
         this.pagination.total = res.metaData.totalItem
@@ -170,6 +170,10 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    onSearchTable () {
+      this.pagination.page = 1
+      this.searchTable()
     }
   }
 }

@@ -38,7 +38,7 @@
         <b-col sm="8" class="position-relative">
           <b-form-textarea
             class="autocomplete-input "
-            placeholder="select :test.test: from :test:"
+            placeholder="select * from :test:"
             rows="8"
             @focusout="focusout"
             @focus="focus"

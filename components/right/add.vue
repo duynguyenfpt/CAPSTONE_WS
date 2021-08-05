@@ -11,6 +11,7 @@
           </b-col>
           <b-col>
             <b-input size="sm" v-model="code"></b-input>
+            <p class="msg-error" v-if="msg.code">{{ msg.code }}</p>
           </b-col>
         </b-row>
         <b-row class="pt-2">
@@ -22,6 +23,7 @@
               size="sm"
               v-model="name"
             ></b-form-input>
+            <p class="msg-error" v-if="msg.name">{{ msg.name }}</p>
           </b-col>
         </b-row>
         <b-row class="text-center pt-3">
@@ -53,7 +55,10 @@ export default {
     name: null,
     isVisible: false,
     isLoadingCreate: false,
-    msg: null
+    msg: {
+      code: null,
+      name: null
+    }
   }),
   methods: {
     async show () {
@@ -73,7 +78,6 @@ export default {
           code: this.code,
           rightName: this.name
         }
-        console.log('LCC: ', body)
         const res = await createRight(body)
         this.$emit('onAdded')
         if (res.code === '201') {

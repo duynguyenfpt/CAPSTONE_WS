@@ -16,7 +16,7 @@
                   placeholder=""
                   v-model="email"
                 />
-                <span class="msg-error">{{ error_mgs.email }}</span>
+                <span class="msg-error">{{ msg.email }}</span>
               </div>
               <div class="text-center">
                 <button class="btn btn-login float-center" @click="onForgot" :disabled="isLoading">
@@ -95,12 +95,30 @@ export default {
   data: () => ({
     email: null,
     isLoading: false,
-    error_mgs: {
+    msg: {
       email: ''
     }
   }),
+  watch: {
+    email (value) {
+      this.email = value
+      this.validateEmail(value)
+    }
+  },
   methods: {
+    validateEmail (value) {
+      if (
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+          value
+        )
+      ) {
+        this.msg.email = ''
+      } else {
+        this.msg.email = 'Invalid email address'
+      }
+    },
     async onForgot () {
+      this.validateEmail(this.email)
     }
   }
 }

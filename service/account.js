@@ -20,3 +20,5 @@ export const searchAccount = (page, limit, textSearch) => http.get('api/accounts
     keyword: textSearch
   }
 })
+export const activeAccount = (id, data) => http.put(`api/accounts/${id}`, data)
+export const deactiveAccount = (id, data) => http.put(`api/accounts/${id}`, data)

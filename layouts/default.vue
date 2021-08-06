@@ -68,7 +68,7 @@
               <b-dropdown-item class="card-info">
                 <div class="account-info">
                   <b-row>
-                    <b-col cols="8" class="text-12">Admin</b-col>
+                    <b-col cols="8" class="text-12"> {{ user.role }}</b-col>
                     <b-col class="text-right">
                       <a id="account-link" class="text-12" @click="logout">Sign Out</a>
                     </b-col>

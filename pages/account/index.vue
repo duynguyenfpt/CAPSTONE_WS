@@ -68,9 +68,18 @@
           <b-btn
             size="sm"
             variant="danger"
-            @click="activeAccount(item.item.id)"
+            @click="deactiveAccount(item.item.id)"
+            v-if="item.item.active"
           >
-            <i class="fa fa-power-off" />
+            <i class="fas fa-toggle-off"></i>
+          </b-btn>
+          <b-btn
+            size="sm"
+            variant="info"
+            @click="activeAccount(item.item.id)"
+            v-if="!item.item.active"
+          >
+            <i class="fas fa-toggle-on"></i>
           </b-btn>
         </template>
         <template #table-busy>
@@ -103,6 +112,9 @@
     </section>
     <section name="popup">
       <account-active ref="active" @onActived="onReload" />
+    </section>
+    <section name="popup">
+      <account-deactive ref="deactive" @onDeactived="onReload" />
     </section>
   </div>
 </template>
@@ -192,6 +204,9 @@ export default {
     },
     activeAccount (id) {
       this.$refs.active.show(id)
+    },
+    deactiveAccount (id) {
+      this.$refs.deactive.show(id)
     },
     async searchAccount (page, limit, textSearch) {
       this.loading = true

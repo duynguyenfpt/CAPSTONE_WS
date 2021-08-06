@@ -15,13 +15,13 @@
               size="sm"
               placeholder="Search"
               v-model="rightSearch"
-              @keyup.enter="searchRight(rightSearch)"
+              @keyup.enter="onSearchRight(rightSearch)"
             />
             <b-input-group-append>
               <b-btn
                 size="sm"
                 variant="primary"
-                @click="searchRight(rightSearch)"
+                @click="onSearchRight(rightSearch)"
               >
                 <i class="fas fa-search" />
               </b-btn>
@@ -71,7 +71,7 @@
           :per-page="paginationRight.limit"
           :total-rows="paginationRight.total"
           align="right"
-          @input="getRightList"
+          @input="searchRight"
         />
       </section>
       <section name="popup">
@@ -93,13 +93,13 @@
               size="sm"
               placeholder="Search"
               v-model="accountSearch"
-              @keyup.enter="searchAccount(accountSearch)"
+              @keyup.enter="onSearchAccount(accountSearch)"
             />
             <b-input-group-append>
               <b-btn
                 size="sm"
                 variant="primary"
-                @click="searchAccount(accountSearch)"
+                @click="onSearchAccount(accountSearch)"
               >
                 <i class="fas fa-search" />
               </b-btn>
@@ -134,7 +134,7 @@
           :per-page="paginationAccount.limit"
           :total-rows="paginationAccount.total"
           align="right"
-          @input="getAccountList"
+          @input="searchAccount"
         />
       </section>
       <section name="action">
@@ -203,7 +203,7 @@
 
 <script>
 import { getList, getRightByAcc, getAll, createRightForAcc, deleteRightForAcc, getAllRightByAcc, searchRight } from '@/service/right'
-import { getListAccount } from '@/service/account'
+import { getListAccount, searchAccount } from '@/service/account'
 
 const rightFields = [
   {
@@ -285,7 +285,9 @@ export default {
     opsRight: [],
     account: null,
     oldRight: [],
-    isChoseAcc: true
+    isChoseAcc: true,
+    textRight: null,
+    textAccount: null
   }),
 
   created () {
@@ -401,8 +403,7 @@ export default {
     async searchRight () {
       this.loadingRight = true
       try {
-        this.paginationRight.page = 1
-        const resRight = await searchRight(this.paginationRight.page, this.paginationRight.limit, this.rightSearch)
+        const resRight = await searchRight(this.paginationRight.page, this.paginationRight.limit, this.textRight)
         this.rights = resRight.data
         this.paginationRight.total = resRight.metaData.totalItem
       } catch (e) {
@@ -410,6 +411,28 @@ export default {
       } finally {
         this.loadingRight = false
       }
+    },
+    onSearchRight () {
+      this.paginationRight.page = 1
+      this.textRight = this.rightSearch
+      this.searchRight()
+    },
+    async searchAccount () {
+      this.loadingAccount = true
+      try {
+        const resAcc = await searchAccount(this.paginationAccount.page, this.paginationAccount.limit, this.textAccount)
+        this.accounts = resAcc.data
+        this.paginationAccount.total = resAcc.metaData.totalItem
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loadingAccount = false
+      }
+    },
+    onSearchAccount () {
+      this.paginationAccount.page = 1
+      this.textAccount = this.accountSearch
+      this.searchAccount()
     }
   }
 }

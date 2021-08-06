@@ -13,13 +13,13 @@
               size="sm"
               placeholder="Search"
               v-model="textSearch"
-              @keyup.enter="searchServer()"
+              @keyup.enter="onSearchServer()"
             />
             <b-input-group-append>
               <b-btn
                 size="sm"
                 variant="primary"
-                @click="searchServer()"
+                @click="onSearchServer()"
               >
                 <i class="fas fa-search" />
               </b-btn>
@@ -83,7 +83,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getList"
+        @input="searchServer"
       />
     </section>
     <section name="popup">
@@ -145,7 +145,8 @@ export default {
       total: 0
     },
     loading: false,
-    servers: []
+    servers: [],
+    keySearch: null
   }),
 
   created () {
@@ -198,11 +199,10 @@ export default {
     async searchServer () {
       this.loading = true
       try {
-        this.pagination.page = 1
         const res = await searchServer(
           this.pagination.page,
           this.pagination.limit,
-          this.textSearch
+          this.keySearch
         )
         this.servers = res.data
         this.servers.forEach((e) => {
@@ -215,6 +215,11 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    onSearchServer () {
+      this.pagination.page = 1
+      this.keySearch = this.textSearch
+      this.searchServer()
     }
   }
 }

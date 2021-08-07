@@ -13,13 +13,13 @@
               size="sm"
               placeholder="Search"
               v-model="textSearch"
-              @keyup.enter="searchAccount(textSearch)"
+              @keyup.enter="onSearchAccount(textSearch)"
             />
             <b-input-group-append>
               <b-btn
                 size="sm"
                 variant="primary"
-                @click="searchAccount(textSearch)"
+                @click="onSearchAccount(textSearch)"
               >
                 <i class="fas fa-search" />
               </b-btn>
@@ -95,7 +95,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getList"
+        @input="searchAccount"
       />
     </section>
     <section name="popup">
@@ -156,7 +156,8 @@ export default {
       total: 0
     },
     loading: false,
-    accounts: []
+    accounts: [],
+    keySearch: null
   }),
 
   created () {
@@ -172,6 +173,17 @@ export default {
           this.pagination.limit
         )
         this.accounts = res.data
+        this.accounts.forEach((e) => {
+          if (e.role === 'admin') {
+            e.role = 'Admin'
+          }
+          if (e.role === 'viewer') {
+            e.role = 'Viewer'
+          }
+          if (e.role === 'engineer') {
+            e.role = 'Engineer'
+          }
+        })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -208,21 +220,37 @@ export default {
     deactiveAccount (id) {
       this.$refs.deactive.show(id)
     },
-    async searchAccount (page, limit, textSearch) {
+    async searchAccount () {
       this.loading = true
       try {
         const result = await searchAccount(
           this.pagination.page,
           this.pagination.limit,
-          this.textSearch
+          this.keySearch
         )
         this.accounts = result.data
+        this.accounts.forEach((e) => {
+          if (e.role === 'admin') {
+            e.role = 'Admin'
+          }
+          if (e.role === 'viewer') {
+            e.role = 'Viewer'
+          }
+          if (e.role === 'engineer') {
+            e.role = 'Engineer'
+          }
+        })
         this.pagination.total = result.metaData.totalItem
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
         this.loading = false
       }
+    },
+    onSearchAccount () {
+      this.pagination.page = 1
+      this.keySearch = this.textSearch
+      this.searchAccount()
     }
   }
 }

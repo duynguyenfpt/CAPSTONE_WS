@@ -1,6 +1,6 @@
 <template>
  <div v-if="table">
-     <h4 class="text-center">Table Detail</h4>
+     <h1 class="text-center">Table Detail</h1>
      <b-table :fields="fields" :items="[table]"></b-table>
      <h4 class="text-center">Table Schema</h4>
      <b-table :fields="schemaFields" :items="litSchema" :busy="loading">
@@ -36,6 +36,14 @@ import moment from 'moment'
 const fields = [
   {
     key: 'tableName'
+  },
+  {
+    key: 'databaseInfo.databaseName',
+    label: 'Database Name'
+  },
+  {
+    key: 'databaseInfo.databaseType',
+    label: 'Database Type'
   },
   {
     key: 'createdBy'
@@ -104,19 +112,29 @@ export default {
       try {
         this.loading = true
         const res = await getTableDetail(this.id)
+        this.tableList = res.data
+        if (this.tableList.databaseInfo.databaseType === 'mysql') {
+          this.tableList.databaseInfo.databaseType = 'My Sql'
+        }
+        if (this.tableList.databaseInfo.databaseType === 'postgresql') {
+          this.tableList.databaseInfo.databaseType = 'PostgreSQL'
+        }
+        if (this.tableList.databaseInfo.databaseType === 'oracle') {
+          this.tableList.databaseInfo.databaseType = 'Oracle'
+        }
         const resSchema = await getSchemaByTableId(this.id, this.pagination.page, this.pagination.limit)
         this.litSchema = resSchema.data
         this.pagination.total = resSchema.metaData.totalItem
         this.table = res.data
         this.table.currentTableSchemas = res.data.currentTableSchemas
-        this.table.createdDate = this.table.createdDate ? moment(this.table.createdDate).format('YYYY-MM-DD') : ''
-        this.table.modifiedDate = this.table.modifiedDate ? moment(this.table.modifiedDate).format('YYYY-MM-DD') : ''
+        this.table.createdDate = this.table.createdDate ? moment(this.table.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+        this.table.modifiedDate = this.table.modifiedDate ? moment(this.table.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
         if (this.table.currentTableSchemas) {
           this.table.currentTableSchemas.forEach((e) => {
-            e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : ''
+            e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
           })
           this.table.currentTableSchemas.forEach((e) => {
-            e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : ''
+            e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
           })
         }
       } catch (e) {

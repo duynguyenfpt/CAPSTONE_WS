@@ -49,6 +49,15 @@ export default {
       this.isLoading = true
       const res = await getAccountDetail(this.idItem)
       this.config = res.data
+      if (this.config.role === 'admin') {
+        this.config.role = 'Admin'
+      }
+      if (this.config.role === 'viewer') {
+        this.config.role = 'Viewer'
+      }
+      if (this.config.role === 'engineer') {
+        this.config.role = 'Engineer'
+      }
       this.isLoading = false
     },
     onClose () {

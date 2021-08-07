@@ -97,6 +97,14 @@ const tableFields = [
     key: 'tableName'
   },
   {
+    key: 'databaseInfo.databaseName',
+    label: 'Database Name'
+  },
+  {
+    key: 'databaseInfo.databaseType',
+    label: 'Database Type'
+  },
+  {
     key: 'createdBy'
   },
   {
@@ -142,12 +150,31 @@ export default {
         this.tableList = res.data
         this.pagination.total = res.metaData.totalItem
         this.tableList.forEach((e) => {
-          e.createdDate = moment(this.tableList.createdDate).format(
-            'YYYY-MM-DD'
-          )
-          e.modifiedDate = moment(this.tableList.modifiedDate).format(
-            'YYYY-MM-DD'
-          )
+          if (e.createdDate === null) {
+            e.createdDate = 'YYYY-MM-DD'
+          } else {
+            e.createdDate = moment(this.tableList.createdDate).format(
+              'YYYY-MM-DD'
+            )
+          }
+          if (e.modifiedDate === null) {
+            e.modifiedDate = 'YYYY-MM-DD'
+          } else {
+            e.modifiedDate = moment(this.tableList.modifiedDate).format(
+              'YYYY-MM-DD'
+            )
+          }
+        })
+        this.tableList.forEach((e) => {
+          if (e.databaseInfo.databaseType === 'mysql') {
+            e.databaseInfo.databaseType = 'My Sql'
+          }
+          if (e.databaseInfo.databaseType === 'postgresql') {
+            e.databaseInfo.databaseType = 'PostgreSQL'
+          }
+          if (e.databaseInfo.databaseType === 'oracle') {
+            e.databaseInfo.databaseType = 'Oracle'
+          }
         })
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -180,12 +207,31 @@ export default {
         this.tableList = res.data
         this.pagination.total = res.metaData.totalItem
         this.tableList.forEach((e) => {
-          e.createdDate = moment(this.tableList.createdDate).format(
-            'YYYY-MM-DD'
-          )
-          e.modifiedDate = moment(this.tableList.modifiedDate).format(
-            'YYYY-MM-DD'
-          )
+          if (e.createdDate === null) {
+            e.createdDate = 'YYYY-MM-DD'
+          } else {
+            e.createdDate = moment(this.tableList.createdDate).format(
+              'YYYY-MM-DD'
+            )
+          }
+          if (e.modifiedDate === null) {
+            e.modifiedDate = 'YYYY-MM-DD'
+          } else {
+            e.modifiedDate = moment(this.tableList.modifiedDate).format(
+              'YYYY-MM-DD'
+            )
+          }
+        })
+        this.tableList.forEach((e) => {
+          if (e.databaseInfo.databaseType === 'mysql') {
+            e.databaseInfo.databaseType = 'My Sql'
+          }
+          if (e.databaseInfo.databaseType === 'postgresql') {
+            e.databaseInfo.databaseType = 'PostgreSQL'
+          }
+          if (e.databaseInfo.databaseType === 'oracle') {
+            e.databaseInfo.databaseType = 'Oracle'
+          }
         })
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

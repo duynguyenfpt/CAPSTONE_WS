@@ -40,7 +40,7 @@ export default {
         this.isLoading = true
         const res = await deleteDatabaseDetail(this.idItem)
         this.$emit('onDeleted')
-        if (res.code) {
+        if (res.code === '200') {
           this.$notify({ type: 'success', text: 'Delete database succeeded' })
         } else {
           this.$notify({ type: 'error', text: 'Delete database failed' })

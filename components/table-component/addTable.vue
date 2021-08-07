@@ -100,7 +100,7 @@ export default {
           }
           const res = await addTable(body)
           this.$emit('onAdded')
-          if (res.code) {
+          if (res.code === '201') {
             this.$notify({ type: 'success', text: 'Add table succeeded' })
           } else {
             this.$notify({ type: 'error', text: 'Add table failed' })

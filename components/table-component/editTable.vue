@@ -97,7 +97,7 @@ export default {
           this.isLoadingCreate = true
           const res = await editTable(this.tableName)
           this.$emit('onUpdated')
-          if (res.code) {
+          if (res.code === '200') {
             this.$notify({ type: 'success', text: 'Update table succeeded' })
           } else {
             this.$notify({ type: 'error', text: 'Update table failed' })

@@ -1,28 +1,22 @@
 <template>
-  <b-modal v-model="isVisible" title="Edit Account" hide-footer>
+  <b-modal v-model="isVisible" title="Edit Right" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
       <b-row>
         <b-col>
-          <label class="form-label">Username</label>
-          <b-input size="sm" v-model="username" />
-          <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-          <label class="form-label">Email</label>
-          <b-input size="sm" v-model="email" />
-          <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
-          <label class="form-label">Role</label>
-          <b-form-select v-model="role" :options="roles" size="sm" @change="chooseRole"></b-form-select>
-          <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
-          <label class="form-label">Phone</label>
-          <b-input size="sm" v-model="phone" />
-          <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
+          <label class="form-label">Right Code</label>
+          <b-input size="sm" v-model="code" />
+          <p class="msg-error" v-if="msg.code">{{ msg.code }}</p>
+          <label class="form-label">Right Name</label>
+          <b-input size="sm" v-model="name" />
+          <p class="msg-error" v-if="msg.name">{{ msg.name }}</p>
         </b-col>
       </b-row>
       <b-row class="pt-3">
         <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onUpdateAcc">
+          <b-button size="sm" variant="primary" @click="onUpdateRight">
             <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
           <b-button size="sm" variant="light" @click="onClose">
             Cancel
@@ -34,117 +28,80 @@
 </template>
 
 <script>
-import { getAccountDetail, updateAccount } from '@/service/account'
 
 export default {
   data: () => ({
-    username: null,
-    email: null,
-    phone: null,
-    role: null,
+    code: null,
+    name: null,
     isVisible: false,
     idItem: 0,
     isLoading: false,
     isLoadingUpdate: false,
-    roles: [
-      { value: null, text: 'Please select a role' },
-      { value: 'viewer', text: 'Viewer' },
-      { value: 'engineer', text: 'Engineer' },
-      { value: 'admin', text: 'Admin' }
-    ],
     msg: {
-      username: null,
-      email: null,
-      phone: null,
-      role: null
+      code: null,
+      name: null
     }
   }),
   watch: {
-    username (value) {
-      this.username = value
-      this.validateUsername(value)
+    name (value) {
+      this.name = value
+      this.validateName(value)
     },
-    email (value) {
-      this.email = value
-      this.validateEmail(value)
-    },
-    phone (value) {
-      this.phone = value
-      this.validatePhone(value)
+    code (value) {
+      this.code = value
+      this.validateCode(value)
     }
   },
   methods: {
+    validateName (value) {
+      if (/^[a-zA-Z0-9_.-]{1,127}$/.test(value)) {
+        this.msg.name = ''
+      } else {
+        this.msg.name = 'Invalid right name'
+      }
+    },
+    validateCode (value) {
+      if (/^[a-zA-Z0-9_.-]{1,127}$/.test(value)) {
+        this.msg.code = ''
+      } else {
+        this.msg.code = 'Invalid right code'
+      }
+    },
     async show (id) {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
-      const res = await getAccountDetail(this.idItem)
-      this.username = res.data.username
-      this.email = res.data.email
-      this.phone = res.data.phone
-      this.role = res.data.role
       this.isLoading = false
-      this.msg.role = null
-      this.msg.username = null
-      this.msg.phone = null
-      this.msg.email = null
-    },
-    chooseRole () {
-      if (this.role === null) {
-        this.msg.role = 'Please select role'
-      } else {
-        this.msg.role = ''
-      }
-    },
-    validateUsername (value) {
-      if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
-        this.msg.username = ''
-      } else {
-        this.msg.username = 'Invalid username'
-      }
-    },
-    validateEmail (value) {
-      if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) {
-        this.msg.email = ''
-      } else {
-        this.msg.email = 'Invalid email address'
-      }
-    },
-    validatePhone (value) {
-      if (/((09|03|07|08|05)+([0-9]{8})\b)/g.test(value)) {
-        this.msg.phone = ''
-      } else {
-        this.msg.phone = 'Invalid phone number'
-      }
+      this.msg.code = null
+      this.msg.name = null
+      this.isLoadingUpdate = false
     },
     onClose () {
       this.isVisible = false
     },
-    async onUpdateAcc () {
-      this.validateUsername(this.username)
-      this.validateEmail(this.email)
+    async onUpdateRight () {
+      this.validateName(this.name)
+      this.validateCode(this.code)
       this.validatePhone(this.phone)
-      if (this.username === null) {
-        this.msg.username = 'Invalid username'
+      if (this.code === null) {
+        this.msg.code = 'Invalid right code'
       }
-      if (this.role === null) {
-        this.msg.role = 'Please select role'
+      if (this.name === null) {
+        this.msg.name = 'Invalid right name'
       }
-      if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '' && this.msg.role === '') {
+      if (this.msg.name === '' && this.msg.code === '') {
         try {
           this.isLoadingUpdate = true
           const data = {
-            username: this.username,
-            email: this.email,
-            role: this.role,
-            phone: this.phone
+            code: this.code,
+            name: this.name
           }
-          const res = await updateAccount(this.idItem, data)
+          const res = data
           this.$emit('onUpdated', data)
-          if (res.code) {
-            this.$notify({ type: 'success', text: 'Update account succeeded' })
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Update right succeeded' })
           } else {
-            this.$notify({ type: 'error', text: 'Update account failed' })
+            this.$notify({ type: 'error', text: 'Update right failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

@@ -1,19 +1,15 @@
 <template>
-  <b-modal v-model="isVisible" title="Detail Account" hide-footer>
+  <b-modal v-model="isVisible" title="Detail Right" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
       <b-row>
         <b-col>
-          <label class="form-label">Username</label>
-          <b-input size="sm" v-model="config.username" disabled />
-          <label class="form-label">Email</label>
-          <b-input size="sm" v-model="config.email" disabled/>
-          <label class="form-label">Role</label>
-          <b-input size="sm" v-model="config.role" disabled/>
-          <label class="form-label">Phone</label>
-          <b-input size="sm" v-model="config.phone" disabled/>
+          <label class="form-label">Right Code</label>
+          <b-input size="sm" v-model="config.code" disabled />
+          <label class="form-label">Right Name</label>
+          <b-input size="sm" v-model="config.name" disabled/>
         </b-col>
       </b-row>
       <b-row class="pt-3">
@@ -28,14 +24,11 @@
 </template>
 
 <script>
-import { getAccountDetail } from '@/service/account'
 export default {
   data: () => ({
     config: {
-      username: null,
-      email: null,
-      phone: null,
-      role: null
+      code: null,
+      name: null
     },
     isVisible: false,
     idItem: 0,
@@ -47,8 +40,6 @@ export default {
       this.idItem = id
       this.isVisible = true
       this.isLoading = true
-      const res = await getAccountDetail(this.idItem)
-      this.config = res.data
       this.isLoading = false
     },
     onClose () {

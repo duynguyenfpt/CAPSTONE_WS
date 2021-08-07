@@ -60,37 +60,72 @@ export default {
       name: null
     }
   }),
+  watch: {
+    name (value) {
+      this.name = value
+      this.validateName(value)
+    },
+    code (value) {
+      this.code = value
+      this.validateCode(value)
+    }
+  },
   methods: {
+    validateName (value) {
+      if (/^[a-zA-Z0-9_.-]{1,127}$/.test(value)) {
+        this.msg.name = ''
+      } else {
+        this.msg.name = 'Invalid right name'
+      }
+    },
+    validateCode (value) {
+      if (/^[a-zA-Z0-9_.-]{1,127}$/.test(value)) {
+        this.msg.code = ''
+      } else {
+        this.msg.code = 'Invalid right code'
+      }
+    },
     async show () {
       this.isVisible = true
       this.isLoading = true
       this.code = null
       this.name = null
       this.isLoading = false
+      this.isLoadingCreate = false
     },
     onClose () {
       this.isVisible = false
     },
     async addRight () {
-      try {
-        this.isLoadingCreate = true
-        const body = {
-          code: this.code,
-          rightName: this.name
+      this.validateName(this.name)
+      this.validateCode(this.code)
+      if (this.code === null) {
+        this.msg.code = 'Invalid right code'
+      }
+      if (this.name === null) {
+        this.msg.name = 'Invalid right name'
+      }
+      if (this.msg.code === '' && this.msg.name === '') {
+        try {
+          this.isLoadingCreate = true
+          const body = {
+            code: this.code,
+            rightName: this.name
+          }
+          const res = await createRight(body)
+          this.$emit('onAdded')
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Add right succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Add right failed' })
+          }
+          this.$router.go()
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.loading = false
+          this.isVisible = false
         }
-        const res = await createRight(body)
-        this.$emit('onAdded')
-        if (res.code === '201') {
-          this.$notify({ type: 'success', text: 'Add right succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Add right failed' })
-        }
-        this.$router.go()
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.loading = false
-        this.isVisible = false
       }
     }
   }

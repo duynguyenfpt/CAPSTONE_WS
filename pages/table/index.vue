@@ -1,17 +1,26 @@
 <template>
- <div>
-   <b-row>
+  <div>
+    <b-row>
       <b-col class="text-center">
         <h1>Table Management</h1>
       </b-col>
     </b-row>
-   <section name="action">
+    <section name="action">
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="onSearchTable(textSearch)"/>
+            <b-input
+              size="sm"
+              placeholder="Search"
+              v-model="textSearch"
+              @keyup.enter="onSearchTable(textSearch)"
+            />
             <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="onSearchTable(textSearch)">
+              <b-btn
+                size="sm"
+                variant="primary"
+                @click="onSearchTable(textSearch)"
+              >
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -25,50 +34,41 @@
         </b-col>
       </b-row>
     </section>
-   <section name="view" class="pt-3">
-    <b-table
-      responsive
-      hover
-      striped
-      :fields="tableFields"
-      :items="tableList"
-      :busy="loading">
-      <template #cell(no)="item">
+    <section name="view" class="pt-3">
+      <b-table
+        responsive
+        hover
+        striped
+        :fields="tableFields"
+        :items="tableList"
+        :busy="loading"
+      >
+        <template #cell(no)="item">
           {{ countRecord(item.index) }}
         </template>
-      <template #cell(action)="item">
-        <b-btn
-          v-b-tooltip="`Detail table config`"
-          :to="{ name: 'table-id', params: { id: item.item.id } }"
-          size="sm"
-          variant="success"
-        >
-          <i class="fa fa-eye" />
-        </b-btn>
-        <b-btn
-            @click="editTb(item.item.id)"
+        <template #cell(action)="item">
+          <b-btn
+            :to="{ name: 'table-id', params: { id: item.item.id } }"
             size="sm"
-            variant="info"
+            variant="success"
           >
+            <i class="fa fa-eye" />
+          </b-btn>
+          <b-btn @click="editTb(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
-        <b-btn
-          v-b-tooltip="`Delete table config`"
-          size="sm"
-          variant="danger"
-          @click="deleteTb(item.item.id)"
-        >
-          <i class="fa fa-trash" />
-        </b-btn>
-      </template>
-      <template #table-busy>
+          <b-btn size="sm" variant="danger" @click="deleteTb(item.item.id)">
+            <i class="fa fa-trash" />
+          </b-btn>
+        </template>
+        <template #table-busy>
           <div class="text-center text-danger my-2">
             <b-spinner class="align-middle"></b-spinner>
             <strong>Loading...</strong>
           </div>
         </template>
-    </b-table>
-     <b-pagination
+      </b-table>
+      <b-pagination
         size="sm"
         v-model="pagination.page"
         :per-page="pagination.limit"
@@ -76,9 +76,9 @@
         align="right"
         @input="searchTable"
       />
-   </section>
-      <section name="popup">
-      <table-component-deleteTable ref="delete" @onDeleted="onReload"/>
+    </section>
+    <section name="popup">
+      <table-component-deleteTable ref="delete" @onDeleted="onReload" />
     </section>
     <section name="popup">
       <table-component-editTable ref="edit" @onUpdated="onReload" />
@@ -135,7 +135,10 @@ export default {
     async getListTable () {
       this.loading = true
       try {
-        const res = await getListTable(this.pagination.page, this.pagination.limit)
+        const res = await getListTable(
+          this.pagination.page,
+          this.pagination.limit
+        )
         this.tableList = res.data
         this.pagination.total = res.metaData.totalItem
         this.tableList.forEach((e) => {
@@ -169,7 +172,11 @@ export default {
     async searchTable () {
       this.loading = true
       try {
-        const res = await searchTable(this.pagination.page, this.pagination.limit, this.keyword)
+        const res = await searchTable(
+          this.pagination.page,
+          this.pagination.limit,
+          this.keyword
+        )
         this.tableList = res.data
         this.pagination.total = res.metaData.totalItem
         this.tableList.forEach((e) => {

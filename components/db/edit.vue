@@ -7,11 +7,14 @@
       <b-row>
         <b-col>
           <label class="form-label">Host</label>
-          <b-form-select
-            v-model="serverInforId"
+          <v-select
+            class="select-sm"
+            :reduce="(text) => text.value"
+            label="text"
             :options="options"
+            v-model="serverInforId"
             size="sm"
-          ></b-form-select>
+          ></v-select>
         </b-col>
         <b-col>
           <label class="form-label">Port</label>

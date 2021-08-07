@@ -1,6 +1,8 @@
 <template>
   <div v-if="detail">
-    <h4>Database detail</h4>
+    <b-col class="text-center">
+        <h1>Database Detail</h1>
+      </b-col>
     <b-table :fields="dbFields" :items="[detail]"></b-table>
 
     <b-row>
@@ -165,6 +167,7 @@ export default {
         this.listTableDetail = resList.data
         this.pagination.total = resList.metaData.totalItem
         this.detail = res.data
+        this.detail.host = this.detail.serverInfor.serverDomain + ' - ' + this.detail.serverInfor.serverHost
         if (res.data.databaseType === 'mysql') {
           this.detail.databaseType = 'My Sql'
         }
@@ -174,18 +177,38 @@ export default {
         if (res.data.databaseType === 'oracle') {
           this.detail.databaseType = 'Oracle'
         }
-        this.detail.createdDate = moment(this.detail.createdDate).format(
-          'YYYY-MM-DD'
-        )
-        this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
-          'YYYY-MM-DD'
-        )
+        if (this.detail.createdDate === null) {
+          this.detail.createdDate = 'YYYY-MM-DD'
+        } else {
+          this.detail.createdDate = moment(this.detail.createdDate).format(
+            'YYYY-MM-DD'
+          )
+        }
+        if (this.detail.modifiedDate === null) {
+          this.detail.modifiedDate = 'YYYY-MM-DD'
+        } else {
+          this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
+            'YYYY-MM-DD'
+          )
+        }
         if (this.listTableDetail) {
           this.listTableDetail.forEach((e) => {
-            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+            if (e.createdDate === null) {
+              e.createdDate = 'YYYY-MM-DD'
+            } else {
+              e.createdDate = moment(e.createdDate).format(
+                'YYYY-MM-DD'
+              )
+            }
           })
           this.listTableDetail.forEach((e) => {
-            e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+            if (e.modifiedDate === null) {
+              e.modifiedDate = 'YYYY-MM-DD'
+            } else {
+              e.modifiedDate = moment(e.modifiedDate).format(
+                'YYYY-MM-DD'
+              )
+            }
           })
         }
       } catch (e) {

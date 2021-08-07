@@ -5,71 +5,92 @@
     </div>
     <div v-else>
       <b-modal v-model="isVisible" title="Create Database" hide-footer>
-    <b-row>
-      <b-col>
-        <label class="form-label">Host</label>
-        <b-form-select
-          v-model="serverInforId"
-          :options="dbHosts"
-          @change="chooseHost"
-          size="sm"
-        ></b-form-select>
-        <p class="msg-error" v-if="msg.serverInforId">{{ msg.serverInforId }}</p>
-      </b-col>
-      <b-col>
-        <label class="form-label">Port</label>
-        <b-input size="sm" v-model="port" />
-        <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <label class="form-label">Database</label>
-        <b-input size="sm" v-model="databaseName" />
-        <p class="msg-error" v-if="msg.databaseName">{{ msg.databaseName }}</p>
-        <label class="form-label">Username</label>
-        <b-input size="sm" v-model="username" />
-        <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-        <label class="form-label">Password</label>
-        <b-input size="sm" v-model="password" type="password" />
-        <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <label class="form-label">Database Type</label>
-        <b-form-select
-          v-model="databaseType"
-          :options="dbTypes"
-          size="sm"
-          @change="chooseDbType"
-        ></b-form-select>
-        <p class="msg-error" v-if="msg.databaseType">{{ msg.databaseType }}</p>
-      </b-col>
-    </b-row>
-    <b-row v-if="isOracle">
-      <b-col>
-        <label class="form-label">SID</label>
-        <b-input size="sm" v-model="sid" type="sid" />
-        <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
-      </b-col>
-    </b-row>
-    <b-row class="pt-3">
-      <b-col>
-          <b-button size="sm" variant="outline-primary" @click="checkConnectionStatus">
-            <b-spinner v-if="isLoadingCheck" variant="primary" small></b-spinner>
-            <i v-if="isConnected" class="fas fa-check"></i>
-            Test connection
-          </b-button>
-      </b-col>
-      <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click='createDatabaseInfo'>
-            <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
-            Create
-          </b-button>
-      </b-col>
-    </b-row>
-    </b-modal>
+        <b-row>
+          <b-col>
+            <label class="form-label">Host</label>
+            <v-select
+              class="select-sm"
+              :reduce="(text) => text.value"
+              label="text"
+              :options="dbHosts"
+              v-model="serverInforId"
+              @input="chooseHost"
+              size="sm"
+            ></v-select>
+            <p class="msg-error" v-if="msg.serverInforId">
+              {{ msg.serverInforId }}
+            </p>
+          </b-col>
+          <b-col>
+            <label class="form-label">Port</label>
+            <b-input size="sm" v-model="port" />
+            <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <label class="form-label">Database</label>
+            <b-input size="sm" v-model="databaseName" />
+            <p class="msg-error" v-if="msg.databaseName">
+              {{ msg.databaseName }}
+            </p>
+            <label class="form-label">Username</label>
+            <b-input size="sm" v-model="username" />
+            <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
+            <label class="form-label">Password</label>
+            <b-input size="sm" v-model="password" type="password" />
+            <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <label class="form-label">Database Type</label>
+            <b-form-select
+              v-model="databaseType"
+              :options="dbTypes"
+              size="sm"
+              @change="chooseDbType"
+            ></b-form-select>
+            <p class="msg-error" v-if="msg.databaseType">
+              {{ msg.databaseType }}
+            </p>
+          </b-col>
+        </b-row>
+        <b-row v-if="isOracle">
+          <b-col>
+            <label class="form-label">SID</label>
+            <b-input size="sm" v-model="sid" type="sid" />
+            <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col>
+            <b-button
+              size="sm"
+              variant="outline-primary"
+              @click="checkConnectionStatus"
+            >
+              <b-spinner
+                v-if="isLoadingCheck"
+                variant="primary"
+                small
+              ></b-spinner>
+              <i v-if="isConnected" class="fas fa-check"></i>
+              Test connection
+            </b-button>
+          </b-col>
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="createDatabaseInfo">
+              <b-spinner
+                v-if="isLoadingCreate"
+                variant="primary"
+                small
+              ></b-spinner>
+              Create
+            </b-button>
+          </b-col>
+        </b-row>
+      </b-modal>
     </div>
   </div>
 </template>
@@ -77,12 +98,13 @@
 <script>
 import { createDatabase, checkConnection } from '@/service/db'
 import { getAllServers } from '@/service/server'
+import Vue from 'vue'
+import vSelect from 'vue-select'
 
+Vue.component('v-select', vSelect)
 export default {
   data: () => ({
-    dbHosts: [
-      { value: null, text: 'Please select an option' }
-    ],
+    dbHosts: [{ value: null, text: 'Please select an option' }],
     dbTypes: [
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'My Sql' },
@@ -117,8 +139,11 @@ export default {
     this.isLoading = true
     const hosts = await getAllServers()
     // eslint-disable-next-line array-callback-return
-    hosts.data.map(item => {
-      this.dbHosts.push({ value: item.id, text: item.serverDomain + ' - ' + item.serverHost })
+    hosts.data.map((item) => {
+      this.dbHosts.push({
+        value: item.id,
+        text: item.serverDomain + ' - ' + item.serverHost
+      })
     })
     this.isLoading = false
   },
@@ -173,7 +198,11 @@ export default {
       }
     },
     validatePortNumber (value) {
-      if (/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(value)) {
+      if (
+        /^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(
+          value
+        )
+      ) {
         this.msg.port = ''
       } else {
         this.msg.port = 'Invalid port number'
@@ -239,7 +268,15 @@ export default {
       if (this.databaseType === null) {
         this.msg.databaseType = 'Please select type database'
       }
-      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.serverInforId === '' && this.msg.databaseType === '' && this.msg.sid === '') {
+      if (
+        this.msg.databaseName === '' &&
+        this.msg.port === '' &&
+        this.msg.username === '' &&
+        this.msg.password === '' &&
+        this.msg.serverInforId === '' &&
+        this.msg.databaseType === '' &&
+        this.msg.sid === ''
+      ) {
         try {
           this.isLoadingCreate = true
           const config = {
@@ -256,7 +293,10 @@ export default {
           this.isVisible = false
           this.$emit('onAdded')
           if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Create database succeeded' })
+            this.$notify({
+              type: 'success',
+              text: 'Create database succeeded'
+            })
           } else {
             this.$notify({ type: 'error', text: 'Create database failed' })
           }
@@ -291,3 +331,33 @@ export default {
   }
 }
 </script>
+<style>
+@import "vue-select/dist/vue-select.css";
+
+.vs--searchable .vs__dropdown-toggle {
+  width: 100%;
+  min-width: 245.54px;
+  white-space: nowrap;
+  max-height: 31px;
+  height: calc(1.5em + 0.5rem + 2px);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.vs__selected {
+  margin: 0;
+  padding-bottom: 3px;
+  padding-left: 0;
+}
+
+.vs__actions {
+  padding: 0;
+  margin-right: 5px;
+}
+
+.vs__clear {
+  margin-bottom: 2px;
+}
+</style>

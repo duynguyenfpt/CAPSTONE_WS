@@ -179,7 +179,11 @@ export default {
           e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
         })
         this.dbs.forEach((e) => {
-          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+          if (e.createdDate === null) {
+            e.createdDate = 'YYYY-MM-DD'
+          } else {
+            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+          }
         })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {

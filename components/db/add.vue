@@ -56,10 +56,17 @@
             </p>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col>
+            <label class="form-label">Alias</label>
+            <b-input size="sm" v-model="alias" />
+            <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
+          </b-col>
+        </b-row>
         <b-row v-if="isOracle">
           <b-col>
             <label class="form-label">SID</label>
-            <b-input size="sm" v-model="sid" type="sid" />
+            <b-input size="sm" v-model="sid" />
             <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
           </b-col>
         </b-row>
@@ -118,6 +125,7 @@ export default {
     password: null,
     databaseType: null,
     sid: null,
+    alias: null,
     isLoading: false,
     isLoadingCreate: false,
     isLoadingCheck: false,
@@ -131,7 +139,8 @@ export default {
       password: null,
       serverInforId: null,
       databaseType: null,
-      sid: null
+      sid: null,
+      alias: null
     }
   }),
 
@@ -168,6 +177,10 @@ export default {
     sid (value) {
       this.sid = value
       this.validateSid(value)
+    },
+    alias (value) {
+      this.alias = value
+      this.validateAlias(value)
     }
   },
 
@@ -181,6 +194,7 @@ export default {
       this.databaseType = null
       this.serverInforId = null
       this.sid = null
+      this.alias = null
       this.isOracle = false
       this.msg.databaseName = ''
       this.msg.port = ''
@@ -189,6 +203,7 @@ export default {
       this.msg.serverInforId = ''
       this.msg.databaseType = ''
       this.msg.sid = ''
+      this.msg.alias = ''
     },
     validateDBName (value) {
       if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
@@ -229,6 +244,13 @@ export default {
         this.msg.sid = 'Invalid sid'
       }
     },
+    validateAlias (value) {
+      if (/^[a-zA-Z_][\w-.]{1,50}$/.test(value)) {
+        this.msg.alias = ''
+      } else {
+        this.msg.alias = 'Invalid alias'
+      }
+    },
     chooseHost () {
       if (this.serverInforId === null) {
         this.msg.serverInforId = 'Please select host'
@@ -259,6 +281,9 @@ export default {
       if (this.username === null) {
         this.msg.username = 'Invalid username'
       }
+      if (this.alias === null) {
+        this.msg.alias = 'Invalid alias'
+      }
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
       }
@@ -275,7 +300,8 @@ export default {
         this.msg.password === '' &&
         this.msg.serverInforId === '' &&
         this.msg.databaseType === '' &&
-        this.msg.sid === ''
+        this.msg.sid === '' &&
+        this.msg.alias === ''
       ) {
         try {
           this.isLoadingCreate = true
@@ -286,7 +312,8 @@ export default {
             databaseName: this.databaseName,
             databaseType: this.databaseType,
             serverInforId: this.serverInforId,
-            sid: this.sid
+            sid: this.sid,
+            alias: this.alias
           }
           const res = await createDatabase(config)
           this.isLoadingCreate = false
@@ -313,8 +340,8 @@ export default {
           port: this.port,
           username: this.username,
           password: this.password,
-          database_name: this.databaseName,
-          database_type: this.databaseType
+          databaseName: this.databaseName,
+          databaseType: this.databaseType
         }
         const res = await checkConnection(data)
         if (res.code === '200') {

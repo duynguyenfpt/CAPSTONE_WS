@@ -98,6 +98,9 @@ const dbFields = [
     key: 'databaseType'
   },
   {
+    key: 'alias'
+  },
+  {
     key: 'createdBy'
   },
   {

@@ -88,8 +88,13 @@
           <p class="msg-error" v-if="msg.dbType">{{ msg.dbType }}</p>
         </b-col>
       </b-row>
-      <b-row v-if="isOracle">
+      <b-row>
         <b-col cols="6">
+          <label>Alias</label>
+          <b-input size="sm" v-model="alias" :disabled="isChoseDb"></b-input>
+          <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
+        </b-col>
+        <b-col cols="6" v-if="isOracle">
           <label>SID</label>
           <b-input size="sm" v-model="sid" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
@@ -155,6 +160,7 @@ export default {
     table: null,
     dbType: null,
     sid: null,
+    alias: null,
     isLoading: false,
     isLoadingCreate: false,
     isLoadingFill: false,
@@ -169,7 +175,8 @@ export default {
       username: '',
       password: '',
       dbType: '',
-      sid: ''
+      sid: '',
+      alias: ''
     }
   }),
   async mounted () {
@@ -187,8 +194,25 @@ export default {
         text: item.serverHost + ' - ' + item.serverDomain
       })
     })
+    this.db = null
+    this.table = null
+    this.dbName = null
+    this.host = null
+    this.port = null
+    this.username = null
+    this.password = null
+    this.dbType = null
+    this.sid = null
+    this.alias = null
+    this.msg.db = ''
+    this.msg.tb = ''
+    this.msg.host = ''
+    this.msg.username = ''
     this.msg.password = ''
     this.msg.port = ''
+    this.msg.dbType = ''
+    this.msg.alias = ''
+    this.msg.sid = ''
     this.isLoading = false
   },
   watch: {
@@ -215,6 +239,10 @@ export default {
     sid (value) {
       this.sid = value
       this.validateSid(value)
+    },
+    alias (value) {
+      this.alias = value
+      this.validateAlias(value)
     }
   },
   methods: {
@@ -265,6 +293,13 @@ export default {
         this.msg.sid = 'Invalid sid'
       }
     },
+    validateAlias (value) {
+      if (/^[a-zA-Z_][\w-.]{1,50}$/.test(value)) {
+        this.msg.alias = ''
+      } else {
+        this.msg.alias = 'Invalid alias'
+      }
+    },
     chooseHost () {
       if (this.host === null) {
         this.msg.dbType = 'Please select host'
@@ -294,6 +329,7 @@ export default {
       this.table = null
       this.dbType = null
       this.sid = null
+      this.alias = null
       this.isOracle = false
       this.msg.db = ''
       this.msg.tb = ''
@@ -303,6 +339,7 @@ export default {
       this.msg.password = ''
       this.msg.dbType = ''
       this.msg.sid = ''
+      this.msg.alias = ''
     },
     async createTableInfo () {
       if (this.msg.db === '' && this.msg.tb === '') {
@@ -317,7 +354,8 @@ export default {
             serverInforId: this.host,
             db: this.db,
             table: this.table,
-            sid: this.sid
+            sid: this.sid,
+            alias: this.alias
           }
           const res = await createTable(config)
           this.isLoadingCreate = false
@@ -384,6 +422,9 @@ export default {
       if (this.port === null) {
         this.msg.port = 'Invalid port number'
       }
+      if (this.alias === null) {
+        this.msg.alias = 'Invalid alias'
+      }
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
       } else {
@@ -398,7 +439,8 @@ export default {
           this.msg.password === '' &&
           this.msg.host === '' &&
           this.msg.dbType === '' &&
-          this.msg.sid === ''
+          this.msg.sid === '' &&
+          this.msg.alias === ''
         ) {
           try {
             this.isLoadingCreate = true
@@ -428,7 +470,8 @@ export default {
           this.msg.password === '' &&
           this.msg.host === '' &&
           this.msg.dbType === '' &&
-          this.msg.sid === ''
+          this.msg.sid === '' &&
+          this.msg.alias === ''
         ) {
           try {
             const db = {
@@ -469,8 +512,8 @@ export default {
           port: this.port,
           username: this.username,
           password: this.password,
-          database_name: this.dbName,
-          database_type: this.dbType
+          databaseName: this.dbName,
+          databaseType: this.dbType
         }
         const res = await checkConnection(data)
         if (res.code === '200') {

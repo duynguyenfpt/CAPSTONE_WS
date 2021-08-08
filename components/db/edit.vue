@@ -42,10 +42,17 @@
           ></b-form-select>
         </b-col>
       </b-row>
+      <b-row>
+          <b-col>
+            <label class="form-label">Alias</label>
+            <b-input size="sm" v-model="alias" />
+            <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
+          </b-col>
+        </b-row>
       <b-row v-if="isOracle">
       <b-col>
         <label class="form-label">SID</label>
-        <b-input size="sm" v-model="sid" type="sid" />
+        <b-input size="sm" v-model="sid" />
         <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
       </b-col>
       </b-row>
@@ -81,6 +88,7 @@ export default {
     password: null,
     databaseType: null,
     sid: null,
+    alias: null,
     isVisible: false,
     idItem: 0,
     isLoading: false,
@@ -91,7 +99,8 @@ export default {
       port: null,
       username: null,
       password: null,
-      sid: null
+      sid: null,
+      alias: null
     }
   }),
 
@@ -124,6 +133,10 @@ export default {
     sid (value) {
       this.sid = value
       this.validateSid(value)
+    },
+    alias (value) {
+      this.alias = value
+      this.validateAlias(value)
     }
   },
 
@@ -139,6 +152,7 @@ export default {
       this.username = res.data.username
       this.password = res.data.password
       this.databaseType = res.data.databaseType
+      this.alias = res.data.alias
       if (this.databaseType === 'oracle') {
         this.isOracle = true
         this.sid = res.data.sid
@@ -152,6 +166,7 @@ export default {
       this.msg.username = ''
       this.msg.password = ''
       this.msg.sid = ''
+      this.msg.alias = null
     },
     validateDBName (value) {
       if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
@@ -188,6 +203,13 @@ export default {
         this.msg.sid = 'Invalid sid'
       }
     },
+    validateAlias (value) {
+      if (/^[a-zA-Z_][\w-.]{1,50}$/.test(value)) {
+        this.msg.alias = ''
+      } else {
+        this.msg.alias = 'Invalid alias'
+      }
+    },
     chooseDbType () {
       if (this.databaseType === 'oracle') {
         this.isOracle = true
@@ -213,7 +235,10 @@ export default {
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
       }
-      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '') {
+      if (this.alias === null) {
+        this.msg.alias = 'Invalid alias'
+      }
+      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '' && this.alias === '') {
         try {
           this.isLoadingUpdate = true
           const config = {
@@ -223,7 +248,8 @@ export default {
             databaseName: this.databaseName,
             databaseType: this.databaseType,
             serverInforId: this.serverInforId,
-            sid: this.sid
+            sid: this.sid,
+            alias: this.alias
           }
           const data = await updateDatabase(this.idItem, config)
           this.isLoadingUpdate = false

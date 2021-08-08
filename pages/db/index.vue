@@ -125,6 +125,12 @@ const TableFields = [
     key: 'databaseType'
   },
   {
+    key: 'alias'
+  },
+  {
+    key: 'sid'
+  },
+  {
     key: 'createdDate'
   },
   {

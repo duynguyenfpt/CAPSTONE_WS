@@ -23,6 +23,11 @@
         </b-col>
       </b-row>
       <b-row class="pt-3">
+        <b-col cols="6">
+          <b-button size="sm" variant="success" @click="onDownload">
+            Download
+          </b-button>
+        </b-col>
         <b-col class="text-right">
           <b-button size="sm" variant="light" @click="onClose">
             Close
@@ -34,44 +39,40 @@
 </template>
 
 <script>
-const resultFields = [
-  {
-    key: 'id'
-  },
-  {
-    key: 'name'
-  },
-  {
-    key: 'content'
-  },
-  {
-    key: 'createdBy'
-  },
-  {
-    key: 'createdDate'
-  }
-]
+import { getResultDetail } from '@/service/etl'
 export default {
   data: () => ({
     isVisibleResult: false,
     idItem: 0,
     isLoading: false,
-    resultFields: resultFields,
-    data: [
-      { id: 1, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-03' },
-      { id: 2, name: 'Select All', content: 'Select * from database', createdBy: 'lcc', createdDate: '2021-08-04' },
-      { id: 3, name: 'Select All', content: 'Select * from database', createdBy: 'linhcancer', createdDate: '2021-08-02' },
-      { id: 4, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-04' }
-    ],
+    resultFields: [],
     rows: []
   }),
-
   methods: {
     async show (id) {
       this.idItem = id
       this.isVisibleResult = true
       this.isLoading = true
-      this.rows = this.data
+      const res = await getResultDetail(this.idItem)
+      const totalArray = res.data.split('\n')
+      let header = []
+      totalArray.forEach((element, index) => {
+        if (index === 0) {
+          header = element.split(',').map(item => {
+            return {
+              key: item
+            }
+          })
+        } else {
+          const tempRow = element.split(',')
+          const objData = {}
+          header.forEach((item, index) => {
+            objData[`${item.key}`] = tempRow[index]
+          })
+          this.rows.push(objData)
+        }
+      })
+      this.resultFields = header
       this.isLoading = false
     },
     onClose () {

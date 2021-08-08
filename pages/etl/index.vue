@@ -8,19 +8,19 @@
     </b-row>
     <b-row>
       <b-col sm="9" class="text-right">
-        <b-button size="sm" v-b-toggle.sidebar-right variant="success">Old Result</b-button>
+        <b-button size="sm" v-b-toggle.sidebar-right variant="success" @click="showAllResults">Old Result</b-button>
       </b-col>
       <b-sidebar id="sidebar-right" title="Old Result" right shadow>
         <div class="px-2 py-2">
           <b-list-group>
             <b-list-group-item class="flex-column align-items-start" v-for="(item, index) in results" :key="index">
-              <div style="cursor: pointer" @click="showResult(item.id)">
+              <div style="cursor: pointer" @click="showResult(item.request.id)">
               <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">{{ item.name }}</h5>
-                <small class="text-muted">{{ item.createdDate }}</small>
+                <h5 class="mb-1">{{ item.queryType }}</h5>
+                <small class="text-muted">{{ format(new Date(item.createdDate), `yyyy-mm-dd`) }}</small>
               </div>
               <p class="mb-1">
-                {{ item.content }}
+                {{ item.query }}
               </p>
               </div>
               <div class="d-flex justify-content-between align-items-center">
@@ -76,9 +76,28 @@
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
         <b-col sm="8" class="text-right">
-          <b-btn size="sm" variant="primary" class="btn-add-request">
+          <b-btn size="sm" variant="primary" class="btn-add-request" @click="createETL">
             Summit
           </b-btn>
+        </b-col>
+      </b-row>
+      <b-row class="pt-2">
+        <b-col sm="1"></b-col>
+        <b-col sm="8">
+          <b-table
+          responsive
+          hover
+          striped
+          :items="rows"
+          :fields="resultFields"
+          :busy="loading">
+          <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+          </template>
+          </b-table>
         </b-col>
       </b-row>
     </div>
@@ -91,6 +110,8 @@
   </div>
 </template>
 <script>
+import { getAllResults } from '@/service/etl'
+import { format } from 'date-fns'
 export default {
   data () {
     return {
@@ -111,15 +132,17 @@ export default {
       selectedIndex: 0,
       clickedChooseItem: false,
       wordIndex: 0,
-      results: [
-        { id: 1, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-03' },
-        { id: 2, name: 'Select All', content: 'Select * from database', createdBy: 'lcc', createdDate: '2021-08-04' },
-        { id: 3, name: 'Select All', content: 'Select * from database', createdBy: 'linhcancer', createdDate: '2021-08-02' },
-        { id: 4, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-04' }
-      ]
+      results: [],
+      format,
+      resultFields: [],
+      rows: []
     }
   },
   methods: {
+    async showAllResults () {
+      const res = await getAllResults()
+      this.results = res.data
+    },
     showResult (id) {
       this.$refs.result.show(id)
     },

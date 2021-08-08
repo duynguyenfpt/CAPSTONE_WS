@@ -163,8 +163,8 @@ export default {
         )
         this.servers = res.data
         this.servers.forEach((e) => {
-          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
-          e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+          e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+          e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
         })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {
@@ -206,8 +206,8 @@ export default {
         )
         this.servers = res.data
         this.servers.forEach((e) => {
-          e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
-          e.modifiedDate = moment(e.modifiedDate).format('YYYY-MM-DD')
+          e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+          e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
         })
         this.pagination.total = res.metaData.totalItem
       } catch (e) {

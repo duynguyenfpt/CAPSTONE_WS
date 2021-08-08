@@ -34,43 +34,38 @@
 </template>
 
 <script>
-const resultFields = [
-  {
-    key: 'id'
-  },
-  {
-    key: 'name'
-  },
-  {
-    key: 'content'
-  },
-  {
-    key: 'createdBy'
-  },
-  {
-    key: 'createdDate'
-  }
-]
+import { getResultDetail } from '@/service/etl'
 export default {
   data: () => ({
     isVisibleResult: false,
     idItem: 0,
     isLoading: false,
-    resultFields: resultFields,
-    data: [
-      { id: 1, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-03' },
-      { id: 2, name: 'Select All', content: 'Select * from database', createdBy: 'lcc', createdDate: '2021-08-04' },
-      { id: 3, name: 'Select All', content: 'Select * from database', createdBy: 'linhcancer', createdDate: '2021-08-02' },
-      { id: 4, name: 'Select All', content: 'Select * from database', createdBy: 'longvt', createdDate: '2021-08-04' }
-    ],
+    resultFields: [],
+    data: [],
     rows: []
   }),
-
   methods: {
     async show (id) {
       this.idItem = id
       this.isVisibleResult = true
       this.isLoading = true
+      const res = await getResultDetail(16)
+      const totalArray = res.data.split('\n')
+      this.resultFields = totalArray[0].split(',').map(item => {
+        return {
+          key: item
+        }
+      })
+      const tempArray = totalArray.splice(1, totalArray.length - 1)
+      tempArray.forEach(element => {
+        const objData = {}
+        const tempRow = element.split(',')
+        this.resultFields.forEach((item, index) => {
+          objData[`${item}`] = tempRow[index]
+        })
+        console.log('LCC: ', objData)
+        this.data.push(objData)
+      })
       this.rows = this.data
       this.isLoading = false
     },

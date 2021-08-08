@@ -28,6 +28,11 @@
       <b-row class="pt-3">
         <b-col class="text-right">
           <b-button size="sm" variant="primary" @click="onShare">
+            <b-spinner
+                v-if="isLoadingShare"
+                variant="primary"
+                small
+              ></b-spinner>
             Share
           </b-button>
           <b-button size="sm" variant="light" @click="onClose">
@@ -41,6 +46,7 @@
 
 <script>
 import { getAllAccount } from '@/service/account'
+import { shareEtl } from '@/service/etl'
 import Vue from 'vue'
 import vSelect from 'vue-select'
 Vue.component('v-select', vSelect)
@@ -51,7 +57,8 @@ export default {
     idItem: 0,
     isLoading: false,
     opsAccount: [],
-    accounts: []
+    accounts: [],
+    isLoadingShare: false
   }),
 
   methods: {
@@ -59,6 +66,7 @@ export default {
       this.idItem = id
       this.isVisibleShare = true
       this.isLoading = true
+      this.isLoadingShare = false
       this.accounts = []
       const res = await getAllAccount()
       this.config = res.data
@@ -70,8 +78,26 @@ export default {
     onClose () {
       this.isVisibleShare = false
     },
-    onShare () {
-      console.log('LCC: ', this.accounts)
+    async onShare () {
+      if (this.accounts !== []) {
+        try {
+          this.isVisibleShare = true
+          const data = {
+            requestId: this.idItem,
+            accountIds: this.accounts
+          }
+          const res = await shareEtl(data)
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Share ETL succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Share ETL failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isVisibleShare = false
+        }
+      }
     }
   }
 }

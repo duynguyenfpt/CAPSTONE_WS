@@ -23,6 +23,11 @@
         </b-col>
       </b-row>
       <b-row class="pt-3">
+        <b-col cols="6">
+          <b-button size="sm" variant="success" @click="onDownload">
+            Download
+          </b-button>
+        </b-col>
         <b-col class="text-right">
           <b-button size="sm" variant="light" @click="onClose">
             Close
@@ -41,7 +46,6 @@ export default {
     idItem: 0,
     isLoading: false,
     resultFields: [],
-    data: [],
     rows: []
   }),
   methods: {
@@ -49,24 +53,26 @@ export default {
       this.idItem = id
       this.isVisibleResult = true
       this.isLoading = true
-      const res = await getResultDetail(16)
+      const res = await getResultDetail(this.idItem)
       const totalArray = res.data.split('\n')
-      this.resultFields = totalArray[0].split(',').map(item => {
-        return {
-          key: item
+      let header = []
+      totalArray.forEach((element, index) => {
+        if (index === 0) {
+          header = element.split(',').map(item => {
+            return {
+              key: item
+            }
+          })
+        } else {
+          const tempRow = element.split(',')
+          const objData = {}
+          header.forEach((item, index) => {
+            objData[`${item.key}`] = tempRow[index]
+          })
+          this.rows.push(objData)
         }
       })
-      const tempArray = totalArray.splice(1, totalArray.length - 1)
-      tempArray.forEach(element => {
-        const objData = {}
-        const tempRow = element.split(',')
-        this.resultFields.forEach((item, index) => {
-          objData[`${item}`] = tempRow[index]
-        })
-        console.log('LCC: ', objData)
-        this.data.push(objData)
-      })
-      this.rows = this.data
+      this.resultFields = header
       this.isLoading = false
     },
     onClose () {

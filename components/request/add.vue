@@ -12,13 +12,7 @@
         <b-col sm="2"></b-col>
         <b-col sm="4">
           <label>Database</label>
-          <b-form-select
-            v-model="request.database"
-            :options="opsDb"
-            size="sm"
-            @change="fillData"
-          >
-          </b-form-select>
+          <v-select class="select-sm" :reduce="(text) => text.value" label="text" v-model="request.database" :options="opsDb" size="sm" @input="fillData" />
           <p class="msg-error" v-if="msg.database">{{ msg.database }}</p>
         </b-col>
       </b-row>
@@ -27,13 +21,7 @@
         <b-col sm="2"></b-col>
         <b-col sm="4">
           <label>Table</label>
-          <b-form-select
-            v-model="request.table"
-            :options="opsTb"
-            size="sm"
-            @change="fillTable"
-          >
-          </b-form-select>
+          <v-select class="select-sm" :reduce="(text) => text.value" label="text" v-model="request.table" :options="opsTb" size="sm" @input="fillTable" />
           <p class="msg-error" v-if="msg.table">{{ msg.table }}</p>
         </b-col>
         <b-col sm="4" class="pt-2">
@@ -192,6 +180,7 @@ export default {
     res.data.map((item) => {
       this.opsDb.push({ value: item.id, text: item.databaseName })
     })
+    this.resetData()
   },
   methods: {
     dateDisabled () {
@@ -341,6 +330,10 @@ export default {
       this.request.toDate = null
       this.request.unique = null
       this.request.partition = null
+      this.msg.database = ''
+      this.msg.table = ''
+      this.msg.toDate = ''
+      this.msg.fromDate = ''
     }
   }
 }

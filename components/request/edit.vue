@@ -13,7 +13,7 @@
       <b-row>
         <b-col>
           <label class="form-label">Approved By</label>
-          <b-form-select v-model="request.account" :options="opsAccount" size="sm" @change="chooseAccount" />
+          <v-select class="select-sm" :reduce="(text) => text.value" label="text" v-model="request.account" :options="opsAccount" size="sm" @input="chooseAccount" />
           <p class="msg-error" v-if="msg.account">{{ msg.account }}</p>
         </b-col>
       </b-row>
@@ -46,6 +46,10 @@
 <script>
 import { getDetailRequest, updateRequest } from '@/service/request'
 import { getListAccount } from '@/service/account'
+import Vue from 'vue'
+import vSelect from 'vue-select'
+
+Vue.component('v-select', vSelect)
 export default {
   data: () => ({
     request: {
@@ -159,4 +163,33 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+@import "vue-select/dist/vue-select.css";
+
+.vs--searchable .vs__dropdown-toggle {
+  width: 100%;
+  min-width: 245.54px;
+  white-space: nowrap;
+  max-height: 31px;
+  height: calc(1.5em + 0.5rem + 2px);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.vs__selected {
+  margin: 0;
+  padding-bottom: 3px;
+  padding-left: 0;
+}
+
+.vs__actions {
+  padding: 0;
+  margin-right: 5px;
+}
+
+.vs__clear {
+  margin-bottom: 2px;
+}
+</style>

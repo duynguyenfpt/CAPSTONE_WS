@@ -53,6 +53,7 @@ export default {
       this.idItem = id
       this.isVisibleResult = true
       this.isLoading = true
+      this.rows = []
       const res = await getResultDetail(this.idItem)
       const totalArray = res.data.split('\n')
       let header = []

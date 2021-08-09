@@ -8,7 +8,7 @@
     </b-row>
     <b-row>
       <b-col sm="9" class="text-right">
-        <b-button size="sm" v-b-toggle.sidebar-right variant="success" @click="showAllResults">Old Result</b-button>
+        <b-button size="sm" v-b-toggle.sidebar-right variant="success" @click="showAllResults">History</b-button>
       </b-col>
       <b-sidebar id="sidebar-right" title="Old Result" right shadow>
         <div class="px-2 py-2">
@@ -77,7 +77,12 @@
         <b-col sm="1"></b-col>
         <b-col sm="8" class="text-right">
           <b-btn size="sm" variant="primary" class="btn-add-request" @click="createETL">
-            Summit
+            <b-spinner
+                v-if="isLoadingCreate"
+                variant="primary"
+                small
+              ></b-spinner>
+            Submit
           </b-btn>
         </b-col>
       </b-row>
@@ -110,7 +115,7 @@
   </div>
 </template>
 <script>
-import { getAllResults } from '@/service/etl'
+import { getAllResults, createEtl } from '@/service/etl'
 import { format } from 'date-fns'
 export default {
   data () {
@@ -135,7 +140,8 @@ export default {
       results: [],
       format,
       resultFields: [],
-      rows: []
+      rows: [],
+      isLoadingCreate: false
     }
   },
   methods: {
@@ -210,6 +216,25 @@ export default {
         this.currentWord === this.searchMatch[0]
       ) {
         this.searchMatch = []
+      }
+    },
+    async createETL () {
+      try {
+        this.isLoadingCreate = true
+        const data = {
+          query: this.inputValue
+        }
+        const res = await createEtl(data)
+        this.isLoadingCreate = false
+        if (res.code === '201') {
+          this.$notify({ type: 'success', text: 'Create ETL succeeded' })
+        } else {
+          this.$notify({ type: 'error', text: 'Create ETL failed' })
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.isLoadingCreate = false
       }
     }
   },

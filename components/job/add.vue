@@ -11,12 +11,15 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-select
-            v-model="request"
+          <v-select
+            class="select-sm"
+            :reduce="(text) => text.value"
+            label="text"
             :options="requests"
+            v-model="request"
+            @input="chooseRequest"
             size="sm"
-            @change="chooseRequest"
-          ></b-form-select>
+          ></v-select>
           <p class="msg-error" v-if="msg.request">{{ msg.request }}</p>
         </b-form-group>
         <b-form-group
@@ -25,12 +28,15 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-select
+          <v-select
+            class="select-sm"
+            :reduce="(text) => text.value"
+            label="text"
             v-model="executedBy"
             :options="executedBys"
             size="sm"
-            @change="chooseExecutor"
-          ></b-form-select>
+            @input="chooseExecutor"
+          ></v-select>
           <p class="msg-error" v-if="msg.executedBy">{{ msg.executedBy }}</p>
         </b-form-group>
         <b-form-group
@@ -91,6 +97,10 @@
 import { getAllAccount } from '@/service/account'
 import { getAllRequestApproved } from '@/service/request'
 import { createJob } from '@/service/job'
+import Vue from 'vue'
+import vSelect from 'vue-select'
+
+Vue.component('v-select', vSelect)
 export default {
   data () {
     return {
@@ -189,7 +199,6 @@ export default {
       if (this.msg.request === '' && this.msg.executedBy === '' && this.msg.maxRetry === '') {
         try {
           this.isLoadingCreate = true
-          console.log('LCC: ', this.isActive)
           const data = {
             requestId: this.request,
             executedById: this.executedBy,
@@ -217,3 +226,33 @@ export default {
   }
 }
 </script>
+<style>
+@import "vue-select/dist/vue-select.css";
+
+.vs--searchable .vs__dropdown-toggle {
+  width: 100%;
+  min-width: 245.54px;
+  white-space: nowrap;
+  max-height: 31px;
+  height: calc(1.5em + 0.5rem + 2px);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.vs__selected {
+  margin: 0;
+  padding-bottom: 3px;
+  padding-left: 0;
+}
+
+.vs__actions {
+  padding: 0;
+  margin-right: 5px;
+}
+
+.vs__clear {
+  margin-bottom: 2px;
+}
+</style>

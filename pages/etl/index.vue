@@ -49,6 +49,7 @@
             v-model="inputValue"
             type="text"
           ></b-form-textarea>
+          <p class="msg-error" v-if="message.query">{{ message.query }}</p>
           <ul
             :class="{
               'autocomplete-list': true,
@@ -76,7 +77,7 @@
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
         <b-col sm="8" class="text-right">
-          <b-btn size="sm" variant="primary" class="btn-add-request" @click="createETL">
+          <b-btn size="sm" variant="primary" class="btn-add-request" @click="createETL" :disabled="!isExecuted">
             <b-spinner
                 v-if="isLoadingCreate"
                 variant="primary"
@@ -88,7 +89,7 @@
       </b-row>
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
-        <b-col sm="8">
+        <b-col sm="8" v-if="isExecuted">
           <b-table
           responsive
           hover
@@ -104,6 +105,12 @@
           </template>
           </b-table>
         </b-col>
+        <b-col sm="8" v-else>
+          <div class="text-center">
+            <b-spinner variant="primary" label="Text Centered"></b-spinner>
+            <h5>{{ msg }}</h5>
+          </div>
+        </b-col>
       </b-row>
     </div>
     <section name="popup">
@@ -115,7 +122,7 @@
   </div>
 </template>
 <script>
-import { getAllResults, createEtl } from '@/service/etl'
+import { getAllResults, createEtl, getResultDetail } from '@/service/etl'
 import { format } from 'date-fns'
 export default {
   data () {
@@ -141,7 +148,12 @@ export default {
       format,
       resultFields: [],
       rows: [],
-      isLoadingCreate: false
+      isLoadingCreate: false,
+      isExecuted: true,
+      msg: '',
+      message: {
+        elt: ''
+      }
     }
   },
   methods: {
@@ -219,22 +231,78 @@ export default {
       }
     },
     async createETL () {
-      try {
-        this.isLoadingCreate = true
-        const data = {
-          query: this.inputValue
+      this.validateQuery(this.query)
+      if (this.message.query === '') {
+        try {
+          this.isLoadingCreate = true
+          const data = {
+            query: this.inputValue
+          }
+          const res = await createEtl(data)
+          this.isLoadingCreate = false
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Create ETL succeeded' })
+            const id = res.data.request.id
+            this.isExecuted = false
+            while (!this.isExecuted) {
+              this.rows = []
+              const resResult = await getResultDetail(id)
+              const header = []
+              if (resResult.data !== '') {
+                header.push({
+                  key: 'no'
+                })
+                this.isExecuted = true
+              } else {
+                this.isExecuted = false
+                this.msg = resResult.message
+              }
+              const totalArray = resResult.data.split('\n')
+              totalArray.forEach((element, index) => {
+                if (index === 0) {
+                // eslint-disable-next-line array-callback-return
+                  element.split(',').map(item => {
+                    header.push({
+                      key: item
+                    })
+                  })
+                } else {
+                  const tempRow = element.split(',')
+                  const objData = {}
+                  header.forEach((item, i) => {
+                    if (item.key === 'no') {
+                      objData[`${item.key}`] = index
+                    } else {
+                      objData[`${item.key}`] = tempRow[i - 1]
+                    }
+                  })
+                  this.rows.push(objData)
+                }
+              })
+              this.resultFields = header
+              await this.sleep(10000)
+            }
+            console.log('ABC: ', this.msg)
+          } else {
+            this.$notify({ type: 'error', text: 'Create ETL failed' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoadingCreate = false
         }
-        const res = await createEtl(data)
-        this.isLoadingCreate = false
-        if (res.code === '201') {
-          this.$notify({ type: 'success', text: 'Create ETL succeeded' })
-        } else {
-          this.$notify({ type: 'error', text: 'Create ETL failed' })
-        }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.isLoadingCreate = false
+      }
+    },
+    sleep (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+      })
+    },
+    validateQuery (value) {
+      if (/^(?=.*select.*from)(?!.*(?:create|drop|update|insert|alter|delete|attach|detach)).*$/.test(value.toLowerCase())) {
+        this.message.query = ''
+      } else {
+        this.message.query = 'Invalid etl'
       }
     }
   },
@@ -256,10 +324,12 @@ export default {
     }
   },
   watch: {
-    inputValue () {
+    inputValue (value) {
       this.focus()
       this.selectedIndex = 0
       this.wordIndex = this.inputSplitted.length - 1
+      this.inputValue = value
+      this.validateQuery(value)
     }
   }
 }

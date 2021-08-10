@@ -5,7 +5,7 @@
     </div>
     <div v-else>
       <b-row>
-        <b-col>
+        <b-col v-if="isExecuted">
           <b-table
           responsive
           hover
@@ -21,10 +21,16 @@
           </template>
           </b-table>
         </b-col>
+        <b-col v-else>
+          <div class="text-center">
+            <b-spinner variant="primary" label="Text Centered"></b-spinner>
+            <h5>{{ msg }}</h5>
+          </div>
+        </b-col>
       </b-row>
       <b-row class="pt-3">
         <b-col cols="6">
-          <b-button size="sm" variant="success" @click="onDownload">
+          <b-button size="sm" variant="success" @click="onDownload" v-if="isExecuted">
             Download
           </b-button>
         </b-col>
@@ -46,7 +52,9 @@ export default {
     idItem: 0,
     isLoading: false,
     resultFields: [],
-    rows: []
+    rows: [],
+    isExecuted: false,
+    msg: null
   }),
   methods: {
     async show (id) {
@@ -56,19 +64,33 @@ export default {
       this.rows = []
       const res = await getResultDetail(this.idItem)
       const totalArray = res.data.split('\n')
-      let header = []
+      const header = []
+      if (res.data !== '') {
+        header.push({
+          key: 'no'
+        })
+        this.isExecuted = true
+      } else {
+        this.isExecuted = false
+        this.msg = res.message
+      }
       totalArray.forEach((element, index) => {
         if (index === 0) {
-          header = element.split(',').map(item => {
-            return {
+          // eslint-disable-next-line array-callback-return
+          element.split(',').map(item => {
+            header.push({
               key: item
-            }
+            })
           })
         } else {
           const tempRow = element.split(',')
           const objData = {}
-          header.forEach((item, index) => {
-            objData[`${item.key}`] = tempRow[index]
+          header.forEach((item, i) => {
+            if (item.key === 'no') {
+              objData[`${item.key}`] = index
+            } else {
+              objData[`${item.key}`] = tempRow[i - 1]
+            }
           })
           this.rows.push(objData)
         }

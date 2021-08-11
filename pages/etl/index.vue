@@ -258,6 +258,7 @@ export default {
                       key: 'no'
                     })
                     this.isExecuted = true
+                    isRunning = false
                   } else {
                     if (resResult.data.status === 'failed') {
                       this.isExecuted = true

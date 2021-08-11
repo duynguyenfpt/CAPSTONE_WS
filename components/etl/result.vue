@@ -11,8 +11,7 @@
           hover
           striped
           :items="rows"
-          :fields="resultFields"
-          :busy="loading">
+          :fields="resultFields">
           <template #table-busy>
           <div class="text-center text-danger my-2">
             <b-spinner class="align-middle"></b-spinner>
@@ -31,6 +30,7 @@
       <b-row class="pt-3">
         <b-col cols="6">
           <b-button size="sm" variant="success" @click="onDownload" v-if="isExecuted">
+            <b-spinner variant="success" v-if="isDownload" small></b-spinner>
             Download
           </b-button>
         </b-col>
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { getResultDetail } from '@/service/etl'
+import { getResultDetail, downloadData } from '@/service/etl'
 export default {
   data: () => ({
     isVisibleResult: false,
@@ -55,7 +55,8 @@ export default {
     rows: [],
     isExecuted: false,
     msg: '',
-    variant: 'primary'
+    variant: 'primary',
+    isDownload: false
   }),
   methods: {
     async show (id) {
@@ -114,11 +115,32 @@ export default {
         }
       } catch (e) {
         this.isExecuted = true
-        this.msg = 'Query is failed'
+        this.msg = e.message
       }
     },
     onClose () {
       this.isVisibleResult = false
+    },
+    async onDownload () {
+      try {
+        this.isDownload = true
+        const res = await downloadData(this.idItem)
+        if (res !== null) {
+          this.$notify({ type: 'success', text: 'Download result succeeded' })
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'file.csv')
+          document.body.appendChild(fileLink)
+          fileLink.click()
+        } else {
+          this.$notify({ type: 'error', text: 'Download result failed' })
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.isDownload = false
+      }
     }
   }
 }

@@ -105,8 +105,12 @@
           </b-table>
         </b-col>
         <b-col sm="8" v-else>
-          <div class="text-center">
-            <b-spinner :variant="variant" label="Text Centered"></b-spinner>
+          <div v-if="isFailed">
+            <h5 class="text-center msg-fail">{{ msgErr }}</h5>
+            <p class="msg-fail">{{ msgFailed }}</p>
+          </div>
+          <div class="text-center" v-else>
+            <b-spinner variant="primary" label="Text Centered"></b-spinner>
             <h5>{{ msg }}</h5>
           </div>
         </b-col>
@@ -153,7 +157,9 @@ export default {
       message: {
         query: ''
       },
-      variant: 'primary'
+      isFailed: false,
+      msgFailed: '',
+      msgErr: ''
     }
   },
   methods: {
@@ -240,6 +246,7 @@ export default {
           }
           const res = await createEtl(data)
           this.isLoadingCreate = false
+          this.isFailed = false
           if (res.code === '201') {
             this.$notify({ type: 'success', text: 'Create ETL succeeded' })
             const id = res.data.request.id
@@ -251,55 +258,61 @@ export default {
               try {
                 const resResult = await getResultDetail(id)
                 if (resResult.code === '200') {
-                  const totalArray = resResult.data.content.split('\n')
                   const header = []
                   if (resResult.data.status === 'successed') {
                     header.push({
                       key: 'no'
                     })
+                    const totalArray = resResult.data.content.split('\n')
                     this.isExecuted = true
+                    totalArray.forEach((element, index) => {
+                      if (index === 0) {
+                      // eslint-disable-next-line array-callback-return
+                        element.split(',').map(item => {
+                          header.push({
+                            key: item
+                          })
+                        })
+                      } else {
+                        const tempRow = element.split(',')
+                        const objData = {}
+                        header.forEach((item, i) => {
+                          if (item.key === 'no') {
+                            objData[`${item.key}`] = index
+                          } else {
+                            objData[`${item.key}`] = tempRow[i - 1]
+                          }
+                        })
+                        this.rows.push(objData)
+                      }
+                    })
+                    this.resultFields = header
                     isRunning = false
                   } else {
                     if (resResult.data.status === 'failed') {
-                      this.isExecuted = true
+                      this.isExecuted = false
+                      this.isFailed = true
                       this.variant = 'danger'
-                      this.msg = 'Query is failed'
+                      this.msgErr = 'Query is failed'
+                      this.msgFailed = resResult.data.content
                       isRunning = false
                     } else {
                       this.isExecuted = false
                       this.msg = 'Query is executing'
                     }
                   }
-                  totalArray.forEach((element, index) => {
-                    if (index === 0) {
-                      // eslint-disable-next-line array-callback-return
-                      element.split(',').map(item => {
-                        header.push({
-                          key: item
-                        })
-                      })
-                    } else {
-                      const tempRow = element.split(',')
-                      const objData = {}
-                      header.forEach((item, i) => {
-                        if (item.key === 'no') {
-                          objData[`${item.key}`] = index
-                        } else {
-                          objData[`${item.key}`] = tempRow[i - 1]
-                        }
-                      })
-                      this.rows.push(objData)
-                    }
-                  })
-                  this.resultFields = header
                   this.isLoadingCreate = false
                 } else {
                   this.isExecuted = true
-                  this.msg = 'Query is failed'
+                  this.isFailed = true
+                  this.msgErr = 'Query is failed'
+                  this.msgFailed = resResult.data.content
                 }
               } catch (e) {
                 this.isExecuted = true
-                this.msg = 'Query is failed'
+                this.isFailed = true
+                this.msgErr = 'Query is failed'
+                this.msgFailed = e.message
               }
               await this.sleep(10000)
             }
@@ -393,5 +406,9 @@ export default {
 .autocomplete-list li :hover,
 .active {
   background-color: #f5f5f5;
+}
+
+.msg-fail {
+  color: red;
 }
 </style>

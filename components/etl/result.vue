@@ -21,8 +21,11 @@
           </b-table>
         </b-col>
         <b-col v-else>
-          <div class="text-center">
-            <b-spinner :variant="variant" label="Text Centered"></b-spinner>
+          <div class="text-center" v-if="isFailed">
+            <h5 class="msg-fail">{{ msgErr }}</h5>
+          </div>
+          <div class="text-center" v-else>
+            <b-spinner variant="primary" label="Text Centered"></b-spinner>
             <h5>{{ msg }}</h5>
           </div>
         </b-col>
@@ -55,8 +58,9 @@ export default {
     rows: [],
     isExecuted: false,
     msg: '',
-    variant: 'primary',
-    isDownload: false
+    isDownload: false,
+    isFailed: false,
+    msgErr: ''
   }),
   methods: {
     async show (id) {
@@ -69,45 +73,45 @@ export default {
       try {
         const res = await getResultDetail(this.idItem)
         if (res.code === '200') {
-          const totalArray = res.data.content.split('\n')
-          const header = []
           if (res.data.status === 'successed') {
+            const totalArray = res.data.content.split('\n')
+            const header = []
             header.push({
               key: 'no'
             })
+            totalArray.forEach((element, index) => {
+              if (index === 0) {
+              // eslint-disable-next-line array-callback-return
+                element.split(',').map(item => {
+                  header.push({
+                    key: item
+                  })
+                })
+              } else {
+                const tempRow = element.split(',')
+                const objData = {}
+                header.forEach((item, i) => {
+                  if (item.key === 'no') {
+                    objData[`${item.key}`] = index
+                  } else {
+                    objData[`${item.key}`] = tempRow[i - 1]
+                  }
+                })
+                this.rows.push(objData)
+              }
+            })
+            this.resultFields = header
             this.isExecuted = true
           } else {
             if (res.data.status === 'failed') {
               this.isExecuted = false
-              this.variant = 'danger'
-              this.msg = 'Query is failed'
+              this.isFailed = true
+              this.msgErr = 'Query is failed'
             } else {
               this.isExecuted = false
               this.msg = 'Query is executing'
             }
           }
-          totalArray.forEach((element, index) => {
-            if (index === 0) {
-              // eslint-disable-next-line array-callback-return
-              element.split(',').map(item => {
-                header.push({
-                  key: item
-                })
-              })
-            } else {
-              const tempRow = element.split(',')
-              const objData = {}
-              header.forEach((item, i) => {
-                if (item.key === 'no') {
-                  objData[`${item.key}`] = index
-                } else {
-                  objData[`${item.key}`] = tempRow[i - 1]
-                }
-              })
-              this.rows.push(objData)
-            }
-          })
-          this.resultFields = header
           this.isLoading = false
         } else {
           this.isExecuted = true
@@ -146,4 +150,8 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.msg-fail {
+  color: red;
+}
+</style>

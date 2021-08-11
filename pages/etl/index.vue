@@ -95,8 +95,7 @@
           hover
           striped
           :items="rows"
-          :fields="resultFields"
-          :busy="loading">
+          :fields="resultFields">
           <template #table-busy>
           <div class="text-center text-danger my-2">
             <b-spinner class="align-middle"></b-spinner>
@@ -292,7 +291,7 @@ export default {
                     }
                   })
                   this.resultFields = header
-                  this.isLoading = false
+                  this.isLoadingCreate = false
                 } else {
                   this.isExecuted = true
                   this.msg = 'Query is failed'

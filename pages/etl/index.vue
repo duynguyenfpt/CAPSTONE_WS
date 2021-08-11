@@ -107,7 +107,7 @@
         </b-col>
         <b-col sm="8" v-else>
           <div class="text-center">
-            <b-spinner variant="primary" label="Text Centered"></b-spinner>
+            <b-spinner :variant="variant" label="Text Centered"></b-spinner>
             <h5>{{ msg }}</h5>
           </div>
         </b-col>
@@ -152,8 +152,9 @@ export default {
       isExecuted: true,
       msg: '',
       message: {
-        elt: ''
-      }
+        query: ''
+      },
+      variant: 'primary'
     }
   },
   methods: {
@@ -231,7 +232,7 @@ export default {
       }
     },
     async createETL () {
-      this.validateQuery(this.query)
+      this.validateQuery(this.inputValue)
       if (this.message.query === '') {
         try {
           this.isLoadingCreate = true
@@ -244,45 +245,64 @@ export default {
             this.$notify({ type: 'success', text: 'Create ETL succeeded' })
             const id = res.data.request.id
             this.isExecuted = false
-            while (!this.isExecuted) {
+            this.variant = 'primary'
+            let isRunning = true
+            while (isRunning) {
               this.rows = []
-              const resResult = await getResultDetail(id)
-              const header = []
-              if (resResult.data !== '') {
-                header.push({
-                  key: 'no'
-                })
-                this.isExecuted = true
-              } else {
-                this.isExecuted = false
-                this.msg = resResult.message
-              }
-              const totalArray = resResult.data.split('\n')
-              totalArray.forEach((element, index) => {
-                if (index === 0) {
-                // eslint-disable-next-line array-callback-return
-                  element.split(',').map(item => {
+              try {
+                const resResult = await getResultDetail(id)
+                if (resResult.code === '200') {
+                  const totalArray = resResult.data.content.split('\n')
+                  const header = []
+                  if (resResult.data.status === 'successed') {
                     header.push({
-                      key: item
+                      key: 'no'
                     })
-                  })
-                } else {
-                  const tempRow = element.split(',')
-                  const objData = {}
-                  header.forEach((item, i) => {
-                    if (item.key === 'no') {
-                      objData[`${item.key}`] = index
+                    this.isExecuted = true
+                  } else {
+                    if (resResult.data.status === 'failed') {
+                      this.isExecuted = true
+                      this.variant = 'danger'
+                      this.msg = 'Query is failed'
+                      isRunning = false
                     } else {
-                      objData[`${item.key}`] = tempRow[i - 1]
+                      this.isExecuted = false
+                      this.msg = 'Query is executing'
+                    }
+                  }
+                  totalArray.forEach((element, index) => {
+                    if (index === 0) {
+                      // eslint-disable-next-line array-callback-return
+                      element.split(',').map(item => {
+                        header.push({
+                          key: item
+                        })
+                      })
+                    } else {
+                      const tempRow = element.split(',')
+                      const objData = {}
+                      header.forEach((item, i) => {
+                        if (item.key === 'no') {
+                          objData[`${item.key}`] = index
+                        } else {
+                          objData[`${item.key}`] = tempRow[i - 1]
+                        }
+                      })
+                      this.rows.push(objData)
                     }
                   })
-                  this.rows.push(objData)
+                  this.resultFields = header
+                  this.isLoading = false
+                } else {
+                  this.isExecuted = true
+                  this.msg = 'Query is failed'
                 }
-              })
-              this.resultFields = header
+              } catch (e) {
+                this.isExecuted = true
+                this.msg = 'Query is failed'
+              }
               await this.sleep(10000)
             }
-            console.log('ABC: ', this.msg)
           } else {
             this.$notify({ type: 'error', text: 'Create ETL failed' })
           }
@@ -299,7 +319,7 @@ export default {
       })
     },
     validateQuery (value) {
-      if (/^(?=.*select|create|drop|update|insert|alter|delete|attach|detach.*from).*$/.test(value.toLowerCase())) {
+      if (/^(?=.*select|create|drop|update|insert|alter|delete|attach|detach.*from).*$/.test(value)) {
         this.message.query = ''
       } else {
         this.message.query = 'Invalid etl'

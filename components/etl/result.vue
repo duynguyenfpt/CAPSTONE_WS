@@ -23,7 +23,7 @@
         </b-col>
         <b-col v-else>
           <div class="text-center">
-            <b-spinner variant="primary" label="Text Centered"></b-spinner>
+            <b-spinner :variant="variant" label="Text Centered"></b-spinner>
             <h5>{{ msg }}</h5>
           </div>
         </b-col>
@@ -54,49 +54,68 @@ export default {
     resultFields: [],
     rows: [],
     isExecuted: false,
-    msg: null
+    msg: '',
+    variant: 'primary'
   }),
   methods: {
     async show (id) {
       this.idItem = id
       this.isVisibleResult = true
       this.isLoading = true
+      this.msg = ''
+      this.variant = 'primary'
       this.rows = []
-      const res = await getResultDetail(this.idItem)
-      const totalArray = res.data.split('\n')
-      const header = []
-      if (res.data !== '') {
-        header.push({
-          key: 'no'
-        })
-        this.isExecuted = true
-      } else {
-        this.isExecuted = false
-        this.msg = res.message
-      }
-      totalArray.forEach((element, index) => {
-        if (index === 0) {
-          // eslint-disable-next-line array-callback-return
-          element.split(',').map(item => {
+      try {
+        const res = await getResultDetail(this.idItem)
+        if (res.code === '200') {
+          const totalArray = res.data.content.split('\n')
+          const header = []
+          if (res.data.status === 'successed') {
             header.push({
-              key: item
+              key: 'no'
             })
-          })
-        } else {
-          const tempRow = element.split(',')
-          const objData = {}
-          header.forEach((item, i) => {
-            if (item.key === 'no') {
-              objData[`${item.key}`] = index
+            this.isExecuted = true
+          } else {
+            if (res.data.status === 'failed') {
+              this.isExecuted = false
+              this.variant = 'danger'
+              this.msg = 'Query is failed'
             } else {
-              objData[`${item.key}`] = tempRow[i - 1]
+              this.isExecuted = false
+              this.msg = 'Query is executing'
+            }
+          }
+          totalArray.forEach((element, index) => {
+            if (index === 0) {
+              // eslint-disable-next-line array-callback-return
+              element.split(',').map(item => {
+                header.push({
+                  key: item
+                })
+              })
+            } else {
+              const tempRow = element.split(',')
+              const objData = {}
+              header.forEach((item, i) => {
+                if (item.key === 'no') {
+                  objData[`${item.key}`] = index
+                } else {
+                  objData[`${item.key}`] = tempRow[i - 1]
+                }
+              })
+              this.rows.push(objData)
             }
           })
-          this.rows.push(objData)
+          this.resultFields = header
+          this.isLoading = false
+        } else {
+          this.isExecuted = true
+          this.msg = 'Query is failed'
         }
-      })
-      this.resultFields = header
-      this.isLoading = false
+      } catch (e) {
+        this.isExecuted = true
+        this.msg = 'Query is failed'
+      }
     },
     onClose () {
       this.isVisibleResult = false

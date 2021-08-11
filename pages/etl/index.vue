@@ -299,7 +299,7 @@ export default {
       })
     },
     validateQuery (value) {
-      if (/^(?=.*select.*from)(?!.*(?:create|drop|update|insert|alter|delete|attach|detach)).*$/.test(value.toLowerCase())) {
+      if (/^(?=.*select|create|drop|update|insert|alter|delete|attach|detach.*from).*$/.test(value.toLowerCase())) {
         this.message.query = ''
       } else {
         this.message.query = 'Invalid etl'

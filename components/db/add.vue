@@ -319,6 +319,7 @@ export default {
           this.isLoadingCreate = false
           this.isVisible = false
           this.$emit('onAdded')
+          console.log('LCC: ', res.code)
           if (res.code === '201') {
             this.$notify({
               type: 'success',
@@ -328,7 +329,7 @@ export default {
             this.$notify({ type: 'error', text: 'Create database failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Create database failed' })
         }
       }
     },

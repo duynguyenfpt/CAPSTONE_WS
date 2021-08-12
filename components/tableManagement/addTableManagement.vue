@@ -502,7 +502,7 @@ export default {
               }
             }
           } catch (e) {
-            this.$notify({ type: 'error', text: e.message })
+            this.$notify({ type: 'error', text: 'Add table failed' })
           }
         }
       }

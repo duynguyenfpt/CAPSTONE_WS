@@ -344,7 +344,7 @@ export default {
           databaseType: this.databaseType
         }
         const res = await checkConnection(data)
-        if (res.code === '200') {
+        if (res.code === '200' && res.data.success) {
           this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {
           this.$notify({ type: 'error', text: 'Test connection failed' })

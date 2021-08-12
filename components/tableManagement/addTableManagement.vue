@@ -381,6 +381,7 @@ export default {
         this.username = res.data.username
         this.password = res.data.password
         this.dbType = res.data.databaseType
+        this.alias = res.data.alias
         if (this.dbType === 'oracle') {
           this.isOracle = true
           this.sid = res.data.sid
@@ -480,7 +481,9 @@ export default {
               databaseName: this.dbName,
               username: this.username,
               password: this.password,
-              databaseType: this.dbType
+              databaseType: this.dbType,
+              sid: this.sid,
+              alias: this.alias
             }
             const resDb = await createDatabase(db)
             if (resDb.code === '201') {
@@ -516,7 +519,7 @@ export default {
           databaseType: this.dbType
         }
         const res = await checkConnection(data)
-        if (res.code === '200') {
+        if (res.code === '200' && res.data.success) {
           this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {
           this.$notify({ type: 'error', text: 'Test connection failed' })

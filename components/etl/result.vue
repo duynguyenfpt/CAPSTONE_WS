@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-model="isVisibleResult" title="Result" hide-footer size="lg">
+  <b-modal v-model="isVisibleResult" title="Sample Data" hide-footer size="lg">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -68,7 +68,6 @@ export default {
       this.isVisibleResult = true
       this.isLoading = true
       this.msg = ''
-      this.variant = 'primary'
       this.rows = []
       try {
         const res = await getResultDetail(this.idItem)

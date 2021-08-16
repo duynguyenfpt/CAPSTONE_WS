@@ -51,6 +51,10 @@
             <i class="fas fa-cogs"></i>
             ETL
           </b-nav-item>
+          <b-nav-item v-b-toggle.merge :to="{ name: 'merge' }">
+            <i class="fab fa-mixer"></i>
+            Merge
+          </b-nav-item>
           <hr />
         </b-nav>
       </b-col>

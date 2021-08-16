@@ -9,7 +9,7 @@ export function addTable (request) {
 
 export const createTable = (tb) => http.post('api/tables', tb)
 export const editTable = (tb) => http.put('api/tables', tb)
-export const getAllTableByDb = (db, page, limit) => http.get(`api/database_infors/${db}/tables`, { params: { page, limit } })
+export const getAllTableByDb = (db) => http.get(`api/database_infors/${db}/tables`, { params: { page: 1, limit: 100 } })
 export const getTableSchema = (id) => http.get(`api/tables/${id}/current_table_schemas`, { params: { page: 1, limit: 100 } })
 export const getTableByDb = (db, page, limit) => http.get(`api/database_infors/${db}/tables`, { params: { page, limit } })
 export const getSchemaByTableId = (id, page, limit) => http.get(`api/tables/${id}/current_table_schemas`, { params: { page, limit } })

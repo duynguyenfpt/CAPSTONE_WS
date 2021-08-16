@@ -37,23 +37,23 @@
           <b-nav-item v-b-toggle.request :to="{ name: 'request' }">
             <i class="fa fa-check mr-1"></i> Requests
             <b-collapse id="request">
-              <b-nav-item :to="{ name: 'request-add' }">
-                <i class="fa fa-plus" />
-                Add Request
+              <b-nav-item :to="{ name: 'request-addSync' }">
+                <i class="fas fa-sync" />
+                Add Sync Request
+              </b-nav-item>
+              <b-nav-item :to="{ name: 'request-addETL' }">
+                <i class="fas fa-cogs" />
+                Add ETL Request
+              </b-nav-item>
+              <b-nav-item :to="{ name: 'request-addMerge' }">
+                <i class="fab fa-mixer" />
+                Add Merge Request
               </b-nav-item>
             </b-collapse>
           </b-nav-item>
           <b-nav-item v-b-toggle.log :to="{ name: 'log' }">
             <i class="fas fa-notes-medical mr-1" />
             Logs
-          </b-nav-item>
-          <b-nav-item v-b-toggle.etl :to="{ name: 'etl' }">
-            <i class="fas fa-cogs"></i>
-            ETL
-          </b-nav-item>
-          <b-nav-item v-b-toggle.merge :to="{ name: 'merge' }">
-            <i class="fab fa-mixer"></i>
-            Merge
           </b-nav-item>
           <hr />
         </b-nav>

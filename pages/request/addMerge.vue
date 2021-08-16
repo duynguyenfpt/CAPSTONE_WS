@@ -22,6 +22,15 @@
       <b-row class="pt-2" v-if="active === 0">
         <b-col sm="1"></b-col>
         <b-col sm="10">
+          <b-row class="my-1">
+            <b-col sm="3">
+              <h5 for="input-small">New Table Merge:</h5>
+            </b-col>
+            <b-col sm="9">
+              <b-form-input id="input-small" size="sm" placeholder="Enter table name"></b-form-input>
+            </b-col>
+          </b-row>
+          <br>
           <table
             :items="rows"
             class="table table-striped table-bordered table-sm"
@@ -112,7 +121,6 @@
                     :reduce="(text) => text.value"
                     label="text"
                     :options="col[tb.text]"
-                    v-model="table[tb.text]"
                     size="sm"
                     placeholder="Please select a column"
                   ></v-select>
@@ -146,6 +154,13 @@
       <b-row class="pt-2">
         <b-col sm="2"></b-col>
         <b-col sm="8" class="text-center">
+           <b-btn
+            @click="pre"
+            size="sm"
+            variant="primary"
+            :disabled="active === 0"
+            >Prerious step</b-btn
+          >
           <b-btn
             @click="next"
             size="sm"
@@ -264,6 +279,9 @@ export default {
       await Promise.all(newArr)
       this.tables = [this.tb]
       this.opsColName = this.col
+    },
+    pre () {
+      if (this.active-- < 0) this.active = 1
     }
   }
 }

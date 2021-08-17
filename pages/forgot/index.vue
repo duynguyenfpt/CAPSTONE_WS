@@ -8,15 +8,15 @@
             <div class="login-form">
               <div class="form-group">
                 <label for="exampleInputEmail1"
-                  >Email</label
+                  >Username</label
                 >
                 <input
                   type="email"
                   class="form-control"
                   placeholder=""
-                  v-model="email"
+                  v-model="username"
                 />
-                <span class="msg-error">{{ msg.email }}</span>
+                <span class="msg-error">{{ msg.username }}</span>
               </div>
               <div class="text-center">
                 <button class="btn btn-login float-center" @click="onForgot" :disabled="isLoading">
@@ -89,36 +89,47 @@
 </template>
 
 <script>
-
+import { forgotPassword } from '@/service/account'
 export default {
   layout: 'auth',
   data: () => ({
-    email: null,
+    username: null,
     isLoading: false,
     msg: {
-      email: ''
+      username: ''
     }
   }),
   watch: {
-    email (value) {
-      this.email = value
-      this.validateEmail(value)
+    username (value) {
+      this.username = value
+      this.validateUsername(value)
     }
   },
   methods: {
-    validateEmail (value) {
-      if (
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-          value
-        )
-      ) {
-        this.msg.email = ''
+    validateUsername (value) {
+      if (/^[a-zA-Z_][\w]{0,127}$/.test(value)) {
+        this.msg.username = ''
       } else {
-        this.msg.email = 'Invalid email address'
+        this.msg.username = 'Invalid username'
       }
     },
     async onForgot () {
-      this.validateEmail(this.email)
+      if (this.username === null) {
+        this.msg.username = 'Invalid username'
+      }
+      if (this.msg.username === '') {
+        try {
+          this.isLoading = true
+          const res = await forgotPassword(this.username)
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'We sent a new password to your email' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoading = false
+        }
+      }
     }
   }
 }

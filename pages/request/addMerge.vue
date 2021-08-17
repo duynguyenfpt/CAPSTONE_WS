@@ -27,7 +27,8 @@
               <h5 for="input-small">New Table Merge:</h5>
             </b-col>
             <b-col sm="9">
-              <b-form-input id="input-small" size="sm" placeholder="Enter table name"></b-form-input>
+              <b-form-input id="input-small" size="sm" placeholder="Enter table name" v-model="mergeTableName"></b-form-input>
+              <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
             </b-col>
           </b-row>
           <br>
@@ -121,6 +122,7 @@
                     :reduce="(text) => text.value"
                     label="text"
                     :options="col[tb.text]"
+                    v-model="table[tb.value]"
                     size="sm"
                     placeholder="Please select a column"
                   ></v-select>
@@ -173,6 +175,7 @@
             variant="primary"
             class="btn-add-request"
             :disabled="active === 0"
+            @click="addRequest"
           >
             <b-spinner
               v-if="isLoadingCreate"
@@ -215,7 +218,18 @@ export default {
       isLoadingCreate: false,
       active: 0,
       tb: {},
-      col: {}
+      col: {},
+      mergeTableName: null,
+      msg: {
+        tableName: ''
+      },
+      listTables: [
+        {
+          table_id: null,
+          table: null,
+          database_alias: null
+        }
+      ]
     }
   },
   async mounted () {
@@ -225,7 +239,20 @@ export default {
       this.opsDbName.push({ value: item.id, text: item.databaseName })
     })
   },
+  watch: {
+    mergeTableName (value) {
+      this.mergeTableName = value
+      this.validateTableName(value)
+    }
+  },
   methods: {
+    validateTableName (value) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+        this.msg.tableName = ''
+      } else {
+        this.msg.tableName = 'Invalid table name'
+      }
+    },
     addNewRow () {
       this.rows.push({
         dbName: null,
@@ -268,13 +295,35 @@ export default {
       this.tbs[index] = { value: tb, text: res.data.tableName }
     },
     async next () {
-      if (this.active++ > 1) this.active = 0
-      const newArr = this.tbs.map(async (item) => {
+      this.validateTableName(this.mergeTableName)
+      if (this.mergeTableName === null || this.mergeTableName === '') {
+        this.msg.tableName = 'Invalid table name'
+      } else {
+        this.msg.tableName = ''
+      }
+      if (this.msg.tableName === '') {
+        if (this.active++ > 1) this.active = 0
+      }
+      this.listTables = [
+        {
+          table_id: null,
+          table: null,
+          database_alias: null
+        }
+      ]
+      const newArr = this.tbs.map(async (item, i) => {
         this.tb[item.text] = null
         const res = await getColumnByTable(item.value)
         this.col[item.text] = res.data.map((item) => {
           return { value: item, text: item }
         })
+        const resTb = await getTableDetail(item.value)
+        const rawTable = {
+          table_id: resTb.data.id,
+          table: resTb.data.tableName,
+          database_alias: resTb.data.databaseInfo.databaseName
+        }
+        this.listTables[i] = rawTable
       })
       await Promise.all(newArr)
       this.tables = [this.tb]
@@ -282,6 +331,14 @@ export default {
     },
     pre () {
       if (this.active-- < 0) this.active = 1
+    },
+    addRequest () {
+      const data = {
+        mergeTableName: this.mergeTableName,
+        listTables: this.listTables
+      }
+      console.log('LCC: ', this.tables)
+      console.log('LCC: ', data)
     }
   }
 }

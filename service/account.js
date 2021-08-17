@@ -22,3 +22,4 @@ export const searchAccount = (page, limit, textSearch) => http.get('api/accounts
 })
 export const activeAccount = (id, data) => http.put(`api/accounts/${id}`, data)
 export const deactiveAccount = (id, data) => http.put(`api/accounts/${id}`, data)
+export const forgotPassword = (username) => http.get('api/accounts/forgot_password', { params: { username } })

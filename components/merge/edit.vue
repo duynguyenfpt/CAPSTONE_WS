@@ -85,25 +85,26 @@
           <tbody>
             <tr v-for="(mapping, idx) in merge.list_mapping" :key="mapping.colName">
               <td>{{idx+1}}</td>
-              <td v-for="(name, i) in mapping.listCol" :key="name">
+              <td v-for="(col, index) in colOf" :key="col">
                 <VSelect
                   :reduce="(e) => e.value"
+                  v-model="mapping.listCol[index]"
                   label="text"
-                  :options="colOf[i]"
-                  v-model="mapping.listCol[i]"
+                  :options="col"
+                  placeholder="Please select a column"
                 />
               </td>
               <td>
                 <b-input size="sm" v-model="mapping.colName"></b-input>
               </td>
               <td>
-                <b-checkbox size="sm" v-model="mapping.is_unique"></b-checkbox>
+                <b-checkbox size="sm" v-model="mapping.is_unique" :checked="mapping.is_unique == 1"></b-checkbox>
               </td>
               <td>
                 <b-btn variant="danger" size="sm">
                   <i class="fa fa-trash"></i>
                 </b-btn>
-                <b-btn variant="success" size="sm">
+                <b-btn variant="success" size="sm" v-if="idx == merge.list_mapping.length - 1">
                   <i class="fa fa-plus" />
                 </b-btn>
               </td>
@@ -145,11 +146,12 @@ export default {
     tables: [
       {
         db_alias: null,
-        table_id: null
+        table_id: null,
+        table: null
       }
     ],
     columns: [],
-    col: {}
+    column: {}
   }),
 
   async created () {
@@ -170,7 +172,8 @@ export default {
         this.merge = JSON.parse(res.data.latestMetadata)
         this.tables = this.merge.list_tables.map((table) => ({
           db_alias: table.database_alias,
-          table_id: table.table_id
+          table_id: table.table_id,
+          table: table.table
         }))
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -182,15 +185,27 @@ export default {
     deleteTable (idx) {
       this.tables = this.tables.filter((_, i) => i !== idx)
     },
-    next () {
-      this.step++
+    async next () {
+      this.colOf = []
+      this.merge.list_mapping = this.merge.list_mapping.map(item => {
+        const newCol = item.listCol.map(col => {
+          return col.split('.').pop()
+        })
+        return {
+          colName: item.colName,
+          is_unique: item.is_unique,
+          listCol: newCol
+        }
+      })
+
       this.tables.forEach(async (table) => {
         const res = await getColumnByTable(table.table_id)
-        this.col = res.data.map((item) => {
+        this.column = res.data.map((item) => {
           return { value: item, text: item }
         })
-        this.colOf.push(this.col)
+        this.colOf.push(this.column)
       })
+      this.step++
     },
     prev () {
       this.step--

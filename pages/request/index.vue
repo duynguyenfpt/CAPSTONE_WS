@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Request Management</h1>
@@ -78,6 +78,9 @@
       <request-log ref="log" @onUpdated="refreshData"/>
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -126,7 +129,8 @@ export default {
     tableFields: tableFields,
     request: null,
     loading: false,
-    textSearch: null
+    textSearch: null,
+    isDeny: false
   }),
   created () {
     this.getList()
@@ -151,14 +155,18 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.request = res.data
-        this.pagination.total = res.metaData.totalItem
-        this.request.forEach((e) => {
-          e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
-          e.modifiedDate = moment(this.request.modifiedDate).format(
-            'YYYY-MM-DD'
-          )
-        })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.request = res.data
+          this.pagination.total = res.metaData.totalItem
+          this.request.forEach((e) => {
+            e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+            e.modifiedDate = moment(this.request.modifiedDate).format(
+              'YYYY-MM-DD'
+            )
+          })
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

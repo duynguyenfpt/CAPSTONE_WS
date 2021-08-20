@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDenyRight">
     <b-row>
       <b-col class="text-center">
         <h1>Right Management</h1>
@@ -91,7 +91,7 @@
           <right-detail ref="detail" @onDetailed="onReload" />
         </section>
       </b-col>
-      <b-col cols="6">
+      <b-col cols="6" v-show="!isDenyAccount">
         <section name="action">
           <b-row>
             <b-col cols="4">
@@ -147,7 +147,7 @@
             @input="searchAccount"
           />
         </section>
-        <section name="action">
+        <section name="action" v-show="!isDenyAccountRight">
           <b-row>
             <b-col cols="3">
               <h6>Account's Right</h6>
@@ -181,7 +181,7 @@
             </b-col>
           </b-row>
         </section>
-        <section name="view" class="pt-3">
+        <section name="view" class="pt-3" v-show="!isDenyAccountRight">
           <b-table
             responsive
             hover
@@ -220,6 +220,9 @@
     <section name="popup">
       <right-detail ref="detail" />
     </section>
+  </div>
+  <div v-else>
+    <common-deny/>
   </div>
 </template>
 
@@ -280,9 +283,6 @@ const accountFields = [
   },
   {
     key: 'role'
-  },
-  {
-    key: 'phone'
   }
 ]
 
@@ -323,7 +323,10 @@ export default {
     oldRight: [],
     isChoseAcc: true,
     textRight: null,
-    textAccount: null
+    textAccount: null,
+    isDenyRight: false,
+    isDenyAccount: false,
+    isDenyAccountRight: true
   }),
 
   created () {
@@ -339,8 +342,12 @@ export default {
           this.paginationRight.page,
           this.paginationRight.limit
         )
-        this.rights = resRight.data
-        this.paginationRight.total = resRight.metaData.totalItem
+        if (resRight.statusCode === '403') {
+          this.isDenyRight = true
+        } else {
+          this.rights = resRight.data
+          this.paginationRight.total = resRight.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -354,19 +361,23 @@ export default {
           this.paginationAccount.page,
           this.paginationAccount.limit
         )
-        this.accounts = resAccount.data
-        this.accounts.forEach((e) => {
-          if (e.role === 'admin') {
-            e.role = 'Admin'
-          }
-          if (e.role === 'viewer') {
-            e.role = 'Viewer'
-          }
-          if (e.role === 'engineer') {
-            e.role = 'Engineer'
-          }
-        })
-        this.paginationAccount.total = resAccount.metaData.totalItem
+        if (resAccount.statusCode === '403') {
+          this.isDenyAccount = true
+        } else {
+          this.accounts = resAccount.data
+          this.accounts.forEach((e) => {
+            if (e.role === 'admin') {
+              e.role = 'Admin'
+            }
+            if (e.role === 'viewer') {
+              e.role = 'Viewer'
+            }
+            if (e.role === 'engineer') {
+              e.role = 'Engineer'
+            }
+          })
+          this.paginationAccount.total = resAccount.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -409,19 +420,24 @@ export default {
           this.paginationAccountRight.page,
           this.paginationAccountRight.limit
         )
-        this.accountRight = res.data
-        const resAll = await getAllRightByAcc(this.account)
-        // eslint-disable-next-line array-callback-return
-        resAll.data.map((item) => {
-          this.rightUpdate.push(item.id)
-        })
-        this.oldRight = this.rightUpdate
-        this.paginationAccountRight.total = res.metaData.totalItem
-        const resRight = await getAll()
-        this.opsRight = resRight.data.map((item) => {
-          return { value: item.id, label: item.path + ' - ' + item.method }
-        })
-        this.isChoseAcc = false
+        if (res.statusCode === '403') {
+          this.isDenyAccountRight = true
+        } else {
+          this.isDenyAccountRight = false
+          this.accountRight = res.data
+          const resAll = await getAllRightByAcc(this.account)
+          // eslint-disable-next-line array-callback-return
+          resAll.data.map((item) => {
+            this.rightUpdate.push(item.id)
+          })
+          this.oldRight = this.rightUpdate
+          this.paginationAccountRight.total = res.metaData.totalItem
+          const resRight = await getAll()
+          this.opsRight = resRight.data.map((item) => {
+            return { value: item.id, label: item.path + ' - ' + item.method }
+          })
+          this.isChoseAcc = false
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -458,7 +474,7 @@ export default {
           this.paginationAccountRight.total = res.metaData.totalItem
           const resRight = await getAll()
           this.opsRight = resRight.data.map((item) => {
-            return { value: item.id, label: item.rightName }
+            return { value: item.id, label: item.path + ' - ' + item.method }
           })
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

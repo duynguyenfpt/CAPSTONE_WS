@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Log Management</h1>
@@ -74,6 +74,9 @@
       />
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -120,7 +123,8 @@ export default {
     fromDate: null,
     toDate: null,
     min: null,
-    logs: []
+    logs: [],
+    isDeny: false
   }),
 
   created () {
@@ -138,11 +142,15 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.logs = res.data
-        this.logs.forEach((e) => {
-          e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.logs = res.data
+          this.logs.forEach((e) => {
+            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

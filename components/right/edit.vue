@@ -4,7 +4,7 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-      <b-row>
+      <b-row class="pt-2">
         <b-col cols="4">
           <label class="form-lab">Path</label>
         </b-col>
@@ -27,7 +27,7 @@
           <p class="msg-error" v-if="msg.method">{{ msg.method }}</p>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row class="pt-2">
           <b-col cols="4">
             <label class="form-lab">Description</label>
           </b-col>

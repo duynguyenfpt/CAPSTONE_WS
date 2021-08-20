@@ -84,15 +84,6 @@
                   <div class="carousel-caption d-none d-md-block">
                   </div>
                 </div>
-                <div class="carousel-item">
-                  <img
-                    class="d-block img-fluid"
-                    src="https://images.pexels.com/photos/872957/pexels-photo-872957.jpeg"
-                    alt="First slide"
-                  />
-                  <div class="carousel-caption d-none d-md-block">
-                  </div>
-                </div>
               </div>
             </div>
           </div>

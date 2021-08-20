@@ -39,12 +39,12 @@ export default {
       try {
         this.isLoading = true
         const res = await deleteRight(this.idItem)
+        console.log(res.code)
         this.$emit('onDeleted')
-        if (res.code === 200) {
+        if (res.code === '200') {
           this.$notify({ type: 'success', text: 'Delete right succeeded' })
         } else {
           this.$notify({ type: 'error', text: 'Delete right failed' })
-          this.$router.go()
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

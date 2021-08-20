@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -113,6 +113,9 @@
       </b-modal>
     </div>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -159,7 +162,8 @@ export default {
       },
       filterMethod (query, item) {
         return item.initial.toLowerCase().indexOf(query.toLowerCase()) > -1
-      }
+      },
+      isDeny: false
     }
   },
   watch: {
@@ -301,19 +305,23 @@ export default {
   },
   async mounted () {
     const res = await getAll()
-    const states = res.data.map(item => {
-      return { id: item.id, name: item.rightName }
-    })
-    const initials = res.data.map(item => {
-      return item.code
-    })
-    states.forEach((right, index) => {
-      this.dataArr.push({
-        label: right.name,
-        key: right.id,
-        initial: initials[index]
+    if (res.statusCode === '403') {
+      this.isDenied = true
+    } else {
+      const states = res.data.map(item => {
+        return { id: item.id, name: item.path + ' - ' + item.method }
       })
-    })
+      const initials = res.data.map(item => {
+        return item.path + ' - ' + item.method
+      })
+      states.forEach((right, index) => {
+        this.dataArr.push({
+          label: right.name,
+          key: right.id,
+          initial: initials[index]
+        })
+      })
+    }
   }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -100,6 +100,9 @@
       </b-modal>
     </div>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -141,19 +144,24 @@ export default {
       databaseType: null,
       sid: null,
       alias: null
-    }
+    },
+    isDeny: false
   }),
 
   async mounted () {
     this.isLoading = true
     const hosts = await getAllServers()
+    if (hosts.statusCode === '403') {
+      this.isDeny = true
+    } else {
     // eslint-disable-next-line array-callback-return
-    hosts.data.map((item) => {
-      this.dbHosts.push({
-        value: item.id,
-        text: item.serverDomain + ' - ' + item.serverHost
+      hosts.data.map((item) => {
+        this.dbHosts.push({
+          value: item.id,
+          text: item.serverDomain + ' - ' + item.serverHost
+        })
       })
-    })
+    }
     this.isLoading = false
   },
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDenied">
     <b-row>
       <b-col class="text-center">
         <h1>Database Management</h1>
@@ -96,6 +96,9 @@
       <db-delete ref="delete" @onDeleted="onReload"/>
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -153,7 +156,8 @@ export default {
     },
     loading: false,
     dbs: [],
-    keyword: null
+    keyword: null,
+    isDenied: false
   }),
 
   created () {
@@ -168,30 +172,33 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.dbs = res.data
-        console.log(res.data)
-        this.dbs.forEach((e) => {
-          if (e.databaseType === 'mysql') {
-            e.databaseType = 'My Sql'
-          }
-          if (e.databaseType === 'postgresql') {
-            e.databaseType = 'PostgreSQL'
-          }
-          if (e.databaseType === 'oracle') {
-            e.databaseType = 'Oracle'
-          }
-        })
-        this.dbs.forEach((e) => {
-          e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
-        })
-        this.dbs.forEach((e) => {
-          if (e.createdDate === null) {
-            e.createdDate = 'YYYY-MM-DD'
-          } else {
-            e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
-          }
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDenied = true
+        } else {
+          this.dbs = res.data
+          this.dbs.forEach((e) => {
+            if (e.databaseType === 'mysql') {
+              e.databaseType = 'My Sql'
+            }
+            if (e.databaseType === 'postgresql') {
+              e.databaseType = 'PostgreSQL'
+            }
+            if (e.databaseType === 'oracle') {
+              e.databaseType = 'Oracle'
+            }
+          })
+          this.dbs.forEach((e) => {
+            e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+          })
+          this.dbs.forEach((e) => {
+            if (e.createdDate === null) {
+              e.createdDate = 'YYYY-MM-DD'
+            } else {
+              e.createdDate = moment(e.createdDate).format('YYYY-MM-DD')
+            }
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

@@ -34,7 +34,7 @@
       :items="request"
       :busy="loading">
         <template #cell(action)="item">
-          <b-btn @click="edit(item.item.id)" size="sm" variant="info">
+          <b-btn @click="edit(item.item.id, item.item.requestType)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
           <b-btn size="sm" @click="reset(item.item.id)" variant="danger">
@@ -173,8 +173,12 @@ export default {
         this.loading = false
       }
     },
-    edit (id) {
-      this.$refs.edit.show(id)
+    edit (id, requestType) {
+      if (requestType === 'MergeRequest') {
+        this.$router.push(`request/${id}`)
+      } else {
+        this.$refs.edit.show(id)
+      }
     },
     onAssign () {
       this.$refs.assign.onShow()

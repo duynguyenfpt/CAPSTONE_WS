@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col class="text-center">
-        <h1>Create Merge Request</h1>
+        <h1>Update Merge Request</h1>
       </b-col>
     </b-row>
     <div>
@@ -192,7 +192,7 @@
 
 <script>
 import { getAllDbType } from '@/service/db'
-import { createMerge } from '@/service/merge'
+import { createMerge, getMerge } from '@/service/merge'
 import {
   getAllTableByDb,
   getTableDetail,
@@ -202,6 +202,9 @@ import Vue from 'vue'
 import vSelect from 'vue-select'
 Vue.component('v-select', vSelect)
 export default {
+  props: {
+    id: {}
+  },
   data () {
     return {
       mapping: {},
@@ -234,11 +237,9 @@ export default {
       listMapping: []
     }
   },
-  async mounted () {
-    const res = await getAllDbType()
-    this.opsDbName = res.data.map((item) => {
-      return { value: item.id, text: item.alias }
-    })
+  async created () {
+    await this.getAllDB()
+    await this.getMergeRequest()
   },
   watch: {
     mergeTableName (value) {
@@ -247,6 +248,42 @@ export default {
     }
   },
   methods: {
+
+    async getAllDB () {
+      const res = await getAllDbType()
+      this.opsDbName = res.data.map((item) => {
+        return { value: item.id, text: item.alias }
+      })
+    },
+
+    async getMergeRequest () {
+      try {
+        const res = await getMerge(this.id)
+        const dbTypes = await getAllDbType()
+        console.log(dbTypes)
+
+        const obj = JSON.parse(res.data.latestMetadata)
+        console.log(obj)
+        this.mergeTableName = obj.merge_table_name
+        obj.list_tables.forEach((item, i) => {
+          this.opsDbName.forEach(async ele => {
+            if (item.database_alias === ele.text) {
+              const resTb = await getAllTableByDb(ele.value)
+              const opsTbs = resTb.data.map((item) => {
+                return { value: item.id, text: item.tableName }
+              })
+              this.rows[i] = {
+                dbName: ele.value,
+                tbName: item.table,
+                opsTbName: opsTbs
+              }
+            }
+          })
+        })
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      }
+    },
     validateTableName (value) {
       if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
         this.msg.tableName = ''
@@ -289,22 +326,16 @@ export default {
       ]
     },
     async fillTb (db, index) {
-      if (db !== null) {
-        const res = await getAllTableByDb(db)
-        this.rows[index].tbName = ''
-        this.rows[index].opsTbName = res.data.map((item) => {
-          return { value: item.id, text: item.tableName }
-        })
-      } else {
-        this.rows[index].tbName = ''
-        this.rows[index].opsTbName = []
-      }
+      const res = await getAllTableByDb(db)
+      this.rows[index].dbName = db
+      this.rows[index].tbName = ''
+      this.rows[index].opsTbName = res.data.map((item) => {
+        return { value: item.id, text: item.tableName }
+      })
     },
     async addTb (tb, index) {
-      if (tb !== null) {
-        const res = await getTableDetail(tb)
-        this.tbs[index] = { value: tb, text: res.data.tableName }
-      }
+      const res = await getTableDetail(tb)
+      this.tbs[index] = { value: tb, text: res.data.tableName }
     },
     async next () {
       this.validateTableName(this.mergeTableName)
@@ -353,28 +384,24 @@ export default {
         this.listMapping[i] = mapping
       })
       const data = {
-        merge_table_name: this.mergeTableName,
-        list_tables: this.listTables,
-        list_mapping: this.listMapping
-      }
-      const dataStr = {
         mergeTableName: this.mergeTableName,
-        currentMetadata: JSON.stringify(data)
+        listTables: this.listTables,
+        listMapping: this.listMapping
       }
       try {
         this.isLoadingCreate = true
-        const res = await createMerge(dataStr)
-        this.isLoadingCreate = false
+        const res = await createMerge(data)
         if (res.code === '201') {
           this.$notify({ type: 'success', text: 'Create merge request succeeded' })
         } else {
           this.$notify({ type: 'error', text: 'Create merge request failed' })
         }
+        this.isLoadingCreate = false
         this.reset()
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
-        this.isLoadingCreate = false
+        this.isLoadingCreate = true
       }
     },
     reset () {

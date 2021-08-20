@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Edit Database" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -67,6 +68,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -101,15 +106,20 @@ export default {
       password: null,
       sid: null,
       alias: null
-    }
+    },
+    isDeny: false
   }),
 
   async mounted () {
     this.isLoading = true
     const hosts = await getAllServers()
-    this.options = hosts.data.map(item => {
-      return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
-    })
+    if (hosts.statusCode === '403') {
+      this.isDeny = true
+    } else {
+      this.options = hosts.data.map(item => {
+        return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
+      })
+    }
     this.isLoading = false
   },
 

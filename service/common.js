@@ -28,6 +28,11 @@ http.interceptors.response.use(
     if (statusCode === 401 || statusCode === '401') {
       window.location.href = '/login'
     }
-    Promise.reject(error)
+    if (error.message.includes('403')) {
+      return {
+        statusCode: '403',
+        message: 'Access denied'
+      }
+    }
   }
 )

@@ -240,10 +240,13 @@ const rightFields = [
     key: 'no'
   },
   {
-    key: 'code'
+    key: 'path'
   },
   {
-    key: 'rightName'
+    key: 'method'
+  },
+  {
+    key: 'description'
   },
   {
     key: 'action'
@@ -255,10 +258,13 @@ const accountRightFields = [
     key: 'no'
   },
   {
-    key: 'code'
+    key: 'path'
   },
   {
-    key: 'rightName'
+    key: 'method'
+  },
+  {
+    key: 'description'
   }
 ]
 
@@ -413,7 +419,7 @@ export default {
         this.paginationAccountRight.total = res.metaData.totalItem
         const resRight = await getAll()
         this.opsRight = resRight.data.map((item) => {
-          return { value: item.id, label: item.rightName }
+          return { value: item.id, label: item.path + ' - ' + item.method }
         })
         this.isChoseAcc = false
       } catch (e) {

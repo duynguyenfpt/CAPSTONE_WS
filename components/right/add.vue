@@ -5,25 +5,36 @@
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
       </div>
       <div v-else>
-        <b-row>
+        <b-row class="pt-2">
           <b-col cols="4">
-            <label class="form-lab">Right Code</label>
+            <label class="form-lab">Path</label>
           </b-col>
           <b-col>
-            <b-input size="sm" v-model="code"></b-input>
-            <p class="msg-error" v-if="msg.code">{{ msg.code }}</p>
+            <b-form-input size="sm" v-model="path"></b-form-input>
+            <p class="msg-error" v-if="msg.path">{{ msg.path }}</p>
           </b-col>
         </b-row>
         <b-row class="pt-2">
           <b-col cols="4">
-            <label class="text-center">Right Name</label>
+            <label class="text-center">Method</label>
           </b-col>
           <b-col>
-            <b-form-input
+            <b-form-select
+              v-model="method"
+              :options="opsMethod"
               size="sm"
-              v-model="name"
-            ></b-form-input>
-            <p class="msg-error" v-if="msg.name">{{ msg.name }}</p>
+              @change="chooseMethod"
+            ></b-form-select>
+            <p class="msg-error" v-if="msg.method">{{ msg.method }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab">Description</label>
+          </b-col>
+          <b-col>
+            <b-form-input size="sm" v-model="description"></b-form-input>
+            <p class="msg-error" v-if="msg.description">{{ msg.description }}</p>
           </b-col>
         </b-row>
         <b-row class="text-center pt-3">
@@ -51,66 +62,93 @@ export default {
   },
   data: () => ({
     isLoading: false,
-    code: null,
-    name: null,
+    path: null,
+    method: null,
+    description: null,
     isVisible: false,
     isLoadingCreate: false,
     msg: {
-      code: null,
-      name: null
-    }
+      path: null,
+      method: null,
+      description: null
+    },
+    opsMethod: [
+      { value: null, text: 'Please select a method' },
+      { value: 'GET', text: 'GET' },
+      { value: 'POST', text: 'POST' },
+      { value: 'PUT', text: 'PUT' },
+      { value: 'DELETE', text: 'DELETE' }
+    ]
   }),
   watch: {
-    name (value) {
-      this.name = value
-      this.validateName(value)
+    path (value) {
+      this.path = value
+      this.validatePath(value)
     },
-    code (value) {
-      this.code = value
-      this.validateCode(value)
+    description (value) {
+      this.description = value
+      this.validateDescription(value)
     }
   },
   methods: {
-    validateName (value) {
+    validatePath (value) {
       if (/^[a-zA-Z0-9_.-]{1,127}$/.test(value)) {
-        this.msg.name = ''
+        this.msg.path = ''
       } else {
-        this.msg.name = 'Invalid right name'
+        this.msg.path = 'Invalid path'
       }
     },
-    validateCode (value) {
-      if (/^[a-zA-Z0-9_.-]{1,127}$/.test(value)) {
-        this.msg.code = ''
+    validateDescription (value) {
+      if (value !== '' && value !== null) {
+        this.msg.description = ''
       } else {
-        this.msg.code = 'Invalid right code'
+        this.msg.description = 'Invalid description'
+      }
+    },
+    chooseMethod () {
+      if (this.method === null) {
+        this.msg.method = 'Please select a method'
+      } else {
+        this.msg.method = ''
       }
     },
     async show () {
       this.isVisible = true
       this.isLoading = true
-      this.code = null
-      this.name = null
+      this.path = null
+      this.method = null
+      this.description = null
       this.isLoading = false
       this.isLoadingCreate = false
+      this.msg = {
+        path: null,
+        method: null,
+        description: null
+      }
     },
     onClose () {
       this.isVisible = false
     },
     async addRight () {
-      this.validateName(this.name)
-      this.validateCode(this.code)
-      if (this.code === null) {
-        this.msg.code = 'Invalid right code'
+      this.validatePath(this.path)
+      this.chooseMethod()
+      this.validateDescription(this.description)
+      if (this.method === null) {
+        this.msg.method = 'Please select a method'
       }
-      if (this.name === null) {
-        this.msg.name = 'Invalid right name'
+      if (this.path === null) {
+        this.msg.path = 'Invalid path'
       }
-      if (this.msg.code === '' && this.msg.name === '') {
+      if (this.description === null) {
+        this.msg.description = 'Invalid description'
+      }
+      if (this.msg.method === '' && this.msg.path === '' && this.msg.description === '') {
         try {
           this.isLoadingCreate = true
           const body = {
-            code: this.code,
-            rightName: this.name
+            path: this.path,
+            method: this.method,
+            description: this.description
           }
           const res = await createRight(body)
           this.$emit('onAdded')
@@ -119,7 +157,6 @@ export default {
           } else {
             this.$notify({ type: 'error', text: 'Add right failed' })
           }
-          this.$router.go()
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
         } finally {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Account Management</h1>
@@ -117,6 +117,9 @@
       <account-deactive ref="deactive" @onDeactived="onReload" />
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -157,7 +160,8 @@ export default {
     },
     loading: false,
     accounts: [],
-    keySearch: null
+    keySearch: null,
+    isDeny: false
   }),
 
   created () {
@@ -172,19 +176,23 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.accounts = res.data
-        this.accounts.forEach((e) => {
-          if (e.role === 'admin') {
-            e.role = 'Admin'
-          }
-          if (e.role === 'viewer') {
-            e.role = 'Viewer'
-          }
-          if (e.role === 'engineer') {
-            e.role = 'Engineer'
-          }
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.accounts = res.data
+          this.accounts.forEach((e) => {
+            if (e.role === 'admin') {
+              e.role = 'Admin'
+            }
+            if (e.role === 'viewer') {
+              e.role = 'Viewer'
+            }
+            if (e.role === 'engineer') {
+              e.role = 'Engineer'
+            }
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -228,19 +236,23 @@ export default {
           this.pagination.limit,
           this.keySearch
         )
-        this.accounts = result.data
-        this.accounts.forEach((e) => {
-          if (e.role === 'admin') {
-            e.role = 'Admin'
-          }
-          if (e.role === 'viewer') {
-            e.role = 'Viewer'
-          }
-          if (e.role === 'engineer') {
-            e.role = 'Engineer'
-          }
-        })
-        this.pagination.total = result.metaData.totalItem
+        if (result.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.accounts = result.data
+          this.accounts.forEach((e) => {
+            if (e.role === 'admin') {
+              e.role = 'Admin'
+            }
+            if (e.role === 'viewer') {
+              e.role = 'Viewer'
+            }
+            if (e.role === 'engineer') {
+              e.role = 'Engineer'
+            }
+          })
+          this.pagination.total = result.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

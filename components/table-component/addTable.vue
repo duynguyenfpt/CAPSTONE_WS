@@ -23,7 +23,20 @@
               size="sm"
               v-model="tableName"
             ></b-form-input>
-            <p class="msg-error" v-if="msg">{{ msg }}</p>
+            <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="text-center">Default Key</label>
+          </b-col>
+          <b-col>
+            <b-form-input
+              id="input-live"
+              size="sm"
+              v-model="keyDefault"
+            ></b-form-input>
+            <p class="msg-error" v-if="msg.defaultKey">{{ msg.defaultKey }}</p>
           </b-col>
         </b-row>
         <b-row class="text-center pt-3">
@@ -55,23 +68,38 @@ export default {
     isLoading: false,
     tableName: null,
     dbName: null,
+    defaultKey: null,
     isVisible: false,
     idItem: 0,
     isLoadingCreate: false,
-    msg: null
+    msg: {
+      tableName: '',
+      defaultKey: ''
+    }
   }),
   watch: {
     tableName (value) {
       this.tableName = value
       this.validateTableName(value)
+    },
+    defaultKey (value) {
+      this.tableName = value
+      this.validateDefaultKey(value)
     }
   },
   methods: {
     validateTableName (value) {
       if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
-        this.msg = ''
+        this.msg.tableName = ''
       } else {
-        this.msg = 'Invalid table name'
+        this.msg.tableName = 'Invalid table name'
+      }
+    },
+    validateDefaultKey (value) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+        this.msg.defaultKey = ''
+      } else {
+        this.msg.defaultKey = 'Invalid default key'
       }
     },
     async show (id) {
@@ -80,7 +108,12 @@ export default {
       this.isLoading = true
       const res = await getDatabaseDetail(this.idItem)
       this.dbName = res.data.databaseName
-      this.msg = null
+      this.tableName = null
+      this.defaultKey = null
+      this.msg = {
+        tableName: '',
+        defaultKey: ''
+      }
       this.isLoading = false
     },
     onClose () {
@@ -88,15 +121,20 @@ export default {
     },
     async addTable () {
       this.validateTableName(this.tableName)
+      this.validateDefaultKey(this.defaultKey)
       if (this.tableName === null) {
-        this.msg = 'Invalid table name'
+        this.msg.tableName = 'Invalid table name'
       }
-      if (this.msg === '') {
+      if (this.defaultKey === null) {
+        this.msg.defaultKey = 'Invalid default key'
+      }
+      if (this.msg.tableName === '' && this.msg.defaultKey === '') {
         try {
           this.isLoadingCreate = true
           const body = {
             tableName: this.tableName,
-            databaseInforId: this.idItem
+            databaseInforId: this.idItem,
+            defaultKey: this.defaultKey
           }
           const res = await addTable(body)
           this.$emit('onAdded')

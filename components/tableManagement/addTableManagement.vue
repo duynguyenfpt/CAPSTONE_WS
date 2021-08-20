@@ -31,7 +31,7 @@
         </b-col>
       </b-row>
       <b-row>
-        <b-col>
+        <b-col cols="3">
           <label>Host</label>
           <v-select
             class="select-sm"
@@ -46,10 +46,22 @@
           </v-select>
           <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
         </b-col>
-        <b-col>
+        <b-col cols="3">
           <label>Port</label>
           <b-input size="sm" v-model="port" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
+        </b-col>
+        <b-col>
+          <label>Database Type</label>
+          <b-form-select
+            v-model="dbType"
+            :options="opsDbType"
+            size="sm"
+            @change="chooseType"
+            :disabled="isChoseDb"
+          >
+          </b-form-select>
+          <p class="msg-error" v-if="msg.dbType">{{ msg.dbType }}</p>
         </b-col>
       </b-row>
       <b-row>
@@ -76,23 +88,16 @@
           <p class="msg-error" v-if="msg.tb">{{ msg.tb }}</p>
         </b-col>
         <b-col>
-          <label>Database Type</label>
-          <b-form-select
-            v-model="dbType"
-            :options="opsDbType"
-            size="sm"
-            @change="chooseType"
-            :disabled="isChoseDb"
-          >
-          </b-form-select>
-          <p class="msg-error" v-if="msg.dbType">{{ msg.dbType }}</p>
+          <label>Alias</label>
+          <b-input size="sm" v-model="alias" :disabled="isChoseDb"></b-input>
+          <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
         </b-col>
       </b-row>
       <b-row>
         <b-col cols="6">
-          <label>Alias</label>
-          <b-input size="sm" v-model="alias" :disabled="isChoseDb"></b-input>
-          <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
+          <label>Default Key</label>
+          <b-input size="sm" v-model="defaultKey"></b-input>
+          <p class="msg-error" v-if="msg.defaultKey">{{ msg.defaultKey }}</p>
         </b-col>
         <b-col cols="6" v-if="isOracle">
           <label>SID</label>
@@ -161,6 +166,7 @@ export default {
     dbType: null,
     sid: null,
     alias: null,
+    defaultKey: null,
     isLoading: false,
     isLoadingCreate: false,
     isLoadingFill: false,
@@ -176,7 +182,8 @@ export default {
       password: '',
       dbType: '',
       sid: '',
-      alias: ''
+      alias: '',
+      defaultKey: ''
     }
   }),
   async mounted () {
@@ -204,6 +211,7 @@ export default {
     this.dbType = null
     this.sid = null
     this.alias = null
+    this.defaultKey = null
     this.msg.db = ''
     this.msg.tb = ''
     this.msg.host = ''
@@ -213,6 +221,7 @@ export default {
     this.msg.dbType = ''
     this.msg.alias = ''
     this.msg.sid = ''
+    this.msg.defaultKey = ''
     this.isLoading = false
   },
   watch: {
@@ -243,6 +252,10 @@ export default {
     alias (value) {
       this.alias = value
       this.validateAlias(value)
+    },
+    keyDefault (value) {
+      this.keyDefault = value
+      this.validateKeyDefault(value)
     }
   },
   methods: {
@@ -300,6 +313,13 @@ export default {
         this.msg.alias = 'Invalid alias'
       }
     },
+    validateKeyDefault (value) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+        this.msg.keyDefault = ''
+      } else {
+        this.msg.keyDefault = 'Invalid key default'
+      }
+    },
     chooseHost () {
       if (this.host === null) {
         this.msg.dbType = 'Please select host'
@@ -331,6 +351,7 @@ export default {
       this.sid = null
       this.alias = null
       this.isOracle = false
+      this.keyDefault = null
       this.msg.db = ''
       this.msg.tb = ''
       this.msg.host = ''
@@ -340,6 +361,7 @@ export default {
       this.msg.dbType = ''
       this.msg.sid = ''
       this.msg.alias = ''
+      this.msg.keyDefault = ''
     },
     async createTableInfo () {
       if (this.msg.db === '' && this.msg.tb === '') {
@@ -355,11 +377,12 @@ export default {
             db: this.db,
             table: this.table,
             sid: this.sid,
-            alias: this.alias
+            alias: this.alias,
+            keyDefault: this.keyDefault
           }
           const res = await createTable(config)
           this.isLoadingCreate = false
-          if (res.id) {
+          if (res.code === '201') {
             this.$notify({ type: 'success', text: 'Add table succeeded' })
           } else {
             this.$notify({ type: 'error', text: 'Add table failed' })
@@ -402,6 +425,7 @@ export default {
       this.validatePortNumber(this.port)
       this.validateUsername(this.username)
       this.validatePassword(this.password)
+      this.validateKeyDefault(this.keyDefault)
       if (this.databaseName === null) {
         this.msg.db = 'Invalid database name'
       }
@@ -426,6 +450,9 @@ export default {
       if (this.alias === null) {
         this.msg.alias = 'Invalid alias'
       }
+      if (this.keyDefault === null) {
+        this.msg.alias = 'Invalid key default'
+      }
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
       } else {
@@ -441,11 +468,12 @@ export default {
           this.msg.host === '' &&
           this.msg.dbType === '' &&
           this.msg.sid === '' &&
-          this.msg.alias === ''
+          this.msg.alias === '' &&
+          this.msg.keyDefault === ''
         ) {
           try {
             this.isLoadingCreate = true
-            const info = { databaseInforId: id, tableName: this.table }
+            const info = { databaseInforId: id, tableName: this.table, keyDefault: this.defaultKey }
             const res = await createTable(info)
             this.isLoadingCreate = false
             if (res.code === '201') {
@@ -489,7 +517,8 @@ export default {
             if (resDb.code === '201') {
               const tb = {
                 databaseInforId: resDb.data.id,
-                tableName: this.table
+                tableName: this.table,
+                defaultKey: this.defaultKey
               }
               this.isLoadingCreate = true
               const resq = await createTable(tb)

@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-model="isVisible" title="View Note" hide-footer>
+  <b-modal v-model="isVisible" title="View Log" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -24,7 +24,7 @@
             <b-form-textarea
               id="textarea-small"
               size="sm"
-              placeholder="Log Note"
+              placeholder="Write log..."
               v-model="note"
             ></b-form-textarea>
           </b-col>
@@ -43,7 +43,7 @@
                 variant="primary"
                 small
               ></b-spinner
-              >Log</b-button
+              >Send</b-button
             >
             <b-button size="sm" variant="light" @click="onClose">
               Cancel

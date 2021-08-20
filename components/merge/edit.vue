@@ -36,6 +36,8 @@
                       v-model="table.db_alias"
                       :reduce="(e) => e.alias"
                       label="alias"
+                      placeholder="Please select a database"
+                      @input="chooseDb(idx)"
                     />
                   </td>
                   <td>
@@ -45,6 +47,8 @@
                       :reduce="(e) => e.id"
                       v-model="table.table_id"
                       label="tableName"
+                      placeholder="Please select a table"
+                      @input="chooseTb(table.db_alias, table.table_id, idx)"
                     />
                   </td>
                   <td>
@@ -64,7 +68,7 @@
     </b-row>
     <b-row align-h="center" id="step-2" v-if="step == 1">
       <b-col cols="12">
-        <table class="table table-bordered">
+        <table class="table table-bordered" responsive>
           <thead>
             <tr>
               <th>No</th>
@@ -117,7 +121,7 @@
       <b-col cols="4"></b-col>
       <b-col cols="4" class="text-center">
         <b-button-group size="sm" class="w-100">
-          <b-btn variant="warning" class="w-50" :disabled="step == 0" @click="prev">Previous</b-btn>
+          <!-- <b-btn variant="warning" class="w-50" :disabled="step == 0" @click="prev">Previous</b-btn> -->
           <b-btn variant="success" class="w-50" :disabled="step == 2" @click="next">Next</b-btn>
         </b-button-group>
       </b-col>
@@ -180,16 +184,46 @@ export default {
       }
     },
     addTable () {
-      this.tables.push({ db_alias: null, table_id: null })
+      this.tables.push({ db_alias: null, table_id: null, table: null })
     },
     deleteTable (idx) {
       this.tables = this.tables.filter((_, i) => i !== idx)
     },
+    chooseDb (index) {
+      this.tables[index].table_id = null
+    },
+    chooseTb (db, id, index) {
+      this.tableOf[db].forEach(tb => {
+        if (tb.id === id) {
+          this.tables[index].table = tb.tableName
+        }
+      })
+    },
     async next () {
       this.colOf = []
+      const arrCol = []
+
+      const forLoop = async _ => {
+        for (let index = 0; index < this.tables.length; index++) {
+          const colData = await getColumnByTable(this.tables[index].table_id)
+          const colItem = []
+          colData.data.forEach(item => {
+            colItem.push({ value: item, text: item })
+          })
+          arrCol.push(colItem)
+        }
+      }
+      await forLoop()
+
+      for (let index = 0; index < this.tables.length; index++) {
+        this.colOf.push(arrCol[index])
+      }
+
       this.merge.list_mapping = this.merge.list_mapping.map(item => {
-        const newCol = item.listCol.map(col => {
-          return col.split('.').pop()
+        const newCol = []
+        this.tables.forEach(table => {
+          const model = this.getSelectedCol(table.table, item.listCol)
+          newCol.push(model)
         })
         return {
           colName: item.colName,
@@ -197,18 +231,17 @@ export default {
           listCol: newCol
         }
       })
-
-      this.tables.forEach(async (table) => {
-        const res = await getColumnByTable(table.table_id)
-        this.column = res.data.map((item) => {
-          return { value: item, text: item }
-        })
-        this.colOf.push(this.column)
-      })
       this.step++
     },
     prev () {
       this.step--
+    },
+    getSelectedCol (tableName, arrData) {
+      const result = arrData.filter(reg => reg.includes(tableName))
+      if (result.length !== 0) {
+        return result[0].split('.').pop()
+      }
+      return ''
     }
   }
 }

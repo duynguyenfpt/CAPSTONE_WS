@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col sm="1"></b-col>
       <b-col sm="8" class="text-center">
@@ -167,6 +167,9 @@
       <etl-share ref="share" />
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 <script>
 import {
@@ -211,13 +214,18 @@ export default {
       msgErr: '',
       isDownload: false,
       isDisplay: false,
-      isSuccess: false
+      isSuccess: false,
+      isDeny: false
     }
   },
   methods: {
     async showAllResults () {
       const res = await getAllResults()
-      this.results = res.data
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.results = res.data
+      }
     },
     showResult (id) {
       this.$refs.result.show(id)
@@ -297,81 +305,105 @@ export default {
             query: this.inputValue
           }
           const res = await createEtl(data)
-          this.isLoadingCreate = false
-          this.isFailed = false
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Create ETL succeeded' })
-            const id = res.data.request.id
-            this.isExecuted = false
-            this.variant = 'primary'
-            let isRunning = true
-            while (isRunning) {
-              this.rows = []
-              try {
-                const resResult = await getResultDetail(id)
-                if (resResult.code === '200') {
-                  const header = []
-                  if (resResult.data.status === 'successed') {
-                    header.push({
-                      key: 'no'
-                    })
-                    const totalArray = resResult.data.content.split('\n')
-                    this.isExecuted = true
-                    this.isSuccess = true
-                    totalArray.forEach((element, index) => {
-                      if (index === 0) {
-                        // eslint-disable-next-line array-callback-return
-                        element.split(',').map((item) => {
-                          header.push({
-                            key: item
-                          })
+          if (res.statusCode === '403') {
+            this.isDeny = true
+          } else {
+            this.isLoadingCreate = false
+            this.isFailed = false
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Create ETL succeeded' })
+              const id = res.data.request.id
+              this.isExecuted = false
+              this.variant = 'primary'
+              let isRunning = true
+              while (isRunning) {
+                this.rows = []
+                try {
+                  const resResult = await getResultDetail(id)
+                  if (resResult.statusCode === '403') {
+                    this.isDeny = true
+                  } else {
+                    if (resResult.code === '200') {
+                      const header = []
+                      if (resResult.data.status === 'successed') {
+                        header.push({
+                          key: 'no'
                         })
-                      } else {
-                        const tempRow = element.split(',')
-                        const objData = {}
-                        header.forEach((item, i) => {
-                          if (item.key === 'no') {
-                            objData[`${item.key}`] = index
+                        const totalArray = resResult.data.content.split('\n')
+                        this.isExecuted = true
+                        this.isSuccess = true
+                        totalArray.forEach((element, index) => {
+                          if (index === 0) {
+                            // eslint-disable-next-line array-callback-return
+                            element.split(',').map((item) => {
+                              header.push({
+                                key: item
+                              })
+                            })
+                            const totalArray = resResult.data.content.split('\n')
+                            this.isExecuted = true
+                            totalArray.forEach((element, index) => {
+                              if (index === 0) {
+                                // eslint-disable-next-line array-callback-return
+                                element.split(',').map(item => {
+                                  header.push({
+                                    key: item
+                                  })
+                                })
+                              } else {
+                                const tempRow = element.split(',')
+                                const objData = {}
+                                header.forEach((item, i) => {
+                                  if (item.key === 'no') {
+                                    objData[`${item.key}`] = index
+                                  } else {
+                                    objData[`${item.key}`] = tempRow[i - 1]
+                                  }
+                                })
+                                this.rows.push(objData)
+                              }
+                            })
+                            this.resultFields = header
+                            isRunning = false
+                            this.isDisplay = true
                           } else {
-                            objData[`${item.key}`] = tempRow[i - 1]
+                            if (resResult.data.status === 'failed') {
+                              this.isExecuted = false
+                              this.isFailed = true
+                              this.variant = 'danger'
+                              this.msgErr = 'Query is failed'
+                              this.msgFailed = resResult.data.content
+                              isRunning = false
+                            } else {
+                              this.isExecuted = false
+                              this.msg = 'Query is executing'
+                            }
                           }
                         })
-                        this.rows.push(objData)
+                        this.resultFields = header
+                        isRunning = false
+                        this.isDisplay = true
+                      } else {
+                        if (resResult.data.status === 'failed') {
+                          this.isExecuted = true
+                          this.isFailed = true
+                          this.msgErr = 'Query is failed'
+                          this.msgFailed = resResult.data.content
+                        }
                       }
-                    })
-                    this.resultFields = header
-                    isRunning = false
-                    this.isDisplay = true
-                  } else {
-                    if (resResult.data.status === 'failed') {
-                      this.isExecuted = true
-                      this.isFailed = true
-                      this.variant = 'danger'
-                      this.msgErr = 'Query is failed'
-                      this.msgFailed = resResult.data.content
-                      isRunning = false
-                    } else {
-                      this.isExecuted = false
-                      this.msg = 'Query is executing'
                     }
                   }
-                  this.isLoadingCreate = false
-                } else {
+                } catch (e) {
                   this.isExecuted = true
                   this.isFailed = true
                   this.msgErr = 'Query is failed'
-                  this.msgFailed = resResult.data.content
+                  this.msgFailed = e.message
                 }
-              } catch (e) {
-                this.isExecuted = true
-                this.isFailed = true
-                this.msgErr = 'Query is failed'
-                this.msgFailed = e.message
+                await this.sleep(10000)
               }
-              await this.sleep(10000)
+            } else {
+              this.$notify({ type: 'error', text: 'Create ETL failed' })
             }
-          } else {
-            this.$notify({ type: 'error', text: 'Create ETL failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
@@ -384,16 +416,20 @@ export default {
       try {
         this.isDownload = true
         const res = await downloadData(this.idItem)
-        if (res !== null) {
-          this.$notify({ type: 'success', text: 'Download result succeeded' })
-          const fileURL = window.URL.createObjectURL(new Blob([res]))
-          const fileLink = document.createElement('a')
-          fileLink.href = fileURL
-          fileLink.setAttribute('download', 'file.csv')
-          document.body.appendChild(fileLink)
-          fileLink.click()
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Download result failed' })
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Download result succeeded' })
+            const fileURL = window.URL.createObjectURL(new Blob([res]))
+            const fileLink = document.createElement('a')
+            fileLink.href = fileURL
+            fileLink.setAttribute('download', 'file.csv')
+            document.body.appendChild(fileLink)
+            fileLink.click()
+          } else {
+            this.$notify({ type: 'error', text: 'Download result failed' })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <section>
     <b-row id="title">
       <b-col class="text-center">
@@ -138,6 +139,10 @@
       </b-col>
     </b-row>
   </section>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -171,7 +176,8 @@ export default {
     mergeTableName: null,
     msg: {
       tableName: null
-    }
+    },
+    isDeny: false
   }),
   async created () {
     await this.getAllDB()
@@ -192,22 +198,31 @@ export default {
       }
     },
     async getAllDB () {
-      this.dbs = (await getAllDbType()).data
-      this.dbs.forEach((db) => {
-        this.tableOf[db.alias] = db.tables
-        db.tables.forEach(table => this.tableMap.set(table.id, table))
-      })
+      const dbs = await getAllDbType()
+      if (dbs.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.dbs = dbs.data
+        this.dbs.forEach((db) => {
+          this.tableOf[db.alias] = db.tables
+          db.tables.forEach(table => this.tableMap.set(table.id, table))
+        })
+      }
     },
     async getMergeRequest () {
       try {
         const res = await getMerge(this.id)
-        this.mergeTableName = res.data.mergeTableName
-        this.merge = JSON.parse(res.data.latestMetadata)
-        this.tables = this.merge.list_tables.map((table) => ({
-          database_alias: table.database_alias,
-          table_id: table.table_id,
-          table: table.table
-        }))
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.mergeTableName = res.data.mergeTableName
+          this.merge = JSON.parse(res.data.latestMetadata)
+          this.tables = this.merge.list_tables.map((table) => ({
+            database_alias: table.database_alias,
+            table_id: table.table_id,
+            table: table.table
+          }))
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       }
@@ -243,11 +258,15 @@ export default {
         const forLoop = async _ => {
           for (let index = 0; index < this.tables.length; index++) {
             const colData = await getColumnByTable(this.tables[index].table_id)
-            const colItem = []
-            colData.data.forEach(item => {
-              colItem.push({ value: item, text: item })
-            })
-            arrCol.push(colItem)
+            if (colData.statusCode === '403') {
+              this.isDeny = true
+            } else {
+              const colItem = []
+              colData.data.forEach(item => {
+                colItem.push({ value: item, text: item })
+              })
+              arrCol.push(colItem)
+            }
           }
         }
         await forLoop()
@@ -306,11 +325,15 @@ export default {
       try {
         this.isLoadingUpdate = true
         const res = await updateMerge(this.id, dataStr)
-        this.isLoadingUpdate = false
-        if (res.code === '200') {
-          this.$notify({ type: 'success', text: 'Update merge request succeeded' })
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Update merge request failed' })
+          this.isLoadingUpdate = false
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Update merge request succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Update merge request failed' })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

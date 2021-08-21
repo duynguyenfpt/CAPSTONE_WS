@@ -324,17 +324,21 @@ export default {
             alias: this.alias
           }
           const res = await createDatabase(config)
-          this.isLoadingCreate = false
-          this.isVisible = false
-          this.$emit('onAdded')
-          console.log('LCC: ', res.code)
-          if (res.code === '201') {
-            this.$notify({
-              type: 'success',
-              text: 'Create database succeeded'
-            })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Create database failed' })
+            this.isLoadingCreate = false
+            this.isVisible = false
+            this.$emit('onAdded')
+            console.log('LCC: ', res.code)
+            if (res.code === '201') {
+              this.$notify({
+                type: 'success',
+                text: 'Create database succeeded'
+              })
+            } else {
+              this.$notify({ type: 'error', text: 'Create database failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: 'Create database failed' })
@@ -353,10 +357,14 @@ export default {
           databaseType: this.databaseType
         }
         const res = await checkConnection(data)
-        if (res.code === '200' && res.data.success) {
-          this.$notify({ type: 'success', text: 'Test connection succeeded.' })
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Test connection failed' })
+          if (res.code === '200' && res.data.success) {
+            this.$notify({ type: 'success', text: 'Test connection succeeded.' })
+          } else {
+            this.$notify({ type: 'error', text: 'Test connection failed' })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

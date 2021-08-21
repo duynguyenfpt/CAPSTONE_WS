@@ -1,4 +1,5 @@
 <template>
+<div v-if="isDeny">
   <div v-if="schemaChanges">
     <b-row>
       <b-col sm="10" class="text-center">
@@ -79,6 +80,10 @@
       />
     </section>
   </div>
+</div>
+<div v-else>
+  <common-deny/>
+</div>
 </template>
 
 <script>
@@ -125,7 +130,8 @@ export default {
     tableOfDb: null,
     typeChange: null,
     schemaChanges: [],
-    loading: false
+    loading: false,
+    isDeny: false
   }),
 
   created () {
@@ -140,13 +146,21 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.schemaChanges = res.data
-        this.pagination.total = res.metaData.totalPage
-        const dbRes = await getListDatabase(1, 1000)
-        // eslint-disable-next-line array-callback-return
-        dbRes.data.map((item) => {
-          this.databaseOps.push({ value: item.id, text: item.databaseName })
-        })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.schemaChanges = res.data
+          this.pagination.total = res.metaData.totalPage
+          const dbRes = await getListDatabase(1, 1000)
+          if (dbRes.statusCode === '403') {
+            this.isDeny = true
+          } else {
+          // eslint-disable-next-line array-callback-return
+            dbRes.data.map((item) => {
+              this.databaseOps.push({ value: item.id, text: item.databaseName })
+            })
+          }
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -157,10 +171,14 @@ export default {
       try {
         if (db != null) {
           const resTable = await getAllTableByDb(db, 1, 1000)
+          if (resTable.statusCode === '403') {
+            this.isDeny = true
+          } else {
           // eslint-disable-next-line array-callback-return
-          resTable.data.map((item) => {
-            this.tableOps.push({ value: item.id, text: item.tableName })
-          })
+            resTable.data.map((item) => {
+              this.tableOps.push({ value: item.id, text: item.tableName })
+            })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -178,7 +196,11 @@ export default {
           this.pagination.limit,
           this.typeChange
         )
-        this.schemaChanges = res.data
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.schemaChanges = res.data
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <div v-if="detail">
     <b-row>
       <b-col cols="6">
@@ -105,6 +106,10 @@
       <content-placeholders-text :lines="3" />
       <content-placeholders-text :lines="18" />
     </content-placeholders>
+  </div>
+  </div>
+  <div v-else>
+    <common-deny/>
   </div>
 </template>
 
@@ -234,7 +239,8 @@ export default {
       status: null,
       isActive: false,
       isDeactive: false,
-      progress: 0
+      progress: 0,
+      isDeny: false
     }
   },
   methods: {
@@ -260,46 +266,62 @@ export default {
       try {
         this.loading = true
         const res = await getJobDetail(this.id)
-        this.detail = res.data
-        if (this.detail.active === true) {
-          this.isActive = true
-          this.isDeactive = false
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.isActive = false
-          this.isDeactive = true
-        }
-        this.detail.server =
-          res.data.serverDomain + ' - ' + res.data.serverHost
-        this.detail.createdDate = moment(this.detail.createdDate).format(
-          'YYYY-MM-DD'
-        )
-        const requestId = this.detail.requestId
-        const resRequest = await getDetailRequest(requestId)
-        resRequest.data.createdDate = moment(this.requestDetail.createdDate).format(
-          'YYYY-MM-DD'
-        )
-        resRequest.data.modifiedDate = moment(this.requestDetail.modifiedDate).format(
-          'YYYY-MM-DD'
-        )
-        this.requestDetail = resRequest.data
-        if (this.listLogDetail) {
-          this.listLogDetail.forEach((e) => {
-            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
-          })
-        }
-        const resList = await getLogByJob(
-          this.id,
-          this.pagination.page,
-          this.pagination.limit
-        )
-        this.pagination.total = resList.metaData.totalItem
-        this.listLogDetail = resList.data
-        const resLast = await getLastJobLog(this.id)
-        if (resLast.data !== null) {
-          if (resLast.data.step !== null && resLast.data.numberStep !== null) {
-            this.progress = (resLast.data.step * 100) / resLast.data.numberStep
+          this.detail = res.data
+          if (this.detail.active === true) {
+            this.isActive = true
+            this.isDeactive = false
+          } else {
+            this.isActive = false
+            this.isDeactive = true
           }
-          this.status = resLast.data.status
+          this.detail.server =
+          res.data.serverDomain + ' - ' + res.data.serverHost
+          this.detail.createdDate = moment(this.detail.createdDate).format(
+            'YYYY-MM-DD'
+          )
+          const requestId = this.detail.requestId
+          const resRequest = await getDetailRequest(requestId)
+          if (resRequest.statusCode === '403') {
+            this.isDeny = true
+          } else {
+            resRequest.data.createdDate = moment(this.requestDetail.createdDate).format(
+              'YYYY-MM-DD'
+            )
+            resRequest.data.modifiedDate = moment(this.requestDetail.modifiedDate).format(
+              'YYYY-MM-DD'
+            )
+            this.requestDetail = resRequest.data
+            if (this.listLogDetail) {
+              this.listLogDetail.forEach((e) => {
+                e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
+              })
+            }
+            const resList = await getLogByJob(
+              this.id,
+              this.pagination.page,
+              this.pagination.limit
+            )
+            if (resList.statusCode === '403') {
+              this.isDeny = true
+            } else {
+              this.pagination.total = resList.metaData.totalItem
+              this.listLogDetail = resList.data
+              const resLast = await getLastJobLog(this.id)
+              if (resLast.statusCode === '403') {
+                this.isDeny = true
+              } else {
+                if (resLast.data !== null) {
+                  if (resLast.data.step !== null && resLast.data.numberStep !== null) {
+                    this.progress = (resLast.data.step * 100) / resLast.data.numberStep
+                  }
+                  this.status = resLast.data.status
+                }
+              }
+            }
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

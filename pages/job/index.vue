@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Job Management</h1>
@@ -108,6 +108,9 @@
       </b-modal>
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -157,7 +160,8 @@ export default {
     loading: false,
     jobs: [],
     isActive: false,
-    isDeactive: false
+    isDeactive: false,
+    isDeny: false
   }),
 
   created () {
@@ -186,20 +190,24 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.jobs = res.data
-        this.jobs.forEach((e) => {
-          e.excutedBy = e.excutedBy.username
-        })
-        this.jobs.forEach((e) => {
-          if (e.active === true) {
-            this.isActive = true
-            this.isDeactive = false
-          } else {
-            this.isActive = false
-            this.isDeactive = true
-          }
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.jobs = res.data
+          this.jobs.forEach((e) => {
+            e.excutedBy = e.excutedBy.username
+          })
+          this.jobs.forEach((e) => {
+            if (e.active === true) {
+              this.isActive = true
+              this.isDeactive = false
+            } else {
+              this.isActive = false
+              this.isDeactive = true
+            }
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -239,20 +247,24 @@ export default {
           this.pagination.limit,
           this.textSearch
         )
-        this.jobs = res.data
-        this.jobs.forEach((e) => {
-          e.excutedBy = e.excutedBy.username
-        })
-        this.jobs.forEach((e) => {
-          if (e.active === true) {
-            this.isActive = true
-            this.isDeactive = false
-          } else {
-            this.isActive = false
-            this.isDeactive = true
-          }
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.jobs = res.data
+          this.jobs.forEach((e) => {
+            e.excutedBy = e.excutedBy.username
+          })
+          this.jobs.forEach((e) => {
+            if (e.active === true) {
+              this.isActive = true
+              this.isDeactive = false
+            } else {
+              this.isActive = false
+              this.isDeactive = true
+            }
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

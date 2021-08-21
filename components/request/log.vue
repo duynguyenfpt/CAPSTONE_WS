@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="View Log" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -53,6 +54,10 @@
       </div>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -68,7 +73,8 @@ export default {
     isReadMore: false,
     note: null,
     msg: null,
-    format
+    format,
+    isDeny: false
   }),
   methods: {
     validateNote (value) {
@@ -86,12 +92,16 @@ export default {
       this.msg = null
       try {
         const res = await getLogByRequest(this.idItem)
-        this.notes = res.data
-        if (res.data.length > 6) {
-          this.shortNotes = res.data.splice(0, 6)
-          this.isReadMore = true
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.shortNotes = res.data
+          this.notes = res.data
+          if (res.data.length > 6) {
+            this.shortNotes = res.data.splice(0, 6)
+            this.isReadMore = true
+          } else {
+            this.shortNotes = res.data
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -115,8 +125,12 @@ export default {
             requestId: this.idItem,
             content: this.note
           }
-          createLog(data)
-          this.show(this.idItem)
+          const res = createLog(data)
+          if (res.statusCode === '403') {
+            this.isDeny = true
+          } else {
+            this.show(this.idItem)
+          }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
         } finally {

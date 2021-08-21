@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Edit Account" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -31,6 +32,10 @@
       </b-row>
     </div>
   </b-modal>
+</div>
+<div v-else>
+  <common-deny/>
+</div>
 </template>
 
 <script>
@@ -57,7 +62,8 @@ export default {
       email: null,
       phone: null,
       role: null
-    }
+    },
+    isDeny: false
   }),
   watch: {
     username (value) {
@@ -79,15 +85,19 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getAccountDetail(this.idItem)
-      this.username = res.data.username
-      this.email = res.data.email
-      this.phone = res.data.phone
-      this.role = res.data.role
-      this.isLoading = false
-      this.msg.role = null
-      this.msg.username = null
-      this.msg.phone = null
-      this.msg.email = null
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.username = res.data.username
+        this.email = res.data.email
+        this.phone = res.data.phone
+        this.role = res.data.role
+        this.isLoading = false
+        this.msg.role = null
+        this.msg.username = null
+        this.msg.phone = null
+        this.msg.email = null
+      }
     },
     chooseRole () {
       if (this.role === null) {
@@ -140,11 +150,15 @@ export default {
             phone: this.phone
           }
           const res = await updateAccount(this.idItem, data)
-          this.$emit('onUpdated', data)
-          if (res.code) {
-            this.$notify({ type: 'success', text: 'Update account succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Update account failed' })
+            this.$emit('onUpdated', data)
+            if (res.code) {
+              this.$notify({ type: 'success', text: 'Update account succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Update account failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

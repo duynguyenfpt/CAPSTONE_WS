@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <div v-if="!isDeny">
     <b-row id="title">
       <b-col class="text-center">
         <h2>Create merge request</h2>
@@ -137,7 +137,10 @@
           <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>Create</b-btn>
       </b-col>
     </b-row>
-  </section>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -171,11 +174,11 @@ export default {
     mergeTableName: null,
     msg: {
       tableName: null
-    }
+    },
+    isDeny: false
   }),
   async created () {
     await this.getAllDB()
-    // await this.getMergeRequest()
   },
   watch: {
     mergeTableName (value) {
@@ -192,11 +195,16 @@ export default {
       }
     },
     async getAllDB () {
-      this.dbs = (await getAllDbType()).data
-      this.dbs.forEach((db) => {
-        this.tableOf[db.alias] = db.tables
-        db.tables.forEach(table => this.tableMap.set(table.id, table))
-      })
+      const dbs = await getAllDbType()
+      if (dbs.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.dbs = dbs.data
+        this.dbs.forEach((db) => {
+          this.tableOf[db.alias] = db.tables
+          db.tables.forEach(table => this.tableMap.set(table.id, table))
+        })
+      }
     },
     addTable () {
       this.tables.push({ database_alias: null, table_id: null, table: null })
@@ -235,11 +243,15 @@ export default {
         const forLoop = async _ => {
           for (let index = 0; index < this.tables.length; index++) {
             const colData = await getColumnByTable(this.tables[index].table_id)
-            const colItem = []
-            colData.data.forEach(item => {
-              colItem.push({ value: item, text: item })
-            })
-            arrCol.push(colItem)
+            if (colData.statusCode === '403') {
+              this.isDeny = true
+            } else {
+              const colItem = []
+              colData.data.forEach(item => {
+                colItem.push({ value: item, text: item })
+              })
+              arrCol.push(colItem)
+            }
           }
         }
         await forLoop()
@@ -292,11 +304,15 @@ export default {
       try {
         this.isLoadingCreate = true
         const res = await createMerge(dataStr)
-        this.isLoadingCreate = false
-        if (res.code === '201') {
-          this.$notify({ type: 'success', text: 'Create merge request succeeded' })
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Create merge request failed' })
+          this.isLoadingCreate = false
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Create merge request succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Create merge request failed' })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

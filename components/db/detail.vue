@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <div v-if="detail">
     <b-col class="text-center">
         <h1>Database Detail</h1>
@@ -73,6 +74,10 @@
       <content-placeholders-text :lines="3" />
       <content-placeholders-text :lines="18" />
     </content-placeholders>
+ </div>
+ </div>
+ <div v-else>
+   <common-deny/>
  </div>
 </template>
 
@@ -158,7 +163,8 @@ export default {
       tbFields: tbFields,
       detail: null,
       listTableDetail: null,
-      loading: false
+      loading: false,
+      isDeny: false
     }
   },
   methods: {
@@ -167,52 +173,56 @@ export default {
         this.loading = true
         const res = await getDatabaseDetail(this.id)
         const resList = await getAllTableByDb(this.id, this.pagination.page, this.pagination.limit)
-        this.listTableDetail = resList.data
-        this.pagination.total = resList.metaData.totalItem
-        this.detail = res.data
-        this.detail.host = this.detail.serverInfor.serverDomain + ' - ' + this.detail.serverInfor.serverHost
-        if (res.data.databaseType === 'mysql') {
-          this.detail.databaseType = 'My Sql'
-        }
-        if (res.data.databaseType === 'postgresql') {
-          this.detail.databaseType = 'PostgreSQL'
-        }
-        if (res.data.databaseType === 'oracle') {
-          this.detail.databaseType = 'Oracle'
-        }
-        if (this.detail.createdDate === null) {
-          this.detail.createdDate = 'YYYY-MM-DD'
+        if (res.statusCode === '403' || resList.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.detail.createdDate = moment(this.detail.createdDate).format(
-            'YYYY-MM-DD'
-          )
-        }
-        if (this.detail.modifiedDate === null) {
-          this.detail.modifiedDate = 'YYYY-MM-DD'
-        } else {
-          this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
-            'YYYY-MM-DD'
-          )
-        }
-        if (this.listTableDetail) {
-          this.listTableDetail.forEach((e) => {
-            if (e.createdDate === null) {
-              e.createdDate = 'YYYY-MM-DD'
-            } else {
-              e.createdDate = moment(e.createdDate).format(
-                'YYYY-MM-DD'
-              )
-            }
-          })
-          this.listTableDetail.forEach((e) => {
-            if (e.modifiedDate === null) {
-              e.modifiedDate = 'YYYY-MM-DD'
-            } else {
-              e.modifiedDate = moment(e.modifiedDate).format(
-                'YYYY-MM-DD'
-              )
-            }
-          })
+          this.listTableDetail = resList.data
+          this.pagination.total = resList.metaData.totalItem
+          this.detail = res.data
+          this.detail.host = this.detail.serverInfor.serverDomain + ' - ' + this.detail.serverInfor.serverHost
+          if (res.data.databaseType === 'mysql') {
+            this.detail.databaseType = 'My Sql'
+          }
+          if (res.data.databaseType === 'postgresql') {
+            this.detail.databaseType = 'PostgreSQL'
+          }
+          if (res.data.databaseType === 'oracle') {
+            this.detail.databaseType = 'Oracle'
+          }
+          if (this.detail.createdDate === null) {
+            this.detail.createdDate = 'YYYY-MM-DD'
+          } else {
+            this.detail.createdDate = moment(this.detail.createdDate).format(
+              'YYYY-MM-DD'
+            )
+          }
+          if (this.detail.modifiedDate === null) {
+            this.detail.modifiedDate = 'YYYY-MM-DD'
+          } else {
+            this.detail.modifiedDate = moment(this.detail.modifiedDate).format(
+              'YYYY-MM-DD'
+            )
+          }
+          if (this.listTableDetail) {
+            this.listTableDetail.forEach((e) => {
+              if (e.createdDate === null) {
+                e.createdDate = 'YYYY-MM-DD'
+              } else {
+                e.createdDate = moment(e.createdDate).format(
+                  'YYYY-MM-DD'
+                )
+              }
+            })
+            this.listTableDetail.forEach((e) => {
+              if (e.modifiedDate === null) {
+                e.modifiedDate = 'YYYY-MM-DD'
+              } else {
+                e.modifiedDate = moment(e.modifiedDate).format(
+                  'YYYY-MM-DD'
+                )
+              }
+            })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

@@ -236,10 +236,14 @@ export default {
         this.isSelected = false
         this.isCopied = true
         const res = await getAllAccount()
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
         // eslint-disable-next-line array-callback-return
-        res.data.map((item) => {
-          this.opsAccount.push({ value: item.id, text: item.username })
-        })
+          res.data.map((item) => {
+            this.opsAccount.push({ value: item.id, text: item.username })
+          })
+        }
       } else {
         this.isSelected = false
         this.isCopied = false
@@ -285,11 +289,15 @@ export default {
             }
           }
           const res = await createAccount(data)
-          this.$emit('onAdded')
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Create account succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Create account failed' })
+            this.$emit('onAdded')
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Create account succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Create account failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

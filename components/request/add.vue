@@ -321,14 +321,18 @@ export default {
               identityId: identities
             }
             const res = await createRequestSync(req)
-            if (res.code === '201') {
-              this.$notify({
-                type: 'success',
-                text: 'Create request succeeded'
-              })
-              this.resetData()
+            if (res.statusCode === '403') {
+              this.isDeny = true
             } else {
-              this.$notify({ type: 'error', text: 'Create request failed' })
+              if (res.code === '201') {
+                this.$notify({
+                  type: 'success',
+                  text: 'Create request succeeded'
+                })
+                this.resetData()
+              } else {
+                this.$notify({ type: 'error', text: 'Create request failed' })
+              }
             }
           } catch (e) {
             this.$notify({ type: 'error', text: e.message })

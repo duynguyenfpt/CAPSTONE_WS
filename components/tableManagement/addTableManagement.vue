@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -131,6 +131,9 @@
       </b-row>
     </div>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -184,23 +187,32 @@ export default {
       sid: '',
       alias: '',
       defaultKey: ''
-    }
+    },
+    isDeny: false
   }),
   async mounted () {
     this.isLoading = true
     const dbs = await getAllDbType()
+    if (dbs.statusCode === '403') {
+      this.isDeny = true
+    } else {
     // eslint-disable-next-line array-callback-return
-    dbs.data.map((item) => {
-      this.opsDb.push({ value: item.id, text: item.databaseName })
-    })
-    const hosts = await getAllServers()
-    // eslint-disable-next-line array-callback-return
-    hosts.data.map((item) => {
-      this.opsHost.push({
-        value: item.id,
-        text: item.serverHost + ' - ' + item.serverDomain
+      dbs.data.map((item) => {
+        this.opsDb.push({ value: item.id, text: item.databaseName })
       })
-    })
+    }
+    const hosts = await getAllServers()
+    if (hosts.statusCode === '403') {
+      this.isDeny = true
+    } else {
+    // eslint-disable-next-line array-callback-return
+      hosts.data.map((item) => {
+        this.opsHost.push({
+          value: item.id,
+          text: item.serverHost + ' - ' + item.serverDomain
+        })
+      })
+    }
     this.db = null
     this.table = null
     this.dbName = null
@@ -381,11 +393,15 @@ export default {
             keyDefault: this.keyDefault
           }
           const res = await createTable(config)
-          this.isLoadingCreate = false
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Add table succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Add table failed' })
+            this.isLoadingCreate = false
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Add table succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Add table failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
@@ -397,22 +413,26 @@ export default {
       if (id !== null) {
         this.isLoadingFill = true
         const res = await getDatabaseDetail(id)
-        this.isLoadingFill = false
-        this.dbName = res.data.databaseName
-        this.host = res.data.serverInfor.id
-        this.port = res.data.port
-        this.username = res.data.username
-        this.password = res.data.password
-        this.dbType = res.data.databaseType
-        this.alias = res.data.alias
-        if (this.dbType === 'oracle') {
-          this.isOracle = true
-          this.sid = res.data.sid
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.isOracle = false
-          this.sid = ''
+          this.isLoadingFill = false
+          this.dbName = res.data.databaseName
+          this.host = res.data.serverInfor.id
+          this.port = res.data.port
+          this.username = res.data.username
+          this.password = res.data.password
+          this.dbType = res.data.databaseType
+          this.alias = res.data.alias
+          if (this.dbType === 'oracle') {
+            this.isOracle = true
+            this.sid = res.data.sid
+          } else {
+            this.isOracle = false
+            this.sid = ''
+          }
+          this.isChoseDb = true
         }
-        this.isChoseDb = true
       } else {
         this.resetData()
         this.isChoseDb = false
@@ -475,12 +495,16 @@ export default {
             this.isLoadingCreate = true
             const info = { databaseInforId: id, tableName: this.table, keyDefault: this.defaultKey }
             const res = await createTable(info)
-            this.isLoadingCreate = false
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Add table succeeded' })
-              this.resetData()
+            if (res.statusCode === '403') {
+              this.isDeny = true
             } else {
-              this.$notify({ type: 'error', text: 'Add table failed' })
+              this.isLoadingCreate = false
+              if (res.code === '201') {
+                this.$notify({ type: 'success', text: 'Add table succeeded' })
+                this.resetData()
+              } else {
+                this.$notify({ type: 'error', text: 'Add table failed' })
+              }
             }
           } catch (e) {
             this.$notify({ type: 'error', text: e.message })
@@ -514,20 +538,28 @@ export default {
               alias: this.alias
             }
             const resDb = await createDatabase(db)
-            if (resDb.code === '201') {
-              const tb = {
-                databaseInforId: resDb.data.id,
-                tableName: this.table,
-                defaultKey: this.defaultKey
-              }
-              this.isLoadingCreate = true
-              const resq = await createTable(tb)
-              this.isLoadingCreate = false
-              if (resq.code) {
-                this.$notify({ type: 'success', text: 'Add table succeeded' })
-                this.resetData()
-              } else {
-                this.$notify({ type: 'error', text: 'Add table failed' })
+            if (resDb.statusCode === '403') {
+              this.isDeny = true
+            } else {
+              if (resDb.code === '201') {
+                const tb = {
+                  databaseInforId: resDb.data.id,
+                  tableName: this.table,
+                  defaultKey: this.defaultKey
+                }
+                this.isLoadingCreate = true
+                const resq = await createTable(tb)
+                if (resq.statusCode === '403') {
+                  this.isDeny = true
+                } else {
+                  this.isLoadingCreate = false
+                  if (resq.code) {
+                    this.$notify({ type: 'success', text: 'Add table succeeded' })
+                    this.resetData()
+                  } else {
+                    this.$notify({ type: 'error', text: 'Add table failed' })
+                  }
+                }
               }
             }
           } catch (e) {
@@ -548,10 +580,14 @@ export default {
           databaseType: this.dbType
         }
         const res = await checkConnection(data)
-        if (res.code === '200' && res.data.success) {
-          this.$notify({ type: 'success', text: 'Test connection succeeded.' })
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Test connection failed' })
+          if (res.code === '200' && res.data.success) {
+            this.$notify({ type: 'success', text: 'Test connection succeeded.' })
+          } else {
+            this.$notify({ type: 'error', text: 'Test connection failed' })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

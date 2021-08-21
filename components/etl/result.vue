@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisibleResult" title="Sample Data" hide-footer size="lg">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -45,6 +46,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -60,7 +65,8 @@ export default {
     msg: '',
     isDownload: false,
     isFailed: false,
-    msgErr: ''
+    msgErr: '',
+    isDeny: false
   }),
   methods: {
     async show (id) {
@@ -71,50 +77,54 @@ export default {
       this.rows = []
       try {
         const res = await getResultDetail(this.idItem)
-        if (res.code === '200') {
-          if (res.data.status === 'successed') {
-            const totalArray = res.data.content.split('\n')
-            const header = []
-            header.push({
-              key: 'no'
-            })
-            totalArray.forEach((element, index) => {
-              if (index === 0) {
-              // eslint-disable-next-line array-callback-return
-                element.split(',').map(item => {
-                  header.push({
-                    key: item
-                  })
-                })
-              } else {
-                const tempRow = element.split(',')
-                const objData = {}
-                header.forEach((item, i) => {
-                  if (item.key === 'no') {
-                    objData[`${item.key}`] = index
-                  } else {
-                    objData[`${item.key}`] = tempRow[i - 1]
-                  }
-                })
-                this.rows.push(objData)
-              }
-            })
-            this.resultFields = header
-            this.isExecuted = true
-          } else {
-            if (res.data.status === 'failed') {
-              this.isExecuted = false
-              this.isFailed = true
-              this.msgErr = 'Query is failed'
-            } else {
-              this.isExecuted = false
-              this.msg = 'Query is executing'
-            }
-          }
-          this.isLoading = false
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.isExecuted = true
-          this.msg = 'Query is failed'
+          if (res.code === '200') {
+            if (res.data.status === 'successed') {
+              const totalArray = res.data.content.split('\n')
+              const header = []
+              header.push({
+                key: 'no'
+              })
+              totalArray.forEach((element, index) => {
+                if (index === 0) {
+                  // eslint-disable-next-line array-callback-return
+                  element.split(',').map(item => {
+                    header.push({
+                      key: item
+                    })
+                  })
+                } else {
+                  const tempRow = element.split(',')
+                  const objData = {}
+                  header.forEach((item, i) => {
+                    if (item.key === 'no') {
+                      objData[`${item.key}`] = index
+                    } else {
+                      objData[`${item.key}`] = tempRow[i - 1]
+                    }
+                  })
+                  this.rows.push(objData)
+                }
+              })
+              this.resultFields = header
+              this.isExecuted = true
+            } else {
+              if (res.data.status === 'failed') {
+                this.isExecuted = false
+                this.isFailed = true
+                this.msgErr = 'Query is failed'
+              } else {
+                this.isExecuted = false
+                this.msg = 'Query is executing'
+              }
+            }
+            this.isLoading = false
+          } else {
+            this.isExecuted = true
+            this.msg = 'Query is failed'
+          }
         }
       } catch (e) {
         this.isExecuted = true
@@ -128,16 +138,20 @@ export default {
       try {
         this.isDownload = true
         const res = await downloadData(this.idItem)
-        if (res !== null) {
-          this.$notify({ type: 'success', text: 'Download result succeeded' })
-          const fileURL = window.URL.createObjectURL(new Blob([res]))
-          const fileLink = document.createElement('a')
-          fileLink.href = fileURL
-          fileLink.setAttribute('download', 'file.csv')
-          document.body.appendChild(fileLink)
-          fileLink.click()
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Download result failed' })
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Download result succeeded' })
+            const fileURL = window.URL.createObjectURL(new Blob([res]))
+            const fileLink = document.createElement('a')
+            fileLink.href = fileURL
+            fileLink.setAttribute('download', 'file.csv')
+            document.body.appendChild(fileLink)
+            fileLink.click()
+          } else {
+            this.$notify({ type: 'error', text: 'Download result failed' })
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

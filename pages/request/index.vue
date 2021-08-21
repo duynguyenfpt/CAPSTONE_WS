@@ -212,14 +212,18 @@ export default {
           this.pagination.limit,
           this.textSearch
         )
-        this.request = res.data
-        this.pagination.total = res.metaData.totalItem
-        this.request.forEach((e) => {
-          e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
-          e.modifiedDate = moment(this.request.modifiedDate).format(
-            'YYYY-MM-DD'
-          )
-        })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.request = res.data
+          this.pagination.total = res.metaData.totalItem
+          this.request.forEach((e) => {
+            e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+            e.modifiedDate = moment(this.request.modifiedDate).format(
+              'YYYY-MM-DD'
+            )
+          })
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

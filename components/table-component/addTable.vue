@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-modal v-model="isVisible" title="Create Table" hide-footer>
       <div v-if="isLoading" class="text-center">
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -54,6 +54,9 @@
       </div>
     </b-modal>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -75,7 +78,8 @@ export default {
     msg: {
       tableName: '',
       defaultKey: ''
-    }
+    },
+    isDeny: false
   }),
   watch: {
     tableName (value) {
@@ -107,14 +111,18 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getDatabaseDetail(this.idItem)
-      this.dbName = res.data.databaseName
-      this.tableName = null
-      this.defaultKey = null
-      this.msg = {
-        tableName: '',
-        defaultKey: ''
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.dbName = res.data.databaseName
+        this.tableName = null
+        this.defaultKey = null
+        this.msg = {
+          tableName: '',
+          defaultKey: ''
+        }
+        this.isLoading = false
       }
-      this.isLoading = false
     },
     onClose () {
       this.isVisible = false
@@ -137,13 +145,17 @@ export default {
             defaultKey: this.defaultKey
           }
           const res = await addTable(body)
-          this.$emit('onAdded')
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Add table succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Add table failed' })
+            this.$emit('onAdded')
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Add table succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Add table failed' })
+            }
+            this.$router.go()
           }
-          this.$router.go()
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
         } finally {

@@ -45,7 +45,7 @@
                   <td>
                     <VSelect
                       :options="dbs"
-                      v-model="table.db_alias"
+                      v-model="table.database_alias"
                       :reduce="(e) => e.alias"
                       label="alias"
                       placeholder="Please select a database"
@@ -54,13 +54,13 @@
                   </td>
                   <td>
                     <VSelect
-                      v-if="table.db_alias"
-                      :options="tableOf[table.db_alias]"
+                      v-if="table.database_alias"
+                      :options="tableOf[table.database_alias]"
                       :reduce="(e) => e.id"
                       v-model="table.table_id"
                       label="tableName"
                       placeholder="Please select a table"
-                      @input="chooseTb(table.db_alias, table.table_id, idx)"
+                      @input="chooseTb(table.database_alias, table.table_id, idx)"
                     />
                   </td>
                   <td>
@@ -111,7 +111,7 @@
                 />
               </td>
               <td>
-                <b-input size="sm" v-model="mapping.colName"></b-input>
+                <b-input size="sm" v-model="mapping.colName" :id="mapping.colName"></b-input>
               </td>
               <td>
                 <b-checkbox size="sm" v-model="mapping.is_unique"></b-checkbox>
@@ -161,7 +161,7 @@ export default {
     tableMap: new Map(),
     tables: [
       {
-        db_alias: null,
+        database_alias: null,
         table_id: null,
         table: null
       }
@@ -204,7 +204,7 @@ export default {
         this.mergeTableName = res.data.mergeTableName
         this.merge = JSON.parse(res.data.latestMetadata)
         this.tables = this.merge.list_tables.map((table) => ({
-          db_alias: table.database_alias,
+          database_alias: table.database_alias,
           table_id: table.table_id,
           table: table.table
         }))
@@ -213,7 +213,7 @@ export default {
       }
     },
     addTable () {
-      this.tables.push({ db_alias: null, table_id: null, table: null })
+      this.tables.push({ database_alias: null, table_id: null, table: null })
     },
     deleteTable (idx) {
       this.tables = this.tables.filter((_, i) => i !== idx)
@@ -264,7 +264,7 @@ export default {
           })
           return {
             colName: item.colName,
-            is_unique: item.is_unique,
+            is_unique: item.is_unique === 1,
             listCol: newCol
           }
         })
@@ -285,13 +285,13 @@ export default {
         const newCol = []
         this.tables.forEach((table, i) => {
           if (item.listCol[i] !== '' && item.listCol[i] !== null && item.listCol[i] !== undefined) {
-            const model = table.db_alias + '.' + table.table + '.' + item.listCol[i]
+            const model = table.database_alias + '.' + table.table + '.' + item.listCol[i]
             newCol.push(model)
           }
         })
         return {
           colName: item.colName,
-          is_unique: item.is_unique,
+          is_unique: item.is_unique ? 1 : 0,
           listCol: newCol
         }
       })
@@ -301,7 +301,7 @@ export default {
         list_mapping: listMap
       }
       const dataStr = {
-        currentMetadata: JSON.stringify(data)
+        latestMetadata: JSON.stringify(data)
       }
       try {
         this.isLoadingUpdate = true

@@ -90,7 +90,9 @@
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
         <b-col sm="8" v-if="isExecuted">
+          <h4 class="text-center" v-if="isDisplay">Sample Data</h4>
           <b-table
+          style="max-width: 1000px"
           responsive
           hover
           striped
@@ -103,6 +105,12 @@
           </div>
           </template>
           </b-table>
+          <div class="text-right">
+            <b-button size="sm" variant="success" @click="onDownload" v-if="isDisplay">
+              <b-spinner variant="success" v-if="isDownload" small></b-spinner>
+              Download
+            </b-button>
+          </div>
         </b-col>
         <b-col sm="8" v-else>
           <div v-if="isFailed">
@@ -125,7 +133,7 @@
   </div>
 </template>
 <script>
-import { getAllResults, createEtl, getResultDetail } from '@/service/etl'
+import { getAllResults, createEtl, getResultDetail, downloadData } from '@/service/etl'
 import { format } from 'date-fns'
 export default {
   data () {
@@ -159,7 +167,9 @@ export default {
       },
       isFailed: false,
       msgFailed: '',
-      msgErr: ''
+      msgErr: '',
+      isDownload: false,
+      isDisplay: false
     }
   },
   methods: {
@@ -288,6 +298,7 @@ export default {
                     })
                     this.resultFields = header
                     isRunning = false
+                    this.isDisplay = true
                   } else {
                     if (resResult.data.status === 'failed') {
                       this.isExecuted = false
@@ -324,6 +335,27 @@ export default {
         } finally {
           this.isLoadingCreate = false
         }
+      }
+    },
+    async onDownload () {
+      try {
+        this.isDownload = true
+        const res = await downloadData(this.idItem)
+        if (res !== null) {
+          this.$notify({ type: 'success', text: 'Download result succeeded' })
+          const fileURL = window.URL.createObjectURL(new Blob([res]))
+          const fileLink = document.createElement('a')
+          fileLink.href = fileURL
+          fileLink.setAttribute('download', 'file.csv')
+          document.body.appendChild(fileLink)
+          fileLink.click()
+        } else {
+          this.$notify({ type: 'error', text: 'Download result failed' })
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.isDownload = false
       }
     },
     sleep (ms) {

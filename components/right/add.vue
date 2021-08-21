@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-modal v-model="isVisible" title="Create Right" hide-footer>
       <div v-if="isLoading" class="text-center">
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -52,6 +52,9 @@
       </div>
     </b-modal>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -78,7 +81,8 @@ export default {
       { value: 'POST', text: 'POST' },
       { value: 'PUT', text: 'PUT' },
       { value: 'DELETE', text: 'DELETE' }
-    ]
+    ],
+    isDeny: false
   }),
   watch: {
     path (value) {
@@ -151,11 +155,15 @@ export default {
             description: this.description
           }
           const res = await createRight(body)
-          this.$emit('onAdded')
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Add right succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Add right failed' })
+            this.$emit('onAdded')
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Add right succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Add right failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

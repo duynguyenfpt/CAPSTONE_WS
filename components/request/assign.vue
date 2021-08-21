@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Assign user" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -33,6 +34,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 <script>
 export default {

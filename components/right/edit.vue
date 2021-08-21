@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Edit Right" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -47,6 +48,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -72,7 +77,8 @@ export default {
       { value: 'POST', text: 'POST' },
       { value: 'PUT', text: 'PUT' },
       { value: 'DELETE', text: 'DELETE' }
-    ]
+    ],
+    isDeny: false
   }),
   watch: {
     path (value) {
@@ -111,16 +117,20 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await detailRight(this.idItem)
-      this.method = res.data.method
-      this.path = res.data.path
-      this.description = res.data.description
-      this.isLoading = false
-      this.msg = {
-        path: null,
-        method: null,
-        description: null
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.method = res.data.method
+        this.path = res.data.path
+        this.description = res.data.description
+        this.isLoading = false
+        this.msg = {
+          path: null,
+          method: null,
+          description: null
+        }
+        this.isLoadingUpdate = false
       }
-      this.isLoadingUpdate = false
     },
     onClose () {
       this.isVisible = false
@@ -147,11 +157,15 @@ export default {
             description: this.description
           }
           const res = await updateRight(this.idItem, body)
-          this.$emit('onUpdated', res.data)
-          if (res.code === '200') {
-            this.$notify({ type: 'success', text: 'Update right succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Update right failed' })
+            this.$emit('onUpdated', res.data)
+            if (res.code === '200') {
+              this.$notify({ type: 'success', text: 'Update right succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Update right failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

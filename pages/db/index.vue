@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDenied">
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Database Management</h1>
@@ -157,7 +157,7 @@ export default {
     loading: false,
     dbs: [],
     keyword: null,
-    isDenied: false
+    isDeny: false
   }),
 
   created () {
@@ -173,7 +173,7 @@ export default {
           this.pagination.limit
         )
         if (res.statusCode === '403') {
-          this.isDenied = true
+          this.isDeny = true
         } else {
           this.dbs = res.data
           this.dbs.forEach((e) => {
@@ -237,25 +237,29 @@ export default {
           this.pagination.limit,
           this.keyword
         )
-        this.dbs = result.data
-        this.dbs.forEach((e) => {
-          e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
-        })
-        this.dbs.forEach((e) => {
-          if (e.databaseType === 'mysql') {
-            e.databaseType = 'My Sql'
-          }
-          if (e.databaseType === 'postgresql') {
-            e.databaseType = 'PostgreSQL'
-          }
-          if (e.databaseType === 'oracle') {
-            e.databaseType = 'Oracle'
-          }
-        })
-        this.dbs.forEach((e) => {
-          e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
-        })
-        this.pagination.total = result.metaData.totalItem
+        if (result.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.dbs = result.data
+          this.dbs.forEach((e) => {
+            e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+          })
+          this.dbs.forEach((e) => {
+            if (e.databaseType === 'mysql') {
+              e.databaseType = 'My Sql'
+            }
+            if (e.databaseType === 'postgresql') {
+              e.databaseType = 'PostgreSQL'
+            }
+            if (e.databaseType === 'oracle') {
+              e.databaseType = 'Oracle'
+            }
+          })
+          this.dbs.forEach((e) => {
+            e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
+          })
+          this.pagination.total = result.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Detail Account" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -25,6 +26,10 @@
       </b-row>
     </div>
   </b-modal>
+</div>
+<div v-else>
+  <common-deny/>
+</div>
 </template>
 
 <script>
@@ -39,7 +44,8 @@ export default {
     },
     isVisible: false,
     idItem: 0,
-    isLoading: false
+    isLoading: false,
+    isDeny: false
   }),
 
   methods: {
@@ -48,17 +54,21 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getAccountDetail(this.idItem)
-      this.config = res.data
-      if (this.config.role === 'admin') {
-        this.config.role = 'Admin'
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.config = res.data
+        if (this.config.role === 'admin') {
+          this.config.role = 'Admin'
+        }
+        if (this.config.role === 'viewer') {
+          this.config.role = 'Viewer'
+        }
+        if (this.config.role === 'engineer') {
+          this.config.role = 'Engineer'
+        }
+        this.isLoading = false
       }
-      if (this.config.role === 'viewer') {
-        this.config.role = 'Viewer'
-      }
-      if (this.config.role === 'engineer') {
-        this.config.role = 'Engineer'
-      }
-      this.isLoading = false
     },
     onClose () {
       this.isVisible = false

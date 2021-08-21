@@ -156,27 +156,31 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getDatabaseDetail(id)
-      this.serverInforId = res.data.serverInfor.id
-      this.port = res.data.port
-      this.databaseName = res.data.databaseName
-      this.username = res.data.username
-      this.password = res.data.password
-      this.databaseType = res.data.databaseType
-      this.alias = res.data.alias
-      if (this.databaseType === 'oracle') {
-        this.isOracle = true
-        this.sid = res.data.sid
+      if (res.statusCode === '403') {
+        this.isDeny = true
       } else {
-        this.isOracle = false
-        this.sid = ''
+        this.serverInforId = res.data.serverInfor.id
+        this.port = res.data.port
+        this.databaseName = res.data.databaseName
+        this.username = res.data.username
+        this.password = res.data.password
+        this.databaseType = res.data.databaseType
+        this.alias = res.data.alias
+        if (this.databaseType === 'oracle') {
+          this.isOracle = true
+          this.sid = res.data.sid
+        } else {
+          this.isOracle = false
+          this.sid = ''
+        }
+        this.isLoading = false
+        this.msg.databaseName = ''
+        this.msg.port = ''
+        this.msg.username = ''
+        this.msg.password = ''
+        this.msg.sid = ''
+        this.msg.alias = null
       }
-      this.isLoading = false
-      this.msg.databaseName = ''
-      this.msg.port = ''
-      this.msg.username = ''
-      this.msg.password = ''
-      this.msg.sid = ''
-      this.msg.alias = null
     },
     validateDBName (value) {
       if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
@@ -262,13 +266,17 @@ export default {
             alias: this.alias
           }
           const data = await updateDatabase(this.idItem, config)
-          this.isLoadingUpdate = false
-          this.isVisible = false
-          this.$emit('onUpdated', data)
-          if (data.code === '200') {
-            this.$notify({ type: 'success', text: 'Update database succeeded' })
+          if (data.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Update database failed' })
+            this.isLoadingUpdate = false
+            this.isVisible = false
+            this.$emit('onUpdated', data)
+            if (data.code === '200') {
+              this.$notify({ type: 'success', text: 'Update database succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Update database failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

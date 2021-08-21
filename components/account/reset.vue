@@ -1,5 +1,5 @@
 <template>
-<div>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
@@ -17,6 +17,9 @@
       </b-row>
   </b-modal>
 </div>
+<div v-else>
+  <common-deny/>
+</div>
 </template>
 
 <script>
@@ -25,7 +28,8 @@ export default {
   data: () => ({
     isVisible: false,
     idItem: 0,
-    isLoading: false
+    isLoading: false,
+    isDeny: false
   }),
   methods: {
     async show (id) {
@@ -39,12 +43,16 @@ export default {
       try {
         this.isLoading = this.idItem
         const res = await resetAccount(this.idItem)
-        this.$emit('onReseted')
-        if (res.code === '200') {
-          this.$notify({ type: 'success', text: 'Reset password succeeded' })
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Reset password  failed' })
-          this.$router.go()
+          this.$emit('onReseted')
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Reset password succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Reset password  failed' })
+            this.$router.go()
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

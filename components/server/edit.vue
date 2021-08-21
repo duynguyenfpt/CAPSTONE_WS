@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Update Server" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -25,6 +26,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -40,7 +45,8 @@ export default {
     msg: {
       host: null,
       domain: null
-    }
+    },
+    isDeny: false
   }),
   watch: {
     serverHost (value) {
@@ -72,12 +78,16 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getServer(this.idItem)
-      console.log(res.data)
-      this.serverHost = res.data.serverHost
-      this.serverDomain = res.data.serverDomain
-      this.isLoading = false
-      this.msg.domain = null
-      this.msg.host = null
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        console.log(res.data)
+        this.serverHost = res.data.serverHost
+        this.serverDomain = res.data.serverDomain
+        this.isLoading = false
+        this.msg.domain = null
+        this.msg.host = null
+      }
     },
     onClose () {
       this.isVisible = false
@@ -91,14 +101,17 @@ export default {
             serverDomain: this.serverDomain
           }
           const data = await updateServer(this.idItem, config)
-          console.log(data)
-          this.isLoadingUpdate = false
-          this.isVisible = false
-          this.$emit('onUpdated', data)
-          if (data.code === '200') {
-            this.$notify({ type: 'success', text: 'Update server succeeded' })
+          if (data.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Update server failed' })
+            this.isLoadingUpdate = false
+            this.isVisible = false
+            this.$emit('onUpdated', data)
+            if (data.code === '200') {
+              this.$notify({ type: 'success', text: 'Update server succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Update server failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

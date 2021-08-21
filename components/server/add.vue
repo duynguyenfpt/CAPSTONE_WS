@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Create Server" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -31,6 +32,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div  v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -46,7 +51,8 @@ export default {
       msg: {
         host: null,
         domain: null
-      }
+      },
+      isDeny: false
     }
   },
   watch: {
@@ -101,14 +107,17 @@ export default {
             serverDomain: this.serverDomain
           }
           const data = await createServer(config)
-          console.log(data)
-          this.isLoadingCreate = false
-          this.isVisible = false
-          this.$emit('onAdded', data)
-          if (data.code === '201') {
-            this.$notify({ type: 'success', text: 'Add server succeeded' })
+          if (data.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Add server failed' })
+            this.isLoadingCreate = false
+            this.isVisible = false
+            this.$emit('onAdded', data)
+            if (data.code === '201') {
+              this.$notify({ type: 'success', text: 'Add server succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Add server failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

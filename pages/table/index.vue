@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Table Management</h1>
@@ -84,6 +84,9 @@
       <table-component-editTable ref="edit" @onUpdated="onReload" />
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -133,7 +136,8 @@ export default {
       tableList: null,
       loading: false,
       textSearch: null,
-      keyword: null
+      keyword: null,
+      isDeny: false
     }
   },
   created () {
@@ -147,35 +151,39 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.tableList = res.data
-        this.pagination.total = res.metaData.totalItem
-        this.tableList.forEach((e) => {
-          if (e.createdDate === null) {
-            e.createdDate = 'YYYY-MM-DD'
-          } else {
-            e.createdDate = moment(this.tableList.createdDate).format(
-              'YYYY-MM-DD'
-            )
-          }
-          if (e.modifiedDate === null) {
-            e.modifiedDate = 'YYYY-MM-DD'
-          } else {
-            e.modifiedDate = moment(this.tableList.modifiedDate).format(
-              'YYYY-MM-DD'
-            )
-          }
-        })
-        this.tableList.forEach((e) => {
-          if (e.databaseInfo.databaseType === 'mysql') {
-            e.databaseInfo.databaseType = 'My Sql'
-          }
-          if (e.databaseInfo.databaseType === 'postgresql') {
-            e.databaseInfo.databaseType = 'PostgreSQL'
-          }
-          if (e.databaseInfo.databaseType === 'oracle') {
-            e.databaseInfo.databaseType = 'Oracle'
-          }
-        })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.tableList = res.data
+          this.pagination.total = res.metaData.totalItem
+          this.tableList.forEach((e) => {
+            if (e.createdDate === null) {
+              e.createdDate = 'YYYY-MM-DD'
+            } else {
+              e.createdDate = moment(this.tableList.createdDate).format(
+                'YYYY-MM-DD'
+              )
+            }
+            if (e.modifiedDate === null) {
+              e.modifiedDate = 'YYYY-MM-DD'
+            } else {
+              e.modifiedDate = moment(this.tableList.modifiedDate).format(
+                'YYYY-MM-DD'
+              )
+            }
+          })
+          this.tableList.forEach((e) => {
+            if (e.databaseInfo.databaseType === 'mysql') {
+              e.databaseInfo.databaseType = 'My Sql'
+            }
+            if (e.databaseInfo.databaseType === 'postgresql') {
+              e.databaseInfo.databaseType = 'PostgreSQL'
+            }
+            if (e.databaseInfo.databaseType === 'oracle') {
+              e.databaseInfo.databaseType = 'Oracle'
+            }
+          })
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -204,35 +212,39 @@ export default {
           this.pagination.limit,
           this.keyword
         )
-        this.tableList = res.data
-        this.pagination.total = res.metaData.totalItem
-        this.tableList.forEach((e) => {
-          if (e.createdDate === null) {
-            e.createdDate = 'YYYY-MM-DD'
-          } else {
-            e.createdDate = moment(this.tableList.createdDate).format(
-              'YYYY-MM-DD'
-            )
-          }
-          if (e.modifiedDate === null) {
-            e.modifiedDate = 'YYYY-MM-DD'
-          } else {
-            e.modifiedDate = moment(this.tableList.modifiedDate).format(
-              'YYYY-MM-DD'
-            )
-          }
-        })
-        this.tableList.forEach((e) => {
-          if (e.databaseInfo.databaseType === 'mysql') {
-            e.databaseInfo.databaseType = 'My Sql'
-          }
-          if (e.databaseInfo.databaseType === 'postgresql') {
-            e.databaseInfo.databaseType = 'PostgreSQL'
-          }
-          if (e.databaseInfo.databaseType === 'oracle') {
-            e.databaseInfo.databaseType = 'Oracle'
-          }
-        })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.tableList = res.data
+          this.pagination.total = res.metaData.totalItem
+          this.tableList.forEach((e) => {
+            if (e.createdDate === null) {
+              e.createdDate = 'YYYY-MM-DD'
+            } else {
+              e.createdDate = moment(this.tableList.createdDate).format(
+                'YYYY-MM-DD'
+              )
+            }
+            if (e.modifiedDate === null) {
+              e.modifiedDate = 'YYYY-MM-DD'
+            } else {
+              e.modifiedDate = moment(this.tableList.modifiedDate).format(
+                'YYYY-MM-DD'
+              )
+            }
+          })
+          this.tableList.forEach((e) => {
+            if (e.databaseInfo.databaseType === 'mysql') {
+              e.databaseInfo.databaseType = 'My Sql'
+            }
+            if (e.databaseInfo.databaseType === 'postgresql') {
+              e.databaseInfo.databaseType = 'PostgreSQL'
+            }
+            if (e.databaseInfo.databaseType === 'oracle') {
+              e.databaseInfo.databaseType = 'Oracle'
+            }
+          })
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

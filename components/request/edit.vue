@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Edit Request" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -41,6 +42,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -66,15 +71,20 @@ export default {
     msg: {
       account: null,
       status: null
-    }
+    },
+    isDeny: false
   }),
   async mounted () {
     // get username
     const accounts = await getListAccount(1, 100)
+    if (accounts.statusCode === '403') {
+      this.isDeny = true
+    } else {
     // eslint-disable-next-line array-callback-return
-    accounts.data.map((acc) => {
-      this.opsAccount.push({ value: acc.username, text: acc.username })
-    })
+      accounts.data.map((acc) => {
+        this.opsAccount.push({ value: acc.username, text: acc.username })
+      })
+    }
   },
   methods: {
     async show (id) {
@@ -85,26 +95,30 @@ export default {
       this.msg.status = ''
       try {
         const res = await getDetailRequest(id)
-        this.request.requestType = res.data.requestType
-        this.request.status = res.data.status
-        this.request.account = res.data.approvedBy
-        if (this.request.status === '0') {
-          this.opsStatus = [
-            { value: '0', text: 'Pending' },
-            { value: '2', text: 'Rejected' },
-            { value: '1', text: 'Approved' }
-          ]
-        }
-        if (this.request.status === '1') {
-          this.opsStatus = [
-            { value: '1', text: 'Approved' }
-          ]
-        }
-        if (this.request.status === '2') {
-          this.opsStatus = [
-            { value: '2', text: 'Rejected' },
-            { value: '1', text: 'Approved' }
-          ]
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.request.requestType = res.data.requestType
+          this.request.status = res.data.status
+          this.request.account = res.data.approvedBy
+          if (this.request.status === '0') {
+            this.opsStatus = [
+              { value: '0', text: 'Pending' },
+              { value: '2', text: 'Rejected' },
+              { value: '1', text: 'Approved' }
+            ]
+          }
+          if (this.request.status === '1') {
+            this.opsStatus = [
+              { value: '1', text: 'Approved' }
+            ]
+          }
+          if (this.request.status === '2') {
+            this.opsStatus = [
+              { value: '2', text: 'Rejected' },
+              { value: '1', text: 'Approved' }
+            ]
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -143,13 +157,16 @@ export default {
             status: this.request.status,
             approvedBy: this.request.account
           }
-          console.log('LCC: ', body)
           const data = await updateRequest(this.idItem, body)
-          this.$emit('onUpdated', data)
-          if (data.code === '200') {
-            this.$notify({ type: 'success', text: 'Update request succeeded' })
+          if (data.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Update request failed' })
+            this.$emit('onUpdated', data)
+            if (data.code === '200') {
+              this.$notify({ type: 'success', text: 'Update request succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Update request failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

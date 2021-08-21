@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Server Management</h1>
@@ -99,6 +99,9 @@
       <server-delete ref="delete" @onDeleted="onReload" />
     </section>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -146,7 +149,8 @@ export default {
     },
     loading: false,
     servers: [],
-    keySearch: null
+    keySearch: null,
+    isDeny: false
   }),
 
   created () {
@@ -161,12 +165,16 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        this.servers = res.data
-        this.servers.forEach((e) => {
-          e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
-          e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.servers = res.data
+          this.servers.forEach((e) => {
+            e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+            e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -204,12 +212,16 @@ export default {
           this.pagination.limit,
           this.keySearch
         )
-        this.servers = res.data
-        this.servers.forEach((e) => {
-          e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
-          e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
-        })
-        this.pagination.total = res.metaData.totalItem
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.servers = res.data
+          this.servers.forEach((e) => {
+            e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+            e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

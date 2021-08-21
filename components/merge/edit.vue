@@ -5,17 +5,29 @@
         <h2>Update merge request</h2>
       </b-col>
     </b-row>
-    <b-row id="step" align-h="center" class="pt-2">
-      <b-col cols="6">
-        <el-steps finish-status="success" :active="step">
-          <el-step title="Select DB" />
-          <el-step title="S2" />
-          <el-step title="S3" />
-        </el-steps>
-      </b-col>
+    <b-row class="pt-2" id="step" align-h="center">
+        <b-col cols="10">
+          <el-steps
+            :active="step"
+            finish-status="success"
+            style="width: 100%"
+          >
+            <el-step title="Step 1"> </el-step>
+            <el-step title="Step 2"> </el-step>
+          </el-steps>
+        </b-col>
     </b-row>
     <b-row align-h="center" id="step-1" v-if="step == 0">
       <b-col cols="10">
+        <b-row class="my-1">
+            <b-col sm="3">
+              <h5 for="input-small">New Table Merge:</h5>
+            </b-col>
+            <b-col sm="9">
+              <b-form-input id="input-small" size="sm" placeholder="Enter table name" v-model="mergeTableName"></b-form-input>
+              <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
+            </b-col>
+          </b-row>
         <b-row align-h="center">
           <b-col>
             <table class="b-table table table-bordered">
@@ -76,10 +88,10 @@
                 {{tableMap.get(table.table_id).tableName}}
               </th>
               <th>
-                Column Name
+                Column
               </th>
               <th>
-                Is Unique
+                Unique
               </th>
               <th>
                 Action
@@ -102,7 +114,7 @@
                 <b-input size="sm" v-model="mapping.colName"></b-input>
               </td>
               <td>
-                <b-checkbox size="sm" v-model="mapping.is_unique" :checked="mapping.is_unique == 1"></b-checkbox>
+                <b-checkbox size="sm" v-model="mapping.is_unique"></b-checkbox>
               </td>
               <td>
                 <b-btn variant="danger" size="sm">
@@ -117,13 +129,12 @@
         </table>
       </b-col>
     </b-row>
-    <b-row>
-      <b-col cols="4"></b-col>
-      <b-col cols="4" class="text-center">
-        <b-button-group size="sm" class="w-100">
-          <!-- <b-btn variant="warning" class="w-50" :disabled="step == 0" @click="prev">Previous</b-btn> -->
-          <b-btn variant="success" class="w-50" :disabled="step == 2" @click="next">Next</b-btn>
-        </b-button-group>
+    <b-row class="pt-2">
+      <b-col sm="2"></b-col>
+      <b-col sm="8" class="text-center">
+        <b-btn variant="primary" size="sm" :disabled="step == 1" @click="next" class="btn-add-request">Next Step</b-btn>
+        <b-btn variant="primary" size="sm" :disabled="step == 0" @click="updateRequest" class="btn-add-request">
+          <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-btn>
       </b-col>
     </b-row>
   </section>
@@ -131,7 +142,7 @@
 
 <script>
 import { getAllDbType } from '@/service/db'
-import { getMerge } from '@/service/merge'
+import { getMerge, updateMerge } from '@/service/merge'
 import { getColumnByTable } from '@/service/table.service'
 import VSelect from 'vue-select'
 
@@ -142,6 +153,7 @@ export default {
   },
   data: () => ({
     step: 0,
+    isLoadingUpdate: false,
     merge: null,
     dbs: [],
     tableOf: {},
@@ -155,14 +167,30 @@ export default {
       }
     ],
     columns: [],
-    column: {}
+    column: {},
+    mergeTableName: null,
+    msg: {
+      tableName: null
+    }
   }),
-
   async created () {
     await this.getAllDB()
     await this.getMergeRequest()
   },
+  watch: {
+    mergeTableName (value) {
+      this.mergeTableName = value
+      this.validateTableName(value)
+    }
+  },
   methods: {
+    validateTableName (value) {
+      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+        this.msg.tableName = ''
+      } else {
+        this.msg.tableName = 'Invalid table name'
+      }
+    },
     async getAllDB () {
       this.dbs = (await getAllDbType()).data
       this.dbs.forEach((db) => {
@@ -173,6 +201,7 @@ export default {
     async getMergeRequest () {
       try {
         const res = await getMerge(this.id)
+        this.mergeTableName = res.data.mergeTableName
         this.merge = JSON.parse(res.data.latestMetadata)
         this.tables = this.merge.list_tables.map((table) => ({
           db_alias: table.database_alias,
@@ -200,38 +229,46 @@ export default {
       })
     },
     async next () {
-      this.colOf = []
-      const arrCol = []
+      this.validateTableName(this.mergeTableName)
+      if (this.mergeTableName === null || this.mergeTableName === '') {
+        this.msg.tableName = 'Invalid table name'
+      } else {
+        this.msg.tableName = ''
+      }
+      if (this.msg.tableName === '') {
+        this.step++
+        this.colOf = []
+        const arrCol = []
 
-      const forLoop = async _ => {
+        const forLoop = async _ => {
+          for (let index = 0; index < this.tables.length; index++) {
+            const colData = await getColumnByTable(this.tables[index].table_id)
+            const colItem = []
+            colData.data.forEach(item => {
+              colItem.push({ value: item, text: item })
+            })
+            arrCol.push(colItem)
+          }
+        }
+        await forLoop()
+
         for (let index = 0; index < this.tables.length; index++) {
-          const colData = await getColumnByTable(this.tables[index].table_id)
-          const colItem = []
-          colData.data.forEach(item => {
-            colItem.push({ value: item, text: item })
+          this.colOf.push(arrCol[index])
+        }
+
+        this.merge.list_mapping = this.merge.list_mapping.map(item => {
+          const newCol = []
+          this.tables.forEach(table => {
+            const model = this.getSelectedCol(table.table, item.listCol)
+            newCol.push(model)
           })
-          arrCol.push(colItem)
-        }
-      }
-      await forLoop()
-
-      for (let index = 0; index < this.tables.length; index++) {
-        this.colOf.push(arrCol[index])
-      }
-
-      this.merge.list_mapping = this.merge.list_mapping.map(item => {
-        const newCol = []
-        this.tables.forEach(table => {
-          const model = this.getSelectedCol(table.table, item.listCol)
-          newCol.push(model)
+          return {
+            colName: item.colName,
+            is_unique: item.is_unique,
+            listCol: newCol
+          }
         })
-        return {
-          colName: item.colName,
-          is_unique: item.is_unique,
-          listCol: newCol
-        }
-      })
-      this.step++
+      }
     },
     prev () {
       this.step--
@@ -242,6 +279,44 @@ export default {
         return result[0].split('.').pop()
       }
       return ''
+    },
+    async updateRequest () {
+      const listMap = this.merge.list_mapping.map(item => {
+        const newCol = []
+        this.tables.forEach((table, i) => {
+          if (item.listCol[i] !== '' && item.listCol[i] !== null && item.listCol[i] !== undefined) {
+            const model = table.db_alias + '.' + table.table + '.' + item.listCol[i]
+            newCol.push(model)
+          }
+        })
+        return {
+          colName: item.colName,
+          is_unique: item.is_unique,
+          listCol: newCol
+        }
+      })
+      const data = {
+        merge_table_name: this.mergeTableName,
+        list_tables: this.tables,
+        list_mapping: listMap
+      }
+      const dataStr = {
+        currentMetadata: JSON.stringify(data)
+      }
+      try {
+        this.isLoadingUpdate = true
+        const res = await updateMerge(this.id, dataStr)
+        this.isLoadingUpdate = false
+        if (res.code === '200') {
+          this.$notify({ type: 'success', text: 'Update merge request succeeded' })
+        } else {
+          this.$notify({ type: 'error', text: 'Update merge request failed' })
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.isLoadingUpdate = false
+      }
     }
   }
 }

@@ -4,7 +4,7 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-      <b-row>
+      <b-row class="pt-2">
         <b-col cols="4">
           <label class="form-lab">Path</label>
         </b-col>
@@ -12,7 +12,7 @@
           <b-form-input size="sm" v-model="config.path" disabled></b-form-input>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row class="pt-2">
         <b-col cols="4">
           <label class="text-center">Method</label>
         </b-col>
@@ -20,7 +20,7 @@
           <b-form-input size="sm" v-model="config.method" disabled></b-form-input>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row class="pt-2">
         <b-col cols="4">
           <label class="text-center">Description</label>
         </b-col>

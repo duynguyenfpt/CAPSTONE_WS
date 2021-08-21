@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <b-row>
       <b-col class="text-center">
         <h1>Create Synchronized Request</h1>
@@ -136,6 +136,9 @@
       </b-row>
     </div>
   </div>
+  <div v-else>
+    <common-deny></common-deny>
+  </div>
 </template>
 
 <script>
@@ -171,16 +174,21 @@ export default {
         table: null,
         toDate: null,
         fromDate: null
-      }
+      },
+      isDeny: false
     }
   },
   async mounted () {
     const res = await getAllDbType()
+    if (res.statusCode === '403') {
+      this.isDeny = true
+    } else {
     // eslint-disable-next-line array-callback-return
-    res.data.map((item) => {
-      this.opsDb.push({ value: item.id, text: item.databaseName })
-    })
-    this.resetData()
+      res.data.map((item) => {
+        this.opsDb.push({ value: item.id, text: item.databaseName })
+      })
+      this.resetData()
+    }
   },
   methods: {
     dateDisabled () {
@@ -213,13 +221,17 @@ export default {
       const id = this.request.database
       if (id !== null) {
         const res = await getAllTableByDb(id, 1, 1000)
-        this.opsTb = [{ value: null, text: 'Please select an option' }]
-        // eslint-disable-next-line array-callback-return
-        res.data.map((item) => {
-          this.opsTb.push({ value: item.id, text: item.tableName })
-        })
-        this.request.table = null
-        this.msg.database = ''
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.opsTb = [{ value: null, text: 'Please select an option' }]
+          // eslint-disable-next-line array-callback-return
+          res.data.map((item) => {
+            this.opsTb.push({ value: item.id, text: item.tableName })
+          })
+          this.request.table = null
+          this.msg.database = ''
+        }
       } else {
         this.request.table = null
         this.msg.database = 'Please select database'
@@ -229,13 +241,17 @@ export default {
       const id = this.request.table
       if (id !== null) {
         const res = await getColumnByTable(id)
-        this.opsUniqueKey = res.data.map((item) => {
-          return { value: item, label: item }
-        })
-        this.opsPartitionKey = res.data.map((item) => {
-          return { value: item, label: item }
-        })
-        this.msg.table = ''
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.opsUniqueKey = res.data.map((item) => {
+            return { value: item, label: item }
+          })
+          this.opsPartitionKey = res.data.map((item) => {
+            return { value: item, label: item }
+          })
+          this.msg.table = ''
+        }
       } else {
         this.msg.table = 'Please select table'
       }

@@ -1,16 +1,14 @@
 <template>
-  <div>
-    <b-row>
+  <section>
+    <b-row id="title">
       <b-col class="text-center">
-        <h1>Create Merge Request</h1>
+        <h2>Create merge request</h2>
       </b-col>
     </b-row>
-    <div>
-      <b-row class="pt-2">
-        <b-col sm="1"></b-col>
-        <b-col sm="10">
+    <b-row class="pt-2" id="step" align-h="center">
+        <b-col cols="10">
           <el-steps
-            :active="active"
+            :active="step"
             finish-status="success"
             style="width: 100%"
           >
@@ -18,11 +16,10 @@
             <el-step title="Step 2"> </el-step>
           </el-steps>
         </b-col>
-      </b-row>
-      <b-row class="pt-2" v-if="active === 0">
-        <b-col sm="1"></b-col>
-        <b-col sm="10">
-          <b-row class="my-1">
+    </b-row>
+    <b-row align-h="center" id="step-1" v-if="step == 0">
+      <b-col cols="10">
+        <b-row class="my-1">
             <b-col sm="3">
               <h5 for="input-small">New Table Merge:</h5>
             </b-col>
@@ -31,214 +28,154 @@
               <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
             </b-col>
           </b-row>
-          <br>
-          <table
-            :items="rows"
-            class="table table-striped table-bordered table-sm"
-          >
-            <thead>
-              <td class="text-center">No</td>
-              <td class="text-center">Database</td>
-              <td class="text-center">Table</td>
-              <td class="text-center">Action</td>
-            </thead>
-            <tbody>
-              <tr v-for="(row, k) in rows" :key="k">
-                <td class="text-center">
-                  {{ k + 1 }}
-                </td>
-                <td>
-                  <v-select
-                    class="select-sm"
-                    :reduce="(text) => text.value"
-                    label="text"
-                    :options="opsDbName"
-                    v-model="row.dbName"
-                    size="sm"
-                    @input="fillTb(row.dbName, k)"
-                    placeholder="Please select a database"
-                  ></v-select>
-                </td>
-                <td>
-                  <v-select
-                    class="select-sm"
-                    :reduce="(text) => text.value"
-                    label="text"
-                    :options="row.opsTbName"
-                    v-model="row.tbName"
-                    size="sm"
-                    @input="addTb(row.tbName, k)"
-                    placeholder="Please select a table"
-                  ></v-select>
-                </td>
-                <td scope="row" class="text-center">
-                  <b-btn
-                    class="btn btn-sm"
-                    size="sm"
-                    variant="danger"
-                    @click="deleteRow(k, row)"
-                  >
-                    <i class="fa fa-trash"></i>
-                  </b-btn>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="text-right">
-            <b-btn
-              type="button"
-              class="btn btn-success"
-              @click="addNewRow"
-              size="sm"
-            >
-              <i class="fa fa-plus"></i>
-              Add
-            </b-btn>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2" v-if="active === 1">
-        <b-col sm="1"></b-col>
-        <b-col sm="10">
-          <table
-            :items="tables"
-            class="table table-striped table-bordered table-sm"
-          >
-            <thead>
-              <td class="text-center">No</td>
-              <td class="text-center" v-for="(tb, ke) in tbs" :key="ke">
-                {{ tb.text }}
+        <b-row align-h="center">
+          <b-col>
+            <table class="b-table table table-bordered">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Database</th>
+                  <th>Table</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(table, idx) in tables" :key="idx">
+                  <td>{{ idx + 1 }}</td>
+                  <td>
+                    <VSelect
+                      :options="dbs"
+                      v-model="table.db_alias"
+                      :reduce="(e) => e.alias"
+                      label="alias"
+                      placeholder="Please select a database"
+                      @input="chooseDb(idx)"
+                    />
+                  </td>
+                  <td>
+                    <VSelect
+                      v-if="table.db_alias"
+                      :options="tableOf[table.db_alias]"
+                      :reduce="(e) => e.id"
+                      v-model="table.table_id"
+                      label="tableName"
+                      placeholder="Please select a table"
+                      @input="chooseTb(table.db_alias, table.table_id, idx)"
+                    />
+                  </td>
+                  <td>
+                    <b-btn variant="danger" size="sm" @click="deleteTable(idx)">
+                      <i class="fa fa-trash"></i>
+                    </b-btn>
+                    <b-btn variant="success" v-if="idx == tables.length - 1" size="sm" @click="addTable">
+                      <i class="fa fa-plus" />
+                    </b-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </b-col>
+        </b-row>
+      </b-col>
+    </b-row>
+    <b-row align-h="center" id="step-2" v-if="step == 1">
+      <b-col cols="12">
+        <table class="table table-bordered" responsive>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th v-for="table in tables" :key="table.table_id">
+                {{tableMap.get(table.table_id).tableName}}
+              </th>
+              <th>
+                Column
+              </th>
+              <th>
+                Unique
+              </th>
+              <th>
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(mapping, idx) in listMapping" :key="mapping.colName">
+              <td>{{idx+1}}</td>
+              <td v-for="(col, index) in colOf" :key="col">
+                <VSelect
+                  :reduce="(e) => e.value"
+                  v-model="mapping.listCol[index]"
+                  label="text"
+                  :options="col"
+                  placeholder="Please select a column"
+                />
               </td>
-              <td class="text-center">Action</td>
-            </thead>
-            <tbody>
-              <tr v-for="(table, k) in tables" :key="k">
-                <td class="text-center">
-                  {{ k + 1 }}
-                </td>
-                <td v-for="tb in tbs" :key="tb.value">
-                  <v-select
-                    class="select-sm"
-                    :reduce="(text) => text.value"
-                    label="text"
-                    :options="col[tb.text]"
-                    v-model="table[tb.text]"
-                    size="sm"
-                    placeholder="Please select a column"
-                  ></v-select>
-                </td>
-                <td scope="row" class="text-center">
-                  <b-btn
-                    class="btn btn-sm"
-                    size="sm"
-                    variant="danger"
-                    @click="deleteRowCol(k, table)"
-                  >
-                    <i class="fa fa-trash"></i>
-                  </b-btn>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="text-right">
-            <b-btn
-              type="button"
-              class="btn btn-success"
-              @click="addNewRowCol"
-              size="sm"
-            >
-              <i class="fa fa-plus"></i>
-              Add
-            </b-btn>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="8" class="text-center">
-           <b-btn
-            @click="pre"
-            size="sm"
-            variant="primary"
-            :disabled="active === 0"
-            >Prerious step</b-btn
-          >
-          <b-btn
-            @click="next"
-            size="sm"
-            variant="primary"
-            :disabled="active === 1"
-            >Next step</b-btn
-          >
-          <b-btn
-            size="sm"
-            variant="primary"
-            class="btn-add-request"
-            :disabled="active === 0"
-            @click="addRequest"
-          >
-            <b-spinner
-              v-if="isLoadingCreate"
-              variant="primary"
-              small
-            ></b-spinner>
-            Save
-          </b-btn>
-        </b-col>
-      </b-row>
-    </div>
-  </div>
+              <td>
+                <b-input size="sm" v-model="mapping.colName"></b-input>
+              </td>
+              <td>
+                <b-checkbox size="sm" v-model="mapping.is_unique"></b-checkbox>
+              </td>
+              <td>
+                <b-btn variant="danger" size="sm" @click="deleteCol(idx)">
+                  <i class="fa fa-trash"></i>
+                </b-btn>
+                <b-btn variant="success" size="sm" v-if="idx == listMapping.length - 1" @click="addCol">
+                  <i class="fa fa-plus" />
+                </b-btn>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </b-col>
+    </b-row>
+    <b-row class="pt-2">
+      <b-col sm="2"></b-col>
+      <b-col sm="8" class="text-center">
+        <b-btn variant="primary" size="sm" :disabled="step == 1" @click="next" class="btn-add-request">Next Step</b-btn>
+        <b-btn variant="primary" size="sm" :disabled="step == 0" @click="createMerge" class="btn-add-request">
+          <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>Create</b-btn>
+      </b-col>
+    </b-row>
+  </section>
 </template>
 
 <script>
 import { getAllDbType } from '@/service/db'
+import { getColumnByTable } from '@/service/table.service'
 import { createMerge } from '@/service/merge'
-import {
-  getAllTableByDb,
-  getTableDetail,
-  getColumnByTable
-} from '@/service/table.service'
-import Vue from 'vue'
-import vSelect from 'vue-select'
-Vue.component('v-select', vSelect)
+import VSelect from 'vue-select'
+
 export default {
-  data () {
-    return {
-      mapping: {},
-      opsDbName: [],
-      opsColName: [],
-      rows: [
-        {
-          dbName: null,
-          tbName: null,
-          opsTbName: []
-        }
-      ],
-      tables: [],
-      tbs: [],
-      colName: [],
-      isLoadingCreate: false,
-      active: 0,
-      col: {},
-      mergeTableName: null,
-      msg: {
-        tableName: ''
-      },
-      listTables: [
-        {
-          table_id: null,
-          table: null,
-          database_alias: null
-        }
-      ],
-      listMapping: []
-    }
+  components: { VSelect },
+  props: {
+    id: String
   },
-  async mounted () {
-    const res = await getAllDbType()
-    this.opsDbName = res.data.map((item) => {
-      return { value: item.id, text: item.alias }
-    })
+  data: () => ({
+    step: 0,
+    isLoadingCreate: false,
+    listMapping: [],
+    dbs: [],
+    tableOf: {},
+    colOf: [],
+    tableMap: new Map(),
+    tables: [
+      {
+        db_alias: null,
+        table_id: null,
+        table: null
+      }
+    ],
+    columns: [],
+    column: {},
+    mergeTableName: null,
+    msg: {
+      tableName: null
+    }
+  }),
+  async created () {
+    await this.getAllDB()
+    // await this.getMergeRequest()
   },
   watch: {
     mergeTableName (value) {
@@ -254,57 +191,34 @@ export default {
         this.msg.tableName = 'Invalid table name'
       }
     },
-    addNewRow () {
-      this.rows.push({
-        dbName: null,
-        tbName: null,
-        opsTbName: []
+    async getAllDB () {
+      this.dbs = (await getAllDbType()).data
+      this.dbs.forEach((db) => {
+        this.tableOf[db.alias] = db.tables
+        db.tables.forEach(table => this.tableMap.set(table.id, table))
       })
     },
-    addNewRowCol () {
-      const tb = {}
-      this.tbs.forEach(e => {
-        tb[e.text] = null
-      })
-      this.tables.push(tb)
+    addTable () {
+      this.tables.push({ db_alias: null, table_id: null, table: null })
     },
-    deleteRow (index, row) {
-      const idx = this.rows.indexOf(row)
-      if (idx > -1) {
-        this.rows.splice(idx, 1)
-      }
+    deleteTable (idx) {
+      this.tables = this.tables.filter((_, i) => i !== idx)
     },
-    deleteRowCol (index, table) {
-      const idx = this.tables.indexOf(table)
-      if (idx > -1) {
-        this.tables.splice(idx, 1)
-      }
+    addCol () {
+      this.listMapping.push({ colName: null, is_unique: 0, listCol: [] })
     },
-    resetData () {
-      this.rows = [
-        {
-          dbName: null,
-          tbName: null
+    deleteCol (idx) {
+      this.listMapping = this.listMapping.filter((_, i) => i !== idx)
+    },
+    chooseDb (index) {
+      this.tables[index].table_id = null
+    },
+    chooseTb (db, id, index) {
+      this.tableOf[db].forEach(tb => {
+        if (tb.id === id) {
+          this.tables[index].table = tb.tableName
         }
-      ]
-    },
-    async fillTb (db, index) {
-      if (db !== null) {
-        const res = await getAllTableByDb(db)
-        this.rows[index].tbName = ''
-        this.rows[index].opsTbName = res.data.map((item) => {
-          return { value: item.id, text: item.tableName }
-        })
-      } else {
-        this.rows[index].tbName = ''
-        this.rows[index].opsTbName = []
-      }
-    },
-    async addTb (tb, index) {
-      if (tb !== null) {
-        const res = await getTableDetail(tb)
-        this.tbs[index] = { value: tb, text: res.data.tableName }
-      }
+      })
     },
     async next () {
       this.validateTableName(this.mergeTableName)
@@ -314,48 +228,62 @@ export default {
         this.msg.tableName = ''
       }
       if (this.msg.tableName === '') {
-        if (this.active++ > 1) this.active = 0
+        this.step++
+        this.colOf = []
+        const arrCol = []
+
+        const forLoop = async _ => {
+          for (let index = 0; index < this.tables.length; index++) {
+            const colData = await getColumnByTable(this.tables[index].table_id)
+            const colItem = []
+            colData.data.forEach(item => {
+              colItem.push({ value: item, text: item })
+            })
+            arrCol.push(colItem)
+          }
+        }
+        await forLoop()
+
+        for (let index = 0; index < this.tables.length; index++) {
+          this.colOf.push(arrCol[index])
+        }
+
+        this.listMapping = [{
+          colName: null,
+          is_unique: 0,
+          listCol: []
+        }]
       }
-      this.tables = []
-      this.listTables = [
-        {
-          table_id: null,
-          table: null,
-          database_alias: null
-        }
-      ]
-      const newArr = this.tbs.map(async (item, i) => {
-        const res = await getColumnByTable(item.value)
-        this.col[item.text] = res.data.map((item) => {
-          return { value: item, text: item }
-        })
-        const resTb = await getTableDetail(item.value)
-        const rawTable = {
-          table_id: resTb.data.id,
-          table: resTb.data.tableName,
-          database_alias: resTb.data.databaseInfo.alias
-        }
-        this.listTables[i] = rawTable
-      })
-      await Promise.all(newArr)
-      this.addNewRowCol()
-      this.opsColName = this.col
     },
-    pre () {
-      if (this.active-- < 0) this.active = 1
+    prev () {
+      this.step--
     },
-    async addRequest () {
-      const mapping = []
-      this.tables.forEach((item, i) => {
-        this.listTables.forEach((element, idx) => {
-          mapping[idx] = element.database_alias + '.' + element.table + '.' + item[element.table]
+    getSelectedCol (tableName, arrData) {
+      const result = arrData.filter(reg => reg.includes(tableName))
+      if (result.length !== 0) {
+        return result[0].split('.').pop()
+      }
+      return ''
+    },
+    async createMerge () {
+      const listMap = this.listMapping.map(item => {
+        const newCol = []
+        this.tables.forEach((table, i) => {
+          if (item.listCol[i] !== '' && item.listCol[i] !== null && item.listCol[i] !== undefined) {
+            const model = table.db_alias + '.' + table.table + '.' + item.listCol[i]
+            newCol.push(model)
+          }
         })
-        this.listMapping[i] = mapping
+        return {
+          colName: item.colName,
+          is_unique: item.is_unique ? 1 : 0,
+          listCol: newCol
+        }
       })
       const data = {
         merge_table_name: this.mergeTableName,
-        list_tables: this.listTables,
-        list_mapping: this.listMapping
+        list_tables: this.tables,
+        list_mapping: listMap
       }
       const dataStr = {
         mergeTableName: this.mergeTableName,
@@ -370,25 +298,11 @@ export default {
         } else {
           this.$notify({ type: 'error', text: 'Create merge request failed' })
         }
-        this.reset()
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
         this.isLoadingCreate = false
       }
-    },
-    reset () {
-      this.mergeTableName = null
-      this.listTables = null
-      this.listMapping = null
-      this.active = 0
-      this.rows = [
-        {
-          dbName: null,
-          tbName: null,
-          opsTbName: []
-        }
-      ]
     }
   }
 }
@@ -396,46 +310,4 @@ export default {
 
 <style>
 @import "vue-select/dist/vue-select.css";
-.vs__search,
-.vs__search:focus {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  line-height: 1.4;
-  font-size: 1em;
-  border: 1px solid transparent;
-  border-left: none;
-  outline: none;
-  margin: 0;
-  padding: 0 7px;
-  background: none;
-  box-shadow: none;
-  width: 0;
-  max-width: 100%;
-  flex-grow: 1;
-  z-index: 1;
-}
-.vs--searchable .vs__dropdown-toggle {
-  width: 100%;
-  min-width: 245.54px;
-  white-space: nowrap;
-  max-height: 31px;
-  height: calc(1.5em + 0.5rem + 2px);
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  padding-left: 0.5rem;
-  font-size: 0.875rem;
-}
-.vs__selected {
-  margin: 0;
-  padding-bottom: 3px;
-  padding-left: 0;
-}
-.vs__actions {
-  padding: 0;
-  margin-right: 5px;
-}
-.vs__clear {
-  margin-bottom: 2px;
-}
 </style>

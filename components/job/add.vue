@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -91,6 +91,9 @@
       </b-modal>
     </div>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -123,20 +126,29 @@ export default {
       ],
       executedBys: [
         { value: null, text: 'Please select executor' }
-      ]
+      ],
+      isDeny: false
     }
   },
   async mounted () {
     const resAcc = await getAllAccount()
+    if (resAcc.statusCode === '403') {
+      this.isDeny = true
+    } else {
     // eslint-disable-next-line array-callback-return
-    resAcc.data.map(item => {
-      this.executedBys.push({ value: item.id, text: item.username })
-    })
-    const resReq = await getAllRequestApproved()
-    // eslint-disable-next-line array-callback-return
-    resReq.data.map(item => {
-      this.requests.push({ value: item.id, text: item.requestType + ' - ' + item.id })
-    })
+      resAcc.data.map(item => {
+        this.executedBys.push({ value: item.id, text: item.username })
+      })
+      const resReq = await getAllRequestApproved()
+      if (resReq.statusCode === '403') {
+        this.isDeny = true
+      } else {
+      // eslint-disable-next-line array-callback-return
+        resReq.data.map(item => {
+          this.requests.push({ value: item.id, text: item.requestType + ' - ' + item.id })
+        })
+      }
+    }
   },
   watch: {
     maxRetry (value) {
@@ -206,11 +218,15 @@ export default {
             maxRetries: this.maxRetry
           }
           const res = await createJob(data)
-          this.$emit('onAdded', res)
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Create job succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Create job failed' })
+            this.$emit('onAdded', res)
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Create job succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Create job failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

@@ -326,7 +326,7 @@ export default {
     textAccount: null,
     isDenyRight: false,
     isDenyAccount: false,
-    isDenyAccountRight: true
+    isDenyAccountRight: false
   }),
 
   created () {
@@ -455,27 +455,35 @@ export default {
         }
         const resDel = await deleteRightForAcc(this.account, dataDel)
         const res = await createRightForAcc(data)
-        if (res.code === '201' && resDel.code === '200') {
-          this.$notify({
-            type: 'success',
-            text: 'Update right succeeded'
-          })
+        if (resDel.statusCode === '403' || res.statusCode === '403') {
+          this.isDenyAccountRight = true
         } else {
-          this.$notify({ type: 'error', text: 'Update right failed' })
+          if (res.code === '201' && resDel.code === '200') {
+            this.$notify({
+              type: 'success',
+              text: 'Update right succeeded'
+            })
+          } else {
+            this.$notify({ type: 'error', text: 'Update right failed' })
+          }
+          this.loadingAccountRight = true
         }
-        this.loadingAccountRight = true
         try {
           const res = await searchRight(
             this.account,
             this.paginationAccountRight.page,
             this.paginationAccountRight.limit
           )
-          this.accountRight = res.data
-          this.paginationAccountRight.total = res.metaData.totalItem
-          const resRight = await getAll()
-          this.opsRight = resRight.data.map((item) => {
-            return { value: item.id, label: item.path + ' - ' + item.method }
-          })
+          if (res.statusCode === '403') {
+            this.isDenyRight = true
+          } else {
+            this.accountRight = res.data
+            this.paginationAccountRight.total = res.metaData.totalItem
+            const resRight = await getAll()
+            this.opsRight = resRight.data.map((item) => {
+              return { value: item.id, label: item.path + ' - ' + item.method }
+            })
+          }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
         } finally {
@@ -517,19 +525,23 @@ export default {
           this.paginationAccount.limit,
           this.textAccount
         )
-        this.accounts = resAcc.data
-        this.accounts.forEach((e) => {
-          if (e.role === 'admin') {
-            e.role = 'Admin'
-          }
-          if (e.role === 'viewer') {
-            e.role = 'Viewer'
-          }
-          if (e.role === 'engineer') {
-            e.role = 'Engineer'
-          }
-        })
-        this.paginationAccount.total = resAcc.metaData.totalItem
+        if (resAcc.statusCode === '403') {
+          this.isDenyAccount = true
+        } else {
+          this.accounts = resAcc.data
+          this.accounts.forEach((e) => {
+            if (e.role === 'admin') {
+              e.role = 'Admin'
+            }
+            if (e.role === 'viewer') {
+              e.role = 'Viewer'
+            }
+            if (e.role === 'engineer') {
+              e.role = 'Engineer'
+            }
+          })
+          this.paginationAccount.total = resAcc.metaData.totalItem
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

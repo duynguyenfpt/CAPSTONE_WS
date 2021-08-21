@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisibleShare" title="Share" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -42,6 +43,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -58,7 +63,8 @@ export default {
     isLoading: false,
     opsAccount: [],
     accounts: [],
-    isLoadingShare: false
+    isLoadingShare: false,
+    isDeny: false
   }),
 
   methods: {
@@ -69,11 +75,15 @@ export default {
       this.isLoadingShare = false
       this.accounts = []
       const res = await getAllAccount()
-      this.config = res.data
-      this.opsAccount = res.data.map((item) => {
-        return { value: item.id, label: item.username }
-      })
-      this.isLoading = false
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.config = res.data
+        this.opsAccount = res.data.map((item) => {
+          return { value: item.id, label: item.username }
+        })
+        this.isLoading = false
+      }
     },
     onClose () {
       this.isVisibleShare = false
@@ -87,10 +97,14 @@ export default {
             accountIds: this.accounts
           }
           const res = await shareEtl(data)
-          if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Share ETL succeeded' })
+          if (res.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Share ETL failed' })
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Share ETL succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Share ETL failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

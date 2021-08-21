@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-show="!isDeny">
     <b-table
       responsive
       hover
@@ -75,7 +75,8 @@ export default {
       fields: TableFields,
       loading: false,
       status: null,
-      logs: []
+      logs: [],
+      isDeny: false
     }
   },
   methods: {
@@ -101,10 +102,14 @@ export default {
       try {
         this.loading = true
         const res = await getAllJobLog(this.pagination.page, this.pagination.limit)
-        this.logs = res.data
-        this.logs.forEach((e) => {
-          e.createdTime = moment(e.createdTime).format('YYYY-MM-DD hh:mm:ss')
-        })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.logs = res.data
+          this.logs.forEach((e) => {
+            e.createdTime = moment(e.createdTime).format('YYYY-MM-DD hh:mm:ss')
+          })
+        }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {

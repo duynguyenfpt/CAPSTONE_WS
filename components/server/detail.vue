@@ -1,4 +1,5 @@
 <template>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Detail Server" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -25,6 +26,10 @@
       </b-row>
     </div>
   </b-modal>
+  </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -41,7 +46,8 @@ export default {
     },
     isVisible: false,
     idItem: 0,
-    isLoading: false
+    isLoading: false,
+    isDeny: false
   }),
 
   methods: {
@@ -50,11 +56,15 @@ export default {
       this.isVisible = true
       this.isLoading = true
       const res = await getServer(this.idItem)
-      this.config = res.data
-      this.config.createdDate = moment(this.config.createdDate).format(
-        'YYYY-MM-DD'
-      )
-      this.isLoading = false
+      if (res.statusCode === '403') {
+        this.isDeny = true
+      } else {
+        this.config = res.data
+        this.config.createdDate = moment(this.config.createdDate).format(
+          'YYYY-MM-DD'
+        )
+        this.isLoading = false
+      }
     },
     onClose () {
       this.isVisible = false

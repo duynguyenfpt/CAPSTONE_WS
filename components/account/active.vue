@@ -1,5 +1,5 @@
 <template>
-<div>
+<div v-if="!isDeny">
   <b-modal v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
@@ -17,6 +17,9 @@
       </b-row>
   </b-modal>
 </div>
+<div v-else>
+  <common-deny/>
+</div>
 </template>
 
 <script>
@@ -25,7 +28,8 @@ export default {
   data: () => ({
     isVisible: false,
     idItem: 0,
-    isLoading: false
+    isLoading: false,
+    isDeny: false
   }),
   methods: {
     async show (id) {
@@ -42,12 +46,16 @@ export default {
           active: true
         }
         const res = await activeAccount(this.idItem, active)
-        this.$emit('onActived')
-        if (res.code === '200') {
-          this.$notify({ type: 'success', text: 'Active account succeeded' })
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.$notify({ type: 'error', text: 'Active account  failed' })
-          this.$router.go()
+          this.$emit('onActived')
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Active account succeeded' })
+          } else {
+            this.$notify({ type: 'error', text: 'Active account  failed' })
+            this.$router.go()
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

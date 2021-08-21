@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isDeny">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -86,6 +86,9 @@
       </b-modal>
     </div>
   </div>
+  <div v-else>
+    <common-deny/>
+  </div>
 </template>
 
 <script>
@@ -115,15 +118,20 @@ export default {
       executedBys: [
         { value: null, text: 'Please select executor' }
       ],
-      idItem: 0
+      idItem: 0,
+      isDeny: false
     }
   },
   async mounted () {
     const resAcc = await getAllAccount()
+    if (resAcc.statusCode === '403') {
+      this.isDeny = true
+    } else {
     // eslint-disable-next-line array-callback-return
-    resAcc.data.map(item => {
-      this.executedBys.push({ value: item.id, text: item.username })
-    })
+      resAcc.data.map(item => {
+        this.executedBys.push({ value: item.id, text: item.username })
+      })
+    }
   },
   watch: {
     maxRetry (value) {
@@ -144,16 +152,20 @@ export default {
       this.msg.executedBy = null
       try {
         const res = await getDetailJob(id)
-        this.request = res.data.request.requestType + ' - All'
-        this.requestId = res.data.request.id
-        this.executedBy = res.data.excutedBy.id
-        this.jobSchedule = res.data.jobSchedule
-        this.maxRetry = res.data.maxRetries
-        this.isActive = res.data.active
-        if (res.data.request.requestType === 'SyncTable') {
-          this.isSync = true
+        if (res.statusCode === '403') {
+          this.isDeny = true
         } else {
-          this.isSync = false
+          this.request = res.data.request.requestType + ' - All'
+          this.requestId = res.data.request.id
+          this.executedBy = res.data.excutedBy.id
+          this.jobSchedule = res.data.jobSchedule
+          this.maxRetry = res.data.maxRetries
+          this.isActive = res.data.active
+          if (res.data.request.requestType === 'SyncTable') {
+            this.isSync = true
+          } else {
+            this.isSync = false
+          }
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
@@ -193,11 +205,15 @@ export default {
             maxRetries: this.maxRetry
           }
           const data = await updateJob(this.idItem, body)
-          this.$emit('onUpdated', data)
-          if (data.code === '200') {
-            this.$notify({ type: 'success', text: 'Update job succeeded' })
+          if (data.statusCode === '403') {
+            this.isDeny = true
           } else {
-            this.$notify({ type: 'error', text: 'Update job failed' })
+            this.$emit('onUpdated', data)
+            if (data.code === '200') {
+              this.$notify({ type: 'success', text: 'Update job succeeded' })
+            } else {
+              this.$notify({ type: 'error', text: 'Update job failed' })
+            }
           }
         } catch (e) {
           this.$notify({ type: 'error', text: 'Update job failed' })

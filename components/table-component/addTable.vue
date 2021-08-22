@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div>
     <b-modal v-model="isVisible" title="Create Table" hide-footer>
       <div v-if="isLoading" class="text-center">
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -54,9 +54,6 @@
       </div>
     </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -78,8 +75,7 @@ export default {
     msg: {
       tableName: '',
       defaultKey: ''
-    },
-    isDeny: false
+    }
   }),
   watch: {
     tableName (value) {
@@ -112,7 +108,8 @@ export default {
       this.isLoading = true
       const res = await getDatabaseDetail(this.idItem)
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
       } else {
         this.dbName = res.data.databaseName
         this.tableName = null
@@ -146,7 +143,8 @@ export default {
           }
           const res = await addTable(body)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.$emit('onAdded')
             if (res.code === '201') {

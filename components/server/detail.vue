@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Detail Server" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -27,9 +27,6 @@
     </div>
   </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -46,8 +43,7 @@ export default {
     },
     isVisible: false,
     idItem: 0,
-    isLoading: false,
-    isDeny: false
+    isLoading: false
   }),
 
   methods: {
@@ -57,14 +53,14 @@ export default {
       this.isLoading = true
       const res = await getServer(this.idItem)
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
       } else {
         this.config = res.data
         this.config.createdDate = moment(this.config.createdDate).format(
           'YYYY-MM-DD'
         )
-        this.isLoading = false
       }
+      this.isLoading = false
     },
     onClose () {
       this.isVisible = false

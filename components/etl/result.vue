@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisibleResult" title="Sample Data" hide-footer size="lg">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -47,9 +47,6 @@
     </div>
   </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -65,8 +62,7 @@ export default {
     msg: '',
     isDownload: false,
     isFailed: false,
-    msgErr: '',
-    isDeny: false
+    msgErr: ''
   }),
   methods: {
     async show (id) {
@@ -78,7 +74,8 @@ export default {
       try {
         const res = await getResultDetail(this.idItem)
         if (res.statusCode === '403') {
-          this.isDeny = true
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisibleResult = false
         } else {
           if (res.code === '200') {
             if (res.data.status === 'successed') {
@@ -139,7 +136,8 @@ export default {
         this.isDownload = true
         const res = await downloadData(this.idItem)
         if (res.statusCode === '403') {
-          this.isDeny = true
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisibleResult = false
         } else {
           if (res.code === '200') {
             this.$notify({ type: 'success', text: 'Download result succeeded' })

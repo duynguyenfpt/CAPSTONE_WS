@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisibleShare" title="Share" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -44,9 +44,6 @@
     </div>
   </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -63,8 +60,7 @@ export default {
     isLoading: false,
     opsAccount: [],
     accounts: [],
-    isLoadingShare: false,
-    isDeny: false
+    isLoadingShare: false
   }),
 
   methods: {
@@ -76,7 +72,8 @@ export default {
       this.accounts = []
       const res = await getAllAccount()
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisibleShare = false
       } else {
         this.config = res.data
         this.opsAccount = res.data.map((item) => {
@@ -98,7 +95,8 @@ export default {
           }
           const res = await shareEtl(data)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisibleShare = false
           } else {
             if (res.code === '201') {
               this.$notify({ type: 'success', text: 'Share ETL succeeded' })

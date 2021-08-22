@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Edit Request" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -43,9 +43,6 @@
     </div>
   </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -78,7 +75,8 @@ export default {
     // get username
     const accounts = await getListAccount(1, 100)
     if (accounts.statusCode === '403') {
-      this.isDeny = true
+      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      this.isVisible = false
     } else {
     // eslint-disable-next-line array-callback-return
       accounts.data.map((acc) => {
@@ -96,7 +94,8 @@ export default {
       try {
         const res = await getDetailRequest(id)
         if (res.statusCode === '403') {
-          this.isDeny = true
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisible = false
         } else {
           this.request.requestType = res.data.requestType
           this.request.status = res.data.status
@@ -159,7 +158,8 @@ export default {
           }
           const data = await updateRequest(this.idItem, body)
           if (data.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.$emit('onUpdated', data)
             if (data.code === '200') {

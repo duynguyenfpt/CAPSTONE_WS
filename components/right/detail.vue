@@ -55,8 +55,7 @@ export default {
     },
     isVisible: false,
     idItem: 0,
-    isLoading: false,
-    isDeny: false
+    isLoading: false
   }),
 
   methods: {
@@ -66,7 +65,8 @@ export default {
       this.isLoading = true
       const res = await detailRight(this.idItem)
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
       } else {
         this.config = res.data
         this.isLoading = false

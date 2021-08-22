@@ -34,5 +34,11 @@ http.interceptors.response.use(
         message: 'Access denied'
       }
     }
+    if (error.message.includes('422')) {
+      return {
+        statusCode: '422',
+        message: 'Can not add rights for yourself'
+      }
+    }
   }
 )

@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Edit Account" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -33,9 +33,6 @@
     </div>
   </b-modal>
 </div>
-<div v-else>
-  <common-deny/>
-</div>
 </template>
 
 <script>
@@ -62,8 +59,7 @@ export default {
       email: null,
       phone: null,
       role: null
-    },
-    isDeny: false
+    }
   }),
   watch: {
     username (value) {
@@ -86,7 +82,8 @@ export default {
       this.isLoading = true
       const res = await getAccountDetail(this.idItem)
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
       } else {
         this.username = res.data.username
         this.email = res.data.email
@@ -151,7 +148,8 @@ export default {
           }
           const res = await updateAccount(this.idItem, data)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.$emit('onUpdated', data)
             if (res.code) {

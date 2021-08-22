@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -113,9 +113,6 @@
       </b-modal>
     </div>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -163,8 +160,7 @@ export default {
       },
       filterMethod (query, item) {
         return item.initial.toLowerCase().indexOf(query.toLowerCase()) > -1
-      },
-      isDeny: false
+      }
     }
   },
   watch: {
@@ -238,12 +234,32 @@ export default {
       if (this.right === 1) {
         this.isSelected = true
         this.isCopied = false
+        const res = await getAll()
+        if (res.statusCode === '403') {
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisible = false
+        } else {
+          const states = res.data.map(item => {
+            return { id: item.id, name: item.path + ' - ' + item.method }
+          })
+          const initials = res.data.map(item => {
+            return item.path + ' - ' + item.method
+          })
+          states.forEach((right, index) => {
+            this.dataArr.push({
+              label: right.name,
+              key: right.id,
+              initial: initials[index]
+            })
+          })
+        }
       } else if (this.right === 2) {
         this.isSelected = false
         this.isCopied = true
         const res = await getAllAccount()
         if (res.statusCode === '403') {
-          this.isDeny = true
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisible = false
         } else {
         // eslint-disable-next-line array-callback-return
           res.data.map((item) => {
@@ -300,7 +316,9 @@ export default {
           }
           const res = await createAccount(data)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isLoadingCreate = false
+            this.isVisible = false
           } else {
             this.$emit('onAdded')
             if (res.code === '201') {
@@ -319,26 +337,6 @@ export default {
     },
     onClose () {
       this.isVisible = false
-    }
-  },
-  async mounted () {
-    const res = await getAll()
-    if (res.statusCode === '403') {
-      this.isDenied = true
-    } else {
-      const states = res.data.map(item => {
-        return { id: item.id, name: item.path + ' - ' + item.method }
-      })
-      const initials = res.data.map(item => {
-        return item.path + ' - ' + item.method
-      })
-      states.forEach((right, index) => {
-        this.dataArr.push({
-          label: right.name,
-          key: right.id,
-          initial: initials[index]
-        })
-      })
     }
   }
 }

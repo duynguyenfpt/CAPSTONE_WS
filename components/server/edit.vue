@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Update Server" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -27,9 +27,6 @@
     </div>
   </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -45,8 +42,7 @@ export default {
     msg: {
       host: null,
       domain: null
-    },
-    isDeny: false
+    }
   }),
   watch: {
     serverHost (value) {
@@ -79,9 +75,10 @@ export default {
       this.isLoading = true
       const res = await getServer(this.idItem)
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
+        this.isLoading = false
       } else {
-        console.log(res.data)
         this.serverHost = res.data.serverHost
         this.serverDomain = res.data.serverDomain
         this.isLoading = false
@@ -102,7 +99,9 @@ export default {
           }
           const data = await updateServer(this.idItem, config)
           if (data.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isLoadingUpdate = false
+            this.isVisible = false
           } else {
             this.isLoadingUpdate = false
             this.isVisible = false
@@ -115,6 +114,9 @@ export default {
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoadingUpdate = false
+          this.isVisible = false
         }
       }
     }

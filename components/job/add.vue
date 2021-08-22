@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -91,9 +91,6 @@
       </b-modal>
     </div>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -126,14 +123,14 @@ export default {
       ],
       executedBys: [
         { value: null, text: 'Please select executor' }
-      ],
-      isDeny: false
+      ]
     }
   },
   async mounted () {
     const resAcc = await getAllAccount()
     if (resAcc.statusCode === '403') {
-      this.isDeny = true
+      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      this.isVisible = false
     } else {
     // eslint-disable-next-line array-callback-return
       resAcc.data.map(item => {
@@ -141,7 +138,8 @@ export default {
       })
       const resReq = await getAllRequestApproved()
       if (resReq.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
       } else {
       // eslint-disable-next-line array-callback-return
         resReq.data.map(item => {
@@ -219,7 +217,8 @@ export default {
           }
           const res = await createJob(data)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.$emit('onAdded', res)
             if (res.code === '201') {

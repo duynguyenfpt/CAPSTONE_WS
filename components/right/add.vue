@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div>
     <b-modal v-model="isVisible" title="Create Right" hide-footer>
       <div v-if="isLoading" class="text-center">
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -52,9 +52,6 @@
       </div>
     </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -81,8 +78,7 @@ export default {
       { value: 'POST', text: 'POST' },
       { value: 'PUT', text: 'PUT' },
       { value: 'DELETE', text: 'DELETE' }
-    ],
-    isDeny: false
+    ]
   }),
   watch: {
     path (value) {
@@ -156,7 +152,8 @@ export default {
           }
           const res = await createRight(body)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.$emit('onAdded')
             if (res.code === '201') {

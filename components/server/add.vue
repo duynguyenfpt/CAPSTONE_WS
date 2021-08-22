@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Create Server" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -33,9 +33,6 @@
     </div>
   </b-modal>
   </div>
-  <div  v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -51,8 +48,7 @@ export default {
       msg: {
         host: null,
         domain: null
-      },
-      isDeny: false
+      }
     }
   },
   watch: {
@@ -108,7 +104,7 @@ export default {
           }
           const data = await createServer(config)
           if (data.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
           } else {
             this.isLoadingCreate = false
             this.isVisible = false
@@ -121,6 +117,9 @@ export default {
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoadingCreate = false
+          this.isVisible = false
         }
       }
     }

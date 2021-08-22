@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
@@ -17,9 +17,6 @@
       </b-row>
   </b-modal>
 </div>
-<div v-else>
-  <common-deny/>
-</div>
 </template>
 
 <script>
@@ -28,8 +25,7 @@ export default {
   data: () => ({
     isVisible: false,
     idItem: 0,
-    isLoading: false,
-    isDeny: false
+    isLoading: false
   }),
   methods: {
     async show (id) {
@@ -47,7 +43,9 @@ export default {
         }
         const res = await activeAccount(this.idItem, active)
         if (res.statusCode === '403') {
-          this.isDeny = true
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isLoading = false
+          this.isVisible = false
         } else {
           this.$emit('onActived')
           if (res.code === '200') {

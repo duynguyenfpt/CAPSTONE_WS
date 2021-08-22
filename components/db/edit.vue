@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div>
   <b-modal v-model="isVisible" title="Edit Database" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -69,9 +69,6 @@
     </div>
   </b-modal>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -114,7 +111,8 @@ export default {
     this.isLoading = true
     const hosts = await getAllServers()
     if (hosts.statusCode === '403') {
-      this.isDeny = true
+      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      this.isVisible = false
     } else {
       this.options = hosts.data.map(item => {
         return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
@@ -157,7 +155,8 @@ export default {
       this.isLoading = true
       const res = await getDatabaseDetail(id)
       if (res.statusCode === '403') {
-        this.isDeny = true
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
       } else {
         this.serverInforId = res.data.serverInfor.id
         this.port = res.data.port
@@ -267,7 +266,8 @@ export default {
           }
           const data = await updateDatabase(this.idItem, config)
           if (data.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.isLoadingUpdate = false
             this.isVisible = false

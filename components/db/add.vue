@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -100,9 +100,6 @@
       </b-modal>
     </div>
   </div>
-  <div v-else>
-    <common-deny/>
-  </div>
 </template>
 
 <script>
@@ -144,15 +141,15 @@ export default {
       databaseType: null,
       sid: null,
       alias: null
-    },
-    isDeny: false
+    }
   }),
 
   async mounted () {
     this.isLoading = true
     const hosts = await getAllServers()
     if (hosts.statusCode === '403') {
-      this.isDeny = true
+      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      this.isVisible = false
     } else {
     // eslint-disable-next-line array-callback-return
       hosts.data.map((item) => {
@@ -325,7 +322,8 @@ export default {
           }
           const res = await createDatabase(config)
           if (res.statusCode === '403') {
-            this.isDeny = true
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
           } else {
             this.isLoadingCreate = false
             this.isVisible = false
@@ -358,7 +356,8 @@ export default {
         }
         const res = await checkConnection(data)
         if (res.statusCode === '403') {
-          this.isDeny = true
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisible = false
         } else {
           if (res.code === '200' && res.data.success) {
             this.$notify({ type: 'success', text: 'Test connection succeeded.' })

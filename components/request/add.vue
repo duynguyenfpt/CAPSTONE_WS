@@ -95,6 +95,7 @@
             v-model="request.fromDate"
             class="mb-2"
             @context="chooseDateFrom"
+            size="sm"
           ></b-form-datepicker>
           <p class="msg-error" v-if="msg.fromDate">{{ msg.fromDate }}</p>
         </b-col>
@@ -112,6 +113,7 @@
             v-model="request.toDate"
             class="mb-2"
             @context="chooseDateTo"
+            size="sm"
           ></b-form-datepicker>
           <p class="msg-error" v-if="msg.toDate">{{ msg.toDate }}</p>
         </b-col>

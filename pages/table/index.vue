@@ -174,7 +174,7 @@ export default {
           })
           this.tableList.forEach((e) => {
             if (e.databaseInfo.databaseType === 'mysql') {
-              e.databaseInfo.databaseType = 'My Sql'
+              e.databaseInfo.databaseType = 'MySql'
             }
             if (e.databaseInfo.databaseType === 'postgresql') {
               e.databaseInfo.databaseType = 'PostgreSQL'
@@ -235,7 +235,7 @@ export default {
           })
           this.tableList.forEach((e) => {
             if (e.databaseInfo.databaseType === 'mysql') {
-              e.databaseInfo.databaseType = 'My Sql'
+              e.databaseInfo.databaseType = 'MySql'
             }
             if (e.databaseInfo.databaseType === 'postgresql') {
               e.databaseInfo.databaseType = 'PostgreSQL'

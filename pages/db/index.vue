@@ -178,7 +178,7 @@ export default {
           this.dbs = res.data
           this.dbs.forEach((e) => {
             if (e.databaseType === 'mysql') {
-              e.databaseType = 'My Sql'
+              e.databaseType = 'MySql'
             }
             if (e.databaseType === 'postgresql') {
               e.databaseType = 'PostgreSQL'
@@ -246,7 +246,7 @@ export default {
           })
           this.dbs.forEach((e) => {
             if (e.databaseType === 'mysql') {
-              e.databaseType = 'My Sql'
+              e.databaseType = 'MySql'
             }
             if (e.databaseType === 'postgresql') {
               e.databaseType = 'PostgreSQL'

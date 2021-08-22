@@ -1,5 +1,5 @@
 <template>
-<div v-if="isDeny">
+<div v-if="!isDeny">
   <div v-if="schemaChanges">
     <b-row>
       <b-col sm="10" class="text-center">

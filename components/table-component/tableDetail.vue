@@ -123,7 +123,7 @@ export default {
         } else {
           this.tableList = res.data
           if (this.tableList.databaseInfo.databaseType === 'mysql') {
-            this.tableList.databaseInfo.databaseType = 'My Sql'
+            this.tableList.databaseInfo.databaseType = 'MySql'
           }
           if (this.tableList.databaseInfo.databaseType === 'postgresql') {
             this.tableList.databaseInfo.databaseType = 'PostgreSQL'

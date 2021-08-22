@@ -7,7 +7,11 @@
     </b-row>
     <section name="action">
       <b-row class="pt-2">
-        <b-col sm="4">
+        <b-col sm="3">
+          <label>Username</label>
+          <b-input v-model="userName" size="sm"></b-input>
+        </b-col>
+        <b-col sm="3">
           <label for="example-datepicker">From date</label>
           <b-form-datepicker
             id="date-from"
@@ -18,10 +22,10 @@
             }"
             v-model="fromDate"
             class="mb-2"
-            @context="chooseDateFrom"
+            size="sm"
           ></b-form-datepicker>
         </b-col>
-        <b-col sm="4">
+        <b-col sm="3">
           <label for="example-datepicker">To date</label>
           <b-form-datepicker
             id="date-to"
@@ -34,12 +38,12 @@
             :min="min"
             v-model="toDate"
             class="mb-2"
-            @context="chooseDateTo"
+            size="sm"
           ></b-form-datepicker>
         </b-col>
         <b-col class="text-right">
           <label></label>
-          <b-btn @click="fillLog()" variant="primary" class="btn-fliter" style="margin-top: 32px">
+          <b-btn @click="onSearchLog()" variant="primary" size="sm" style="margin-top: 32px; width: 75px">
             Fillter
           </b-btn>
         </b-col>
@@ -70,7 +74,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getList"
+        @input="searchLog"
       />
     </section>
   </div>
@@ -80,7 +84,7 @@
 </template>
 
 <script>
-import { getAllLog } from '@/service/log'
+import { getAllLog, searchLog } from '@/service/log'
 import moment from 'moment'
 
 const TableFields = [
@@ -120,8 +124,12 @@ export default {
       total: 0
     },
     loading: false,
+    userName: null,
     fromDate: null,
     toDate: null,
+    keyName: null,
+    keyFrom: null,
+    keyTo: null,
     min: null,
     logs: [],
     isDeny: false
@@ -162,6 +170,38 @@ export default {
     },
     onReload () {
       this.getList()
+    },
+    async searchLog () {
+      this.loading = true
+      try {
+        const res = await searchLog(
+          this.pagination.page,
+          this.pagination.limit,
+          this.keyName,
+          this.keyFrom,
+          this.keyTo
+        )
+        if (res.statusCode === '403') {
+          this.isDeny = true
+        } else {
+          this.logs = res.data
+          this.logs.forEach((e) => {
+            e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
+          })
+          this.pagination.total = res.metaData.totalItem
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.loading = false
+      }
+    },
+    onSearchLog () {
+      this.pagination.page = 1
+      this.keyName = this.userName
+      this.keyFrom = this.fromDate
+      this.keyTo = this.toDate
+      this.searchLog()
     }
   }
 }

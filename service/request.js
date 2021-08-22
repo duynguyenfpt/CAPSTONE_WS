@@ -8,16 +8,17 @@ export const updateRequest = (id, requests) => http.put(`api/requests/${id}`, re
 
 export const createRequestSync = (request) => http.post('api/requests', request)
 export const createRequestAddColumn = (request) => http.post('api/requests', request)
-export const getAllRequestApproved = (page, limit) => http.get('api/requests', { params: { page: 1, limit: 100, status: '1' } })
+export const getAllRequestApproved = () => http.get('api/requests', { params: { page: 1, limit: 100, status: '1' } })
 export const getAllRequest = (page, limit) => http.get('api/requests', { params: { page: 1, limit: 100 } })
 
 export const getLogByRequest = (id) => http.get(`api/requests/${id}/notes`, { params: { page: 1, limit: 100 } })
 export const createLog = (data) => http.post('api/notes', data)
-export const searchRequest = (page, limit, textSearch) => http.get('api/requests', {
+export const searchRequest = (page, limit, requestType, status, approvedBy) => http.get('api/requests', {
   params: {
     page: page,
     limit: limit,
-    status: '1',
-    keyword: textSearch
+    requestType: requestType,
+    status: status,
+    approvedBy: approvedBy
   }
 })

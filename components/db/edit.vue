@@ -79,7 +79,7 @@ export default {
   data: () => ({
     options: [],
     dbTypes: [
-      { value: 'mysql', text: 'My Sql' },
+      { value: 'mysql', text: 'MySql' },
       { value: 'postgresql', text: 'PostgreSQL' },
       { value: 'oracle', text: 'Oracle' }
     ],

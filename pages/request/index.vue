@@ -7,17 +7,36 @@
     </b-row>
     <section name="action">
       <b-row>
-        <b-col cols="4" class="text-left">
-          <b-input-group>
-            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="searchRequest()"/>
-            <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchRequest()">
-                <i class="fas fa-search" />
-              </b-btn>
-            </b-input-group-append>
-          </b-input-group>
+        <b-col sm="3">
+          <label>Request Type</label>
+          <b-form-select
+            v-model="requestType"
+            :options="opsRequestType"
+            size="sm"
+          ></b-form-select>
         </b-col>
-        <b-col class="text-right">
+        <b-col sm="3">
+          <label>Status</label>
+          <b-form-select
+            v-model="status"
+            :options="opsStatus"
+            size="sm"
+          ></b-form-select>
+        </b-col>
+        <b-col sm="3">
+          <label>Approved By</label>
+          <b-input v-model="approvedBy" size="sm"></b-input>
+        </b-col>
+        <b-col class="text-right" style="margin-top: 32px;">
+          <b-btn
+            @click="onSearchRequest"
+            size="sm"
+            class="ml-2"
+            variant="primary"
+          >
+            <i class="fas fa-search" />
+            Search
+          </b-btn>
           <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
             <i class="fa fa-sync pr-1" />
             Reload
@@ -27,14 +46,19 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
-      responsive
-      hover
-      striped
-      :fields="tableFields"
-      :items="request"
-      :busy="loading">
+        responsive
+        hover
+        striped
+        :fields="tableFields"
+        :items="request"
+        :busy="loading"
+      >
         <template #cell(action)="item">
-          <b-btn @click="edit(item.item.id, item.item.requestType)" size="sm" variant="info">
+          <b-btn
+            @click="edit(item.item.id, item.item.requestType)"
+            size="sm"
+            variant="info"
+          >
             <i class="fa fa-pen" />
           </b-btn>
           <b-btn size="sm" @click="reset(item.item.id)" variant="danger">
@@ -67,7 +91,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getList"
+        @input="searchRequest"
       />
     </section>
     <section name="popup">
@@ -75,11 +99,11 @@
       <request-assign ref="assign" />
     </section>
     <section name="popup">
-      <request-log ref="log" @onUpdated="refreshData"/>
+      <request-log ref="log" @onUpdated="refreshData" />
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
@@ -129,8 +153,25 @@ export default {
     tableFields: tableFields,
     request: null,
     loading: false,
-    textSearch: null,
-    isDeny: false
+    isDeny: false,
+    requestType: null,
+    status: null,
+    approvedBy: null,
+    keyType: null,
+    keyStatus: null,
+    keyApproved: null,
+    opsRequestType: [
+      { value: null, text: 'Please select an option' },
+      { value: 'SyncTable', text: 'SyncTable' },
+      { value: 'ETLRequest', text: 'ETLRequest' },
+      { value: 'MergeRequest', text: 'MergeRequest' }
+    ],
+    opsStatus: [
+      { value: null, text: 'Please select an option' },
+      { value: '0', text: 'Pending' },
+      { value: '1', text: 'Approved' },
+      { value: '2', text: 'Rejected' }
+    ]
   }),
   created () {
     this.getList()
@@ -161,7 +202,9 @@ export default {
           this.request = res.data
           this.pagination.total = res.metaData.totalItem
           this.request.forEach((e) => {
-            e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+            e.createdDate = moment(this.request.createdDate).format(
+              'YYYY-MM-DD'
+            )
             e.modifiedDate = moment(this.request.modifiedDate).format(
               'YYYY-MM-DD'
             )
@@ -201,16 +244,18 @@ export default {
         return 'Approved'
       } else if (status === '2') {
         return 'Rejected'
-      } return null
+      }
+      return null
     },
     async searchRequest () {
       this.loading = true
       try {
-        this.pagination.page = 1
         const res = await searchRequest(
           this.pagination.page,
           this.pagination.limit,
-          this.textSearch
+          this.keyType,
+          this.keyStatus,
+          this.keyApproved
         )
         if (res.statusCode === '403') {
           this.isDeny = true
@@ -218,7 +263,9 @@ export default {
           this.request = res.data
           this.pagination.total = res.metaData.totalItem
           this.request.forEach((e) => {
-            e.createdDate = moment(this.request.createdDate).format('YYYY-MM-DD')
+            e.createdDate = moment(this.request.createdDate).format(
+              'YYYY-MM-DD'
+            )
             e.modifiedDate = moment(this.request.modifiedDate).format(
               'YYYY-MM-DD'
             )
@@ -229,6 +276,13 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    onSearchRequest () {
+      this.pagination.page = 1
+      this.keyType = this.requestType
+      this.keyStatus = this.status
+      this.keyApproved = this.approvedBy
+      this.searchRequest()
     }
   }
 }

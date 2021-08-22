@@ -80,7 +80,7 @@
     </b-row>
     <b-row align-h="center" id="step-2" v-if="step == 1">
       <b-col cols="12">
-        <table class="table table-bordered" responsive style="max-width: 1300px">
+        <table class="table table-bordered table-responsive" responsive style="max-width: 1300px">
           <thead>
             <tr>
               <th>No</th>
@@ -93,7 +93,7 @@
               <th>
                 Unique
               </th>
-              <th>
+              <th style="min-width: 90px;">
                 Action
               </th>
             </tr>

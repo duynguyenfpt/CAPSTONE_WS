@@ -114,7 +114,7 @@ export default {
     dbHosts: [{ value: null, text: 'Please select an option' }],
     dbTypes: [
       { value: null, text: 'Please select an option' },
-      { value: 'mysql', text: 'My Sql' },
+      { value: 'mysql', text: 'MySql' },
       { value: 'postgresql', text: 'PostgreSQL' },
       { value: 'oracle', text: 'Oracle' }
     ],

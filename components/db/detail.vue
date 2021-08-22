@@ -181,7 +181,7 @@ export default {
           this.detail = res.data
           this.detail.host = this.detail.serverInfor.serverDomain + ' - ' + this.detail.serverInfor.serverHost
           if (res.data.databaseType === 'mysql') {
-            this.detail.databaseType = 'My Sql'
+            this.detail.databaseType = 'MySql'
           }
           if (res.data.databaseType === 'postgresql') {
             this.detail.databaseType = 'PostgreSQL'

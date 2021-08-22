@@ -9,14 +9,14 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input
-              size="sm"
-              placeholder="Search"
+            <b-form-select
               v-model="textSearch"
-              @keyup.enter="searchJob(textSearch)"
-            />
+              :options="opsStatus"
+              size="sm"
+              @change="onSearchJob()"
+            ></b-form-select>
             <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchJob(textSearch)">
+              <b-btn size="sm" variant="primary" @click="onSearchJob()">
                 <i class="fas fa-search" />
               </b-btn>
             </b-input-group-append>
@@ -93,7 +93,7 @@
         :per-page="pagination.limit"
         :total-rows="pagination.total"
         align="right"
-        @input="getList"
+        @input="searchJob"
       />
     </section>
     <section name="popup">
@@ -152,6 +152,7 @@ export default {
   data: () => ({
     fields: jobFields,
     textSearch: null,
+    keyword: null,
     pagination: {
       page: 1,
       limit: 10,
@@ -161,7 +162,13 @@ export default {
     jobs: [],
     isActive: false,
     isDeactive: false,
-    isDeny: false
+    isDeny: false,
+    opsStatus: [
+      { value: null, text: 'Please select an option' },
+      { value: 'success', text: 'Success' },
+      { value: 'pending', text: 'Pending' },
+      { value: 'fail', text: 'Fail' }
+    ]
   }),
 
   created () {
@@ -241,11 +248,10 @@ export default {
     async searchJob () {
       this.loading = true
       try {
-        this.pagination.page = 1
         const res = await searchJob(
           this.pagination.page,
           this.pagination.limit,
-          this.textSearch
+          this.keyword
         )
         if (res.statusCode === '403') {
           this.isDeny = true
@@ -270,6 +276,11 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    onSearchJob () {
+      this.pagination.page = 1
+      this.keyword = this.textSearch
+      this.searchJob()
     }
   }
 }

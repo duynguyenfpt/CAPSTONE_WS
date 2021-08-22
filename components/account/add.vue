@@ -139,6 +139,7 @@ export default {
       isLoadingCreate: false,
       isVisible: false,
       rights: [
+        { text: 'Default right', value: 0 },
         { text: 'Select right', value: 1 },
         { text: 'Copy right', value: 2 }
       ],
@@ -189,6 +190,7 @@ export default {
       this.role = null
       this.account = null
       this.value = []
+      this.right = 0
       this.isCopied = false
       this.isSelected = false
       this.msg.username = null
@@ -229,6 +231,10 @@ export default {
       }
     },
     async showRight () {
+      if (this.right === 0) {
+        this.isSelected = false
+        this.isCopied = false
+      }
       if (this.right === 1) {
         this.isSelected = true
         this.isCopied = false
@@ -277,15 +283,19 @@ export default {
           if (this.isCopied) {
             data = {
               account: acc,
-              copyRight: true,
+              rightOption: 'copy',
               accountId: this.account
             }
-          }
-          if (this.isSelected) {
+          } else if (this.isSelected) {
             data = {
               account: acc,
-              copyRight: false,
+              rightOption: 'select',
               rightIds: this.value
+            }
+          } else {
+            data = {
+              account: acc,
+              rightOption: 'default'
             }
           }
           const res = await createAccount(data)
@@ -362,5 +372,23 @@ export default {
 
 .vs__clear {
   margin-bottom: 2px;
+}
+
+.el-transfer-panel {
+    border: 1px solid #EBEEF5;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #FFF;
+    display: inline-block;
+    width: 245px;
+    max-height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.el-transfer__buttons {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 15px;
 }
 </style>

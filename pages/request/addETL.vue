@@ -8,24 +8,42 @@
     </b-row>
     <b-row>
       <b-col sm="9" class="text-right">
-        <b-button size="sm" v-b-toggle.sidebar-right variant="success" @click="showAllResults">History</b-button>
+        <b-button
+          size="sm"
+          v-b-toggle.sidebar-right
+          variant="success"
+          @click="showAllResults"
+          >History</b-button
+        >
       </b-col>
       <b-sidebar id="sidebar-right" title="Old Result" right shadow>
         <div class="px-2 py-2">
           <b-list-group>
-            <b-list-group-item class="flex-column align-items-start" v-for="(item, index) in results" :key="index">
+            <b-list-group-item
+              class="flex-column align-items-start"
+              v-for="(item, index) in results"
+              :key="index"
+            >
               <div style="cursor: pointer" @click="showResult(item.request.id)">
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">{{ item.queryType }}</h5>
-                <small class="text-muted">{{ format(new Date(item.createdDate), `yyyy-mm-dd`) }}</small>
-              </div>
-              <p class="mb-1">
-                {{ item.query }}
-              </p>
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">{{ item.queryType }}</h5>
+                  <small class="text-muted">{{
+                    format(new Date(item.createdDate), `yyyy-mm-dd`)
+                  }}</small>
+                </div>
+                <p class="mb-1">
+                  {{ item.query }}
+                </p>
               </div>
               <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">{{ item.createdBy }}</small>
-                <b-button class="text-right" variant="primary" size="sm" @click="shareResult(item.id)">Share</b-button>
+                <b-button
+                  class="text-right"
+                  variant="primary"
+                  size="sm"
+                  @click="shareResult(item.id)"
+                  >Share</b-button
+                >
               </div>
             </b-list-group-item>
           </b-list-group>
@@ -77,12 +95,18 @@
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
         <b-col sm="8" class="text-right">
-          <b-btn size="sm" variant="primary" class="btn-add-request" @click="createETL" :disabled="!isExecuted">
+          <b-btn
+            size="sm"
+            variant="primary"
+            class="btn-add-request"
+            @click="createETL"
+            :disabled="!isExecuted"
+          >
             <b-spinner
-                v-if="isLoadingCreate"
-                variant="primary"
-                small
-              ></b-spinner>
+              v-if="isLoadingCreate"
+              variant="primary"
+              small
+            ></b-spinner>
             Submit
           </b-btn>
         </b-col>
@@ -90,34 +114,46 @@
       <b-row class="pt-2">
         <b-col sm="1"></b-col>
         <b-col sm="8" v-if="isExecuted">
-          <h4 class="text-center" v-if="isDisplay">Sample Data</h4>
-          <b-table
-          style="max-width: 1000px"
-          responsive
-          hover
-          striped
-          :items="rows"
-          :fields="resultFields">
-          <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>
-            <strong>Loading...</strong>
+          <div v-if="isSuccess">
+            <h4 class="text-center" v-if="isDisplay">Sample Data</h4>
+            <b-table
+              style="max-width: 1000px"
+              responsive
+              hover
+              striped
+              :items="rows"
+              :fields="resultFields"
+            >
+              <template #table-busy>
+                <div class="text-center text-danger my-2">
+                  <b-spinner class="align-middle"></b-spinner>
+                  <strong>Loading...</strong>
+                </div>
+              </template>
+            </b-table>
+            <div class="text-right">
+              <b-button
+                size="sm"
+                variant="success"
+                @click="onDownload"
+                v-if="isDisplay"
+              >
+                <b-spinner
+                  variant="success"
+                  v-if="isDownload"
+                  small
+                ></b-spinner>
+                Download
+              </b-button>
+            </div>
           </div>
-          </template>
-          </b-table>
-          <div class="text-right">
-            <b-button size="sm" variant="success" @click="onDownload" v-if="isDisplay">
-              <b-spinner variant="success" v-if="isDownload" small></b-spinner>
-              Download
-            </b-button>
-          </div>
-        </b-col>
-        <b-col sm="8" v-else>
           <div v-if="isFailed">
             <h5 class="text-center msg-fail">{{ msgErr }}</h5>
             <p class="msg-fail">{{ msgFailed }}</p>
           </div>
-          <div class="text-center" v-else>
+        </b-col>
+        <b-col sm="8" v-else>
+          <div class="text-center">
             <b-spinner variant="primary" label="Text Centered"></b-spinner>
             <h5>{{ msg }}</h5>
           </div>
@@ -136,7 +172,12 @@
   </div>
 </template>
 <script>
-import { getAllResults, createEtl, getResultDetail, downloadData } from '@/service/etl'
+import {
+  getAllResults,
+  createEtl,
+  getResultDetail,
+  downloadData
+} from '@/service/etl'
 import { format } from 'date-fns'
 export default {
   data () {
@@ -173,6 +214,7 @@ export default {
       msgErr: '',
       isDownload: false,
       isDisplay: false,
+      isSuccess: false,
       isDeny: false
     }
   },
@@ -289,25 +331,53 @@ export default {
                         })
                         const totalArray = resResult.data.content.split('\n')
                         this.isExecuted = true
+                        this.isSuccess = true
                         totalArray.forEach((element, index) => {
                           if (index === 0) {
-                          // eslint-disable-next-line array-callback-return
-                            element.split(',').map(item => {
+                            // eslint-disable-next-line array-callback-return
+                            element.split(',').map((item) => {
                               header.push({
                                 key: item
                               })
                             })
-                          } else {
-                            const tempRow = element.split(',')
-                            const objData = {}
-                            header.forEach((item, i) => {
-                              if (item.key === 'no') {
-                                objData[`${item.key}`] = index
+                            const totalArray = resResult.data.content.split('\n')
+                            this.isExecuted = true
+                            totalArray.forEach((element, index) => {
+                              if (index === 0) {
+                                // eslint-disable-next-line array-callback-return
+                                element.split(',').map(item => {
+                                  header.push({
+                                    key: item
+                                  })
+                                })
                               } else {
-                                objData[`${item.key}`] = tempRow[i - 1]
+                                const tempRow = element.split(',')
+                                const objData = {}
+                                header.forEach((item, i) => {
+                                  if (item.key === 'no') {
+                                    objData[`${item.key}`] = index
+                                  } else {
+                                    objData[`${item.key}`] = tempRow[i - 1]
+                                  }
+                                })
+                                this.rows.push(objData)
                               }
                             })
-                            this.rows.push(objData)
+                            this.resultFields = header
+                            isRunning = false
+                            this.isDisplay = true
+                          } else {
+                            if (resResult.data.status === 'failed') {
+                              this.isExecuted = false
+                              this.isFailed = true
+                              this.variant = 'danger'
+                              this.msgErr = 'Query is failed'
+                              this.msgFailed = resResult.data.content
+                              isRunning = false
+                            } else {
+                              this.isExecuted = false
+                              this.msg = 'Query is executing'
+                            }
                           }
                         })
                         this.resultFields = header
@@ -315,23 +385,12 @@ export default {
                         this.isDisplay = true
                       } else {
                         if (resResult.data.status === 'failed') {
-                          this.isExecuted = false
+                          this.isExecuted = true
                           this.isFailed = true
-                          this.variant = 'danger'
                           this.msgErr = 'Query is failed'
                           this.msgFailed = resResult.data.content
-                          isRunning = false
-                        } else {
-                          this.isExecuted = false
-                          this.msg = 'Query is executing'
                         }
                       }
-                      this.isLoadingCreate = false
-                    } else {
-                      this.isExecuted = true
-                      this.isFailed = true
-                      this.msgErr = 'Query is failed'
-                      this.msgFailed = resResult.data.content
                     }
                   }
                 } catch (e) {
@@ -384,10 +443,10 @@ export default {
       })
     },
     validateQuery (value) {
-      if (/^(?=.*select|create|drop|update|insert|alter|delete|attach|detach.*from).*$/.test(value)) {
-        this.message.query = ''
-      } else {
+      if (/^(\s*)$/.test(value)) {
         this.message.query = 'Invalid etl'
+      } else {
+        this.message.query = ''
       }
     }
   },

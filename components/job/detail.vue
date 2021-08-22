@@ -7,6 +7,9 @@
       </b-col>
     </b-row>
     <b-table :fields="requestFields" :items="[requestDetail]">
+      <template #cell(status)="row">
+          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{ getStatus(row.item.status) }}</b-badge>
+        </template>
     </b-table>
     <b-row>
       <b-col cols="6">
@@ -22,7 +25,7 @@
         >
       </b-col>
     </b-row>
-    <b-table :fields="jobFields" :items="[detail]">
+    <b-table :fields="jobFields" :items="detail">
       <template #cell(active)>
         <b-btn size="sm" variant="danger" v-if="isDeactive">
           <i class="fa fa-power-off" v-if="isDeactive" />
@@ -164,8 +167,7 @@ const requestFields = [
     label: 'Approver'
   },
   {
-    key: 'status',
-    variant: 'denger'
+    key: 'status'
   },
   {
     key: 'createdDate'
@@ -232,7 +234,7 @@ export default {
       jobFields: jobFields,
       logFields: logFields,
       requestFields: requestFields,
-      detail: null,
+      detail: [],
       listLogDetail: null,
       requestDetail: [],
       loading: false,
@@ -256,11 +258,26 @@ export default {
           return 'primary'
         case 'pending':
           return 'secondary'
+        case '0':
+          return 'secondary'
+        case '1':
+          return 'success'
+        case '2':
+          return 'danger'
         case 'retrying':
           return 'warning'
         default:
           return 'secondary'
       }
+    },
+    getStatus (status) {
+      if (status === '0') {
+        return 'Pending'
+      } else if (status === '1') {
+        return 'Approved'
+      } else if (status === '2') {
+        return 'Rejected'
+      } return null
     },
     async getDetail () {
       try {
@@ -277,12 +294,11 @@ export default {
             this.isActive = false
             this.isDeactive = true
           }
-          this.detail.server =
-          res.data.serverDomain + ' - ' + res.data.serverHost
-          this.detail.createdDate = moment(this.detail.createdDate).format(
-            'YYYY-MM-DD'
-          )
-          const requestId = this.detail.requestId
+          this.detail.forEach(item => {
+            item.server = item.serverDomain + ' - ' + item.serverHost
+            item.createdDate = moment(item.createdDate).format('YYYY-MM-DD')
+          })
+          const requestId = this.detail[0].requestId
           const resRequest = await getDetailRequest(requestId)
           if (resRequest.statusCode === '403') {
             this.isDeny = true

@@ -6,8 +6,9 @@
           <div class="col-md-4 login-sec">
             <h2 class="text-center">Login Now</h2>
             <div class="login-form">
+              <p class="msg-error-login" v-if="msg">{{ msg }}</p>
               <div class="form-group">
-                <label for="exampleInputEmail1" class="text-uppercase"
+                <label for="exampleInputEmail1"
                   >Username</label
                 >
                 <input
@@ -19,7 +20,7 @@
                 <span class="msg-error">{{ error_mgs.username }}</span>
               </div>
               <div class="form-group">
-                <label for="exampleInputPassword1" class="text-uppercase"
+                <label for="exampleInputPassword1"
                   >Password</label
                 >
                 <input
@@ -104,7 +105,8 @@ export default {
     error_mgs: {
       username: '',
       password: ''
-    }
+    },
+    msg: null
   }),
   methods: {
     async onLogin () {
@@ -132,7 +134,7 @@ export default {
         if (data) {
           this.$router.push('/')
         } else {
-          this.$notify({ type: 'error', text: 'Login failed' })
+          this.msg = 'Incorrect username or password.'
         }
       }
     }
@@ -237,5 +239,12 @@ export default {
 }
 .banner-text p {
   color: #fff;
+}
+.msg-error-login {
+  padding-top: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-size: 15px;
+  color: red;
 }
 </style>

@@ -414,7 +414,9 @@ export default {
       this.loadingAccountRight = true
       try {
         this.rightUpdate = []
-        this.account = record.id
+        if (record.id) {
+          this.account = record.id
+        }
         const res = await getRightByAcc(
           this.account,
           this.paginationAccountRight.page,

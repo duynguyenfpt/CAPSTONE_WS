@@ -24,11 +24,11 @@
               v-for="(item, index) in results"
               :key="index"
             >
-              <div style="cursor: pointer" @click="showResult(item.request.id)">
+              <div style="cursor: pointer; overflow: hidden; text-overflow: ellipsis;" @click="showResult(item.request.id)">
                 <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">{{ item.queryType }}</h5>
+                  <b-badge variant="processing" class="mb-1">{{ index + 1 }}</b-badge>
                   <small class="text-muted">{{
-                    format(new Date(item.createdDate), `yyyy-mm-dd`)
+                    format(new Date(item.createdDate), `yyyy-MM-dd`)
                   }}</small>
                 </div>
                 <p class="mb-1">

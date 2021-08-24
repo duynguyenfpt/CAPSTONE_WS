@@ -81,7 +81,7 @@
     </b-row>
     <b-row align-h="center" id="step-2" v-if="step == 1">
       <b-col cols="12">
-        <table class="table table-bordered table-responsive" style="max-width: 1300px">
+        <table v-if="!isLoading" class="table table-bordered table-responsive" style="max-width: 1200px">
           <thead>
             <tr>
               <th>No</th>
@@ -128,6 +128,12 @@
             </tr>
           </tbody>
         </table>
+        <div v-else>
+          <content-placeholders class="article-card-block">
+            <content-placeholders-text :lines="2" />
+            <content-placeholders-text :lines="6" />
+          </content-placeholders>
+        </div>
       </b-col>
     </b-row>
     <b-row class="pt-2">
@@ -177,7 +183,8 @@ export default {
     msg: {
       tableName: null
     },
-    isDeny: false
+    isDeny: false,
+    isLoading: false
   }),
   async created () {
     await this.getAllDB()
@@ -244,6 +251,7 @@ export default {
       })
     },
     async next () {
+      this.isLoading = true
       this.validateTableName(this.mergeTableName)
       if (this.mergeTableName === null || this.mergeTableName === '') {
         this.msg.tableName = 'Invalid table name'
@@ -288,6 +296,7 @@ export default {
           }
         })
       }
+      this.isLoading = false
     },
     prev () {
       this.step--

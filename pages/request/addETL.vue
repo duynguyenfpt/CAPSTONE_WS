@@ -335,51 +335,25 @@ export default {
                         totalArray.forEach((element, index) => {
                           if (index === 0) {
                             // eslint-disable-next-line array-callback-return
-                            element.split(',').map((item) => {
+                            element.split(',').map(item => {
                               header.push({
                                 key: item
                               })
                             })
-                            const totalArray = resResult.data.content.split('\n')
-                            this.isExecuted = true
-                            totalArray.forEach((element, index) => {
-                              if (index === 0) {
-                                // eslint-disable-next-line array-callback-return
-                                element.split(',').map(item => {
-                                  header.push({
-                                    key: item
-                                  })
-                                })
+                          } else {
+                            const tempRow = element.split(',')
+                            const objData = {}
+                            header.forEach((item, i) => {
+                              if (item.key === 'no') {
+                                objData[`${item.key}`] = index
                               } else {
-                                const tempRow = element.split(',')
-                                const objData = {}
-                                header.forEach((item, i) => {
-                                  if (item.key === 'no') {
-                                    objData[`${item.key}`] = index
-                                  } else {
-                                    objData[`${item.key}`] = tempRow[i - 1]
-                                  }
-                                })
-                                this.rows.push(objData)
+                                objData[`${item.key}`] = tempRow[i - 1]
                               }
                             })
-                            this.resultFields = header
-                            isRunning = false
-                            this.isDisplay = true
-                          } else {
-                            if (resResult.data.status === 'failed') {
-                              this.isExecuted = false
-                              this.isFailed = true
-                              this.variant = 'danger'
-                              this.msgErr = 'Query is failed'
-                              this.msgFailed = resResult.data.content
-                              isRunning = false
-                            } else {
-                              this.isExecuted = false
-                              this.msg = 'Query is executing'
-                            }
+                            this.rows.push(objData)
                           }
                         })
+                        this.isExecuted = true
                         this.resultFields = header
                         isRunning = false
                         this.isDisplay = true
@@ -389,6 +363,10 @@ export default {
                           this.isFailed = true
                           this.msgErr = 'Query is failed'
                           this.msgFailed = resResult.data.content
+                          this.isSuccess = false
+                        } else {
+                          this.isExecuted = false
+                          this.msg = 'Query is executing'
                         }
                       }
                     }
@@ -399,7 +377,7 @@ export default {
                   this.msgErr = 'Query is failed'
                   this.msgFailed = e.message
                 }
-                await this.sleep(10000)
+                await this.sleep(5000)
               }
             } else {
               this.$notify({ type: 'error', text: 'Create ETL failed' })

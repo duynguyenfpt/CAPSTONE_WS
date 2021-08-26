@@ -178,7 +178,7 @@ export default {
         this.msg.username = ''
         this.msg.password = ''
         this.msg.sid = ''
-        this.msg.alias = null
+        this.msg.alias = ''
       }
     },
     validateDBName (value) {
@@ -247,11 +247,20 @@ export default {
       }
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
+      } else {
+        this.msg.sid = ''
       }
       if (this.alias === null) {
         this.msg.alias = 'Invalid alias'
       }
-      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '' && this.alias === '') {
+      console.log('LCC: ', this.msg.databaseName)
+      console.log('LCC: ', this.msg.port)
+      console.log('LCC: ', this.msg.username)
+      console.log('LCC: ', this.msg.password)
+      console.log('LCC: ', this.msg.sid)
+      console.log('LCC: ', this.msg.alias)
+      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '' && this.msg.alias === '') {
+        console.log('LCC')
         try {
           this.isLoadingUpdate = true
           const config = {

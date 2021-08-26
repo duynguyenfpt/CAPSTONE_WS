@@ -6,31 +6,34 @@
       </b-col>
     </b-row>
     <b-row class="pt-2" id="step" align-h="center">
-        <b-col cols="10">
-          <el-steps
-            :active="step"
-            finish-status="success"
-            style="width: 100%"
-          >
-            <el-step title="Step 1"> </el-step>
-            <el-step title="Step 2"> </el-step>
-          </el-steps>
-        </b-col>
+      <b-col cols="12">
+        <el-steps :active="step" finish-status="success" style="width: 100%">
+          <el-step title="Choose tables"> </el-step>
+          <el-step title="Mapping table"> </el-step>
+          <el-step title="Done"> </el-step>
+        </el-steps>
+      </b-col>
     </b-row>
+    <hr />
     <b-row align-h="center" id="step-1" v-if="step == 0">
-      <b-col cols="10">
+      <b-col cols="12">
         <b-row class="my-1">
-            <b-col sm="3">
-              <h5 for="input-small">New Table Merge:</h5>
-            </b-col>
-            <b-col sm="9">
-              <b-form-input id="input-small" size="sm" placeholder="Enter table name" v-model="mergeTableName"></b-form-input>
-              <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
-            </b-col>
-          </b-row>
-        <b-row align-h="center">
+          <b-col sm="3">
+            <h5 for="input-small">Table name:</h5>
+          </b-col>
+          <b-col sm="9">
+            <b-form-input
+              id="input-small"
+              size="sm"
+              placeholder="Enter table name"
+              v-model="mergeTableName"
+            ></b-form-input>
+            <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
+          </b-col>
+        </b-row>
+        <b-row align-h="center" class="pt-2">
           <b-col>
-            <table class="b-table table table-striped table-hover">
+            <table class="b-table table table-striped table-hover table-sm">
               <thead>
                 <tr>
                   <th>No</th>
@@ -54,20 +57,26 @@
                   </td>
                   <td>
                     <VSelect
-                      v-if="table.database_alias"
+                      :disabled="!table.database_alias"
                       :options="tableOf[table.database_alias]"
                       :reduce="(e) => e.id"
                       v-model="table.table_id"
                       label="tableName"
                       placeholder="Please select a table"
-                      @input="chooseTb(table.database_alias, table.table_id, idx)"
+                      @input="
+                        chooseTb(table.database_alias, table.table_id, idx)
+                      "
                     />
                   </td>
                   <td>
                     <b-btn variant="danger" size="sm" @click="deleteTable(idx)">
                       <i class="fa fa-trash"></i>
                     </b-btn>
-                    <b-btn variant="success" v-if="idx == tables.length - 1" size="sm" @click="addTable">
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="100%" class="text-center">
+                    <b-btn variant="success" size="sm" block @click="addTable">
                       <i class="fa fa-plus" />
                     </b-btn>
                   </td>
@@ -78,29 +87,39 @@
         </b-row>
       </b-col>
     </b-row>
-    <b-row no-gutters align-h="center" id="step-2" v-if="step == 1" class="pt-2">
+    <b-row
+      no-gutters
+      align-h="center"
+      id="step-2"
+      v-if="step == 1"
+      class="pt-2"
+    >
       <b-col cols="12" class="table-responsive">
-        <table class="table b-table table-striped table-hover table-bordered table-sm" v-if="!isLoading">
+        <table
+          class="
+            table
+            b-table
+            table-striped table-hover table-bordered table-sm
+          "
+          v-if="!isLoading"
+        >
           <thead>
             <tr>
               <th>No</th>
-              <th v-for="(table, idx) in tables" :key="`${table.table_id}-${idx}`">
-                {{tableMap.get(table.table_id).tableName}}
+              <th
+                v-for="(table, idx) in tables"
+                :key="`${table.table_id}-${idx}`"
+              >
+                {{ tableMap.get(table.table_id).tableName }}
               </th>
-              <th>
-                Column
-              </th>
-              <th>
-                Unique
-              </th>
-              <th style="min-width: 90px;">
-                Action
-              </th>
+              <th>Column</th>
+              <th>Unique</th>
+              <th style="min-width: 90px">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(mapping, idx) in listMapping" :key="`mp-${idx}`">
-              <td>{{idx+1}}</td>
+              <td>{{ idx + 1 }}</td>
               <td v-for="(col, index) in colOf" :key="`${idx}-${index}`">
                 <VSelect
                   :appendToBody="true"
@@ -121,7 +140,11 @@
                 <b-btn variant="danger" size="sm" @click="deleteCol(idx)">
                   <i class="fa fa-trash"></i>
                 </b-btn>
-                <b-btn variant="success" size="sm" v-if="idx == listMapping.length - 1" @click="addCol">
+              </td>
+            </tr>
+            <tr>
+              <td colspan="100%">
+                <b-btn variant="success" size="sm" block @click="addCol">
                   <i class="fa fa-plus" />
                 </b-btn>
               </td>
@@ -139,14 +162,42 @@
     <b-row class="pt-2">
       <b-col sm="2"></b-col>
       <b-col sm="8" class="text-center">
-        <b-btn variant="primary" size="sm" :disabled="step == 1" @click="next" class="btn-add-request">Next Step</b-btn>
-        <b-btn variant="primary" size="sm" :disabled="step == 0" @click="createMerge" class="btn-add-request">
-          <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>Create</b-btn>
+        <b-btn
+          variant="primary"
+          size="sm"
+          @click="prev"
+          v-show="step == 1"
+          class="px-3"
+        >
+        <i class="fa fa-arrow-left"/>
+          Back
+        </b-btn>
+        <b-btn
+          variant="primary"
+          size="sm"
+          v-show="step == 0"
+          @click="next"
+          class="btn-add-request"
+        >
+          Continue
+          <i class="fa fa-arrow-right"/>
+        </b-btn>
+        <b-btn
+          variant="success"
+          size="sm"
+          v-show="step == 1"
+          @click="createMerge"
+          class="btn-add-request"
+        >
+          <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
+          <i class="fa fa-folder-plus"/>
+          Create
+        </b-btn>
       </b-col>
     </b-row>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
@@ -210,7 +261,7 @@ export default {
         this.dbs = dbs.data
         this.dbs.forEach((db) => {
           this.tableOf[db.alias] = db.tables
-          db.tables.forEach(table => this.tableMap.set(table.id, table))
+          db.tables.forEach((table) => this.tableMap.set(table.id, table))
         })
       }
     },
@@ -230,7 +281,7 @@ export default {
       this.tables[index].table_id = null
     },
     chooseTb (db, id, index) {
-      this.tableOf[db].forEach(tb => {
+      this.tableOf[db].forEach((tb) => {
         if (tb.id === id) {
           this.tables[index].table = tb.tableName
         }
@@ -249,14 +300,14 @@ export default {
         this.colOf = []
         const arrCol = []
 
-        const forLoop = async _ => {
+        const forLoop = async (_) => {
           for (let index = 0; index < this.tables.length; index++) {
             const colData = await getColumnByTable(this.tables[index].table_id)
             if (colData.statusCode === '403') {
               this.isDeny = true
             } else {
               const colItem = []
-              colData.data.forEach(item => {
+              colData.data.forEach((item) => {
                 colItem.push({ value: item, text: item })
               })
               arrCol.push(colItem)
@@ -269,11 +320,13 @@ export default {
           this.colOf.push(arrCol[index])
         }
 
-        this.listMapping = [{
-          colName: null,
-          is_unique: 0,
-          listCol: []
-        }]
+        this.listMapping = [
+          {
+            colName: null,
+            is_unique: 0,
+            listCol: []
+          }
+        ]
       }
       this.isLoading = false
     },
@@ -281,18 +334,23 @@ export default {
       this.step--
     },
     getSelectedCol (tableName, arrData) {
-      const result = arrData.filter(reg => reg.includes(tableName))
+      const result = arrData.filter((reg) => reg.includes(tableName))
       if (result.length !== 0) {
         return result[0].split('.').pop()
       }
       return ''
     },
     async createMerge () {
-      const listMap = this.listMapping.map(item => {
+      const listMap = this.listMapping.map((item) => {
         const newCol = []
         this.tables.forEach((table, i) => {
-          if (item.listCol[i] !== '' && item.listCol[i] !== null && item.listCol[i] !== undefined) {
-            const model = table.database_alias + '.' + table.table + '.' + item.listCol[i]
+          if (
+            item.listCol[i] !== '' &&
+            item.listCol[i] !== null &&
+            item.listCol[i] !== undefined
+          ) {
+            const model =
+              table.database_alias + '.' + table.table + '.' + item.listCol[i]
             newCol.push(model)
           }
         })
@@ -319,9 +377,15 @@ export default {
         } else {
           this.isLoadingCreate = false
           if (res.code === '201') {
-            this.$notify({ type: 'success', text: 'Create merge request succeeded' })
+            this.$notify({
+              type: 'success',
+              text: 'Create merge request succeeded'
+            })
           } else {
-            this.$notify({ type: 'error', text: 'Create merge request failed' })
+            this.$notify({
+              type: 'error',
+              text: 'Create merge request failed'
+            })
           }
         }
       } catch (e) {

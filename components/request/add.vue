@@ -5,138 +5,147 @@
         <h1>Create Synchronized Request</h1>
       </b-col>
     </b-row>
+        <!-- Database -->
+        <b-row class="pt-2" align-h="center">
+          <b-col cols="4">
+            <label class="form-label">Database</label>
+            <v-select
+              :reduce="(text) => text.value"
+              label="text"
+              v-model="request.database"
+              :options="opsDb"
+              size="sm"
+              placeholder="Please select a database"
+              @input="fillData"
+            />
+            <p class="msg-error" v-if="msg.database">{{ msg.database }}</p>
+          </b-col>
+          <b-col cols="3">
+            <label class="form-label">Table</label>
+            <v-select
+              :reduce="(text) => text.value"
+              label="text"
+              v-model="request.table"
+              :options="opsTb"
+              size="sm"
+              placeholder="Please select a table"
+              @input="fillTable"
+            />
+            <p class="msg-error" v-if="msg.table">{{ msg.table }}</p>
+          </b-col>
+           <b-col cols="1" class="pt-2">
+            <label></label>
+            <b-form-checkbox
+              v-model="request.isAll"
+              name="checkbox-1"
+              @change="chooseIsAll"
+            >
+              Is All
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
+        <!-- Table -->
+        <b-row class="pt-2" align-h="center">
 
-    <div>
-      <!-- Database -->
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="4">
-          <label>Database</label>
-          <v-select class="select-sm" :reduce="(text) => text.value" label="text" v-model="request.database" :options="opsDb" size="sm" @input="fillData" />
-          <p class="msg-error" v-if="msg.database">{{ msg.database }}</p>
-        </b-col>
-      </b-row>
-      <!-- Table -->
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="4">
-          <label>Table</label>
-          <v-select class="select-sm" :reduce="(text) => text.value" label="text" v-model="request.table" :options="opsTb" size="sm" @input="fillTable" />
-          <p class="msg-error" v-if="msg.table">{{ msg.table }}</p>
-        </b-col>
-        <b-col sm="4" class="pt-2">
-          <label></label>
-          <b-form-checkbox
-            v-model="request.isAll"
-            name="checkbox-1"
-            value="chosen"
-            unchecked-value="not_chosen"
-            @change="chooseIsAll"
-          >
-            Is All
-          </b-form-checkbox>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="4">
-          <label>Unique key</label>
-          <div>
-            <el-select class="w-100"
-              v-model="request.unique"
-              multiple
-              filterable
-              no-match-text="Data search not found"
-              no-data-text="No data"
-              placeholder="Choose unique key">
-              <el-option
-                v-for="item in opsUniqueKey"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="4">
-          <label>Partition By</label>
-          <div>
-            <el-select class="w-100"
-              v-model="request.partition"
-              multiple
-              filterable
-              no-match-text="Data search not found"
-              no-data-text="No data"
-              placeholder="Choose partition key">
-              <el-option
-                v-for="item in opsPartitionKey"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="4">
-          <label for="example-datepicker">From date</label>
-          <b-form-datepicker
-            id="date-from"
-            :date-format-options="{
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-            }"
-            v-model="request.fromDate"
-            class="mb-2"
-            @context="chooseDateFrom"
-            size="sm"
-          ></b-form-datepicker>
-          <p class="msg-error" v-if="msg.fromDate">{{ msg.fromDate }}</p>
-        </b-col>
-        <b-col sm="4">
-          <label for="example-datepicker">To date</label>
-          <b-form-datepicker
-            id="date-to"
-            :date-format-options="{
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-            }"
-            :date-disabled-fn="dateDisabled"
-            :min="min"
-            v-model="request.toDate"
-            class="mb-2"
-            @context="chooseDateTo"
-            size="sm"
-          ></b-form-datepicker>
-          <p class="msg-error" v-if="msg.toDate">{{ msg.toDate }}</p>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
-        <b-col sm="2"></b-col>
-        <b-col sm="8" class="text-center">
-          <b-btn
-            @click="addRequest"
-            size="sm"
-            variant="primary"
-            class="btn-add-request"
-          >
-            <b-spinner
-              v-if="isLoadingCreate"
+          <b-col cols="4">
+            <label>Unique key</label>
+            <div>
+              <el-select
+                class="w-100"
+                v-model="request.unique"
+                multiple
+                filterable
+                no-match-text="Data search not found"
+                no-data-text="No data"
+                placeholder="Choose unique key"
+              >
+                <el-option
+                  v-for="item in opsUniqueKey"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </div>
+          </b-col>
+          <b-col cols="4">
+            <label>Partition By</label>
+            <div>
+              <el-select
+                class="w-100"
+                v-model="request.partition"
+                multiple
+                filterable
+                no-match-text="Data search not found"
+                no-data-text="No data"
+                placeholder="Choose partition key"
+              >
+                <el-option
+                  v-for="item in opsPartitionKey"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </div>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2"  align-h="center" v-show="!request.isAll">
+          <b-col sm="4">
+            <label for="example-datepicker">From date</label>
+            <b-form-datepicker
+              id="date-from"
+              :date-format-options="{
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+              }"
+              v-model="request.fromDate"
+              class="mb-2"
+              @context="chooseDateFrom"
+              size="sm"
+            ></b-form-datepicker>
+            <p class="msg-error" v-if="msg.fromDate">{{ msg.fromDate }}</p>
+          </b-col>
+          <b-col sm="4">
+            <label for="example-datepicker">To date</label>
+            <b-form-datepicker
+              id="date-to"
+              :date-format-options="{
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+              }"
+              :date-disabled-fn="dateDisabled"
+              :min="min"
+              v-model="request.toDate"
+              class="mb-2"
+              @context="chooseDateTo"
+              size="sm"
+            ></b-form-datepicker>
+            <p class="msg-error" v-if="msg.toDate">{{ msg.toDate }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col sm="2"></b-col>
+          <b-col sm="8" class="text-center">
+            <b-btn
+              @click="addRequest"
+              size="sm"
               variant="primary"
-              small
-            ></b-spinner>
-            Save
-          </b-btn>
-        </b-col>
-      </b-row>
-    </div>
+              class="btn-add-request"
+            >
+              <b-spinner
+                v-if="isLoadingCreate"
+                variant="primary"
+                small
+              ></b-spinner>
+              Save
+            </b-btn>
+          </b-col>
+    </b-row>
   </div>
   <div v-else>
     <common-deny></common-deny>
@@ -159,17 +168,17 @@ export default {
         table: null,
         fromDate: null,
         toDate: null,
-        isAdd: false,
+        isAll: true,
         unique: [],
         partition: []
       },
       status: 'not_chosen',
-      opsDb: [{ value: null, text: 'Please select an option' }],
-      opsTb: [{ value: null, text: 'Please select an option' }],
+      opsDb: [],
+      opsTb: [],
       min: null,
       opsUniqueKey: [],
       opsPartitionKey: [],
-      opsName: [{ value: null, text: 'Please select an option' }],
+      opsName: [],
       isLoadingCreate: false,
       msg: {
         database: null,
@@ -185,7 +194,7 @@ export default {
     if (res.statusCode === '403') {
       this.isDeny = true
     } else {
-    // eslint-disable-next-line array-callback-return
+      // eslint-disable-next-line array-callback-return
       res.data.map((item) => {
         this.opsDb.push({ value: item.id, text: item.databaseName })
       })
@@ -211,7 +220,7 @@ export default {
       }
     },
     chooseIsAll () {
-      if (this.request.isAll === 'chosen') {
+      if (this.request.isAll) {
         this.msg.fromDate = ''
         this.msg.toDate = ''
       } else {
@@ -268,24 +277,12 @@ export default {
       if (this.request.table === null) {
         this.msg.table = 'Please select table'
       }
-      if (
-        this.msg.database === '' &&
-        this.msg.table === ''
-      ) {
-        if (this.request.isAll === 'chosen') {
-          this.request.isAll = true
-          this.msg.toDate = ''
-          this.msg.fromDate = ''
-        } else {
-          this.request.isAll = false
-          this.msg.toDate = ''
-          this.msg.fromDate = ''
-        }
-        if (this.request.isAll === false) {
-          if (this.request.toDate === null) {
+      if (this.msg.database === '' && this.msg.table === '') {
+        if (!this.request.isAll) {
+          if (this.request.toDate == null) {
             this.msg.toDate = 'Please select a date'
           }
-          if (this.request.fromDate === null) {
+          if (this.request.fromDate == null) {
             this.msg.fromDate = 'Please select a date'
           }
         } else {
@@ -347,7 +344,7 @@ export default {
     resetData () {
       this.request.database = null
       this.request.table = null
-      this.request.isAll = 'not_chosen'
+      this.request.isAll = true
       this.request.fromDate = null
       this.request.toDate = null
       this.request.unique = null

@@ -80,7 +80,7 @@
     </b-row>
     <b-row align-h="center" id="step-2" v-if="step == 1" class="pt-2">
       <b-col cols="12">
-        <table class="table table-bordered table-responsive" style="width: 1200px" v-if="!isLoading">
+        <table class="table table-bordered table-responsive" style="width: 1200px; align: center" v-if="!isLoading">
           <thead>
             <tr>
               <th>No</th>

@@ -1,5 +1,5 @@
 <template>
-<div v-if="!isDeny">
+<div class="container-fluid" v-if="!isDeny">
   <section>
     <b-row id="title">
       <b-col class="text-center">
@@ -79,13 +79,13 @@
         </b-row>
       </b-col>
     </b-row>
-    <b-row align-h="center" id="step-2" v-if="step == 1">
-      <b-col cols="12">
-        <table v-if="!isLoading" class="table table-bordered table-responsive" style="max-width: 1200px">
+    <b-row no-gutters align-h="center" id="step-2" v-if="step == 1" class="pt-2">
+      <b-col cols="12" class="table-responsive">
+        <table v-if="!isLoading" class="table b-table table-striped table-hover table-bordered table-sm">
           <thead>
             <tr>
               <th>No</th>
-              <th v-for="table in tables" :key="table.table_id">
+              <th v-for="table in tables" :key="`${table.table_id}-${idx}`">
                 {{tableMap.get(table.table_id).tableName}}
               </th>
               <th>
@@ -100,10 +100,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(mapping, idx) in merge.list_mapping" :key="mapping.colName">
+            <tr v-for="(mapping, idx) in merge.list_mapping" :key="`mp-${idx}`">
               <td>{{idx+1}}</td>
-              <td v-for="(col, index) in colOf" :key="col">
+              <td v-for="(col, index) in colOf" :key="`${idx}-${index}`">
                 <VSelect
+                  :appendToBody="true"
                   :reduce="(e) => e.value"
                   v-model="mapping.listCol[index]"
                   label="text"
@@ -112,16 +113,16 @@
                 />
               </td>
               <td>
-                <b-input size="sm" v-model="mapping.colName" :id="mapping.colName"></b-input>
+                <b-input size="sm" v-model="mapping.colName"></b-input>
               </td>
               <td>
                 <b-checkbox size="sm" v-model="mapping.is_unique"></b-checkbox>
               </td>
               <td>
-                <b-btn variant="danger" size="sm">
+                <b-btn variant="danger" size="sm" @click="deleteCol(idx)">
                   <i class="fa fa-trash"></i>
                 </b-btn>
-                <b-btn variant="success" size="sm" v-if="idx == merge.list_mapping.length - 1">
+                <b-btn variant="success" size="sm" v-if="idx == merge.list_mapping.length - 1" @click="addCol">
                   <i class="fa fa-plus" />
                 </b-btn>
               </td>
@@ -239,6 +240,12 @@ export default {
     },
     deleteTable (idx) {
       this.tables = this.tables.filter((_, i) => i !== idx)
+    },
+    addCol () {
+      this.merge.list_mapping.push({ colName: null, is_unique: 0, listCol: [] })
+    },
+    deleteCol (idx) {
+      this.merge.list_mapping = this.merge.list_mapping.filter((_, i) => i !== idx)
     },
     chooseDb (index) {
       this.tables[index].table_id = null

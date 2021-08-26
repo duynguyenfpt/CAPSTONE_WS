@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div class="container-fluid" v-if="!isDeny">
     <b-row id="title">
       <b-col class="text-center">
         <h2>Create merge request</h2>
@@ -30,7 +30,7 @@
           </b-row>
         <b-row align-h="center">
           <b-col>
-            <table class="b-table table table-bordered">
+            <table class="b-table table table-striped table-hover">
               <thead>
                 <tr>
                   <th>No</th>
@@ -78,13 +78,13 @@
         </b-row>
       </b-col>
     </b-row>
-    <b-row align-h="center" id="step-2" v-if="step == 1" class="pt-2">
-      <b-col cols="12">
-        <table class="table table-bordered table-responsive" style="width: 1200px; align: center" v-if="!isLoading">
+    <b-row no-gutters align-h="center" id="step-2" v-if="step == 1" class="pt-2">
+      <b-col cols="12" class="table-responsive">
+        <table class="table b-table table-striped table-hover table-bordered table-sm" v-if="!isLoading">
           <thead>
             <tr>
               <th>No</th>
-              <th v-for="table in tables" :key="table.table_id">
+              <th v-for="(table, idx) in tables" :key="`${table.table_id}-${idx}`">
                 {{tableMap.get(table.table_id).tableName}}
               </th>
               <th>
@@ -99,10 +99,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(mapping, idx) in listMapping" :key="mapping.colName">
+            <tr v-for="(mapping, idx) in listMapping" :key="`mp-${idx}`">
               <td>{{idx+1}}</td>
-              <td v-for="(col, index) in colOf" :key="col">
+              <td v-for="(col, index) in colOf" :key="`${idx}-${index}`">
                 <VSelect
+                  :appendToBody="true"
                   :reduce="(e) => e.value"
                   v-model="mapping.listCol[index]"
                   label="text"
@@ -111,7 +112,7 @@
                 />
               </td>
               <td>
-                <b-input size="sm" v-model="mapping.colName" :id="mapping.colName"></b-input>
+                <b-input size="sm" v-model="mapping.colName"></b-input>
               </td>
               <td>
                 <b-checkbox size="sm" v-model="mapping.is_unique"></b-checkbox>

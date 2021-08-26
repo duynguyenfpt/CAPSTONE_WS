@@ -5,7 +5,7 @@
         <b-nav vertical class="side-nav w-100 p-3">
           <router-link to="/" class="link">FTDS System</router-link>
           <b-nav-item v-b-toggle.right :to="{ name: 'right' }">
-            <i class="fas fa-balance-scale-right"/> Rights
+            <i class="fas fa-balance-scale-right" /> Rights
           </b-nav-item>
           <b-nav-item v-b-toggle.account :to="{ name: 'account' }">
             <i class="fa fa-user mr-1" /> Accounts
@@ -58,7 +58,7 @@
           <hr />
         </b-nav>
       </b-col>
-      <b-col>
+      <b-col cols="10">
         <b-navbar toggleable="sm" variant="light" sticky>
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown right>
@@ -74,7 +74,9 @@
                   <b-row>
                     <b-col cols="8" class="text-12"> {{ user.role }}</b-col>
                     <b-col class="text-right">
-                      <a id="account-link" class="text-12" @click="logout">Sign Out</a>
+                      <a id="account-link" class="text-12" @click="logout"
+                        >Sign Out</a
+                      >
                     </b-col>
                   </b-row>
                   <b-row class="account-detail">
@@ -87,7 +89,9 @@
                     <b-col class="info-detail" v-if="user">
                       <h6>{{ user.username }}</h6>
                       <p class="text-12">{{ user.email }}</p>
-                      <b-link class="text-12" :to="{ name: 'password-change' }">Change password</b-link>
+                      <b-link class="text-12" :to="{ name: 'password-change' }"
+                        >Change password</b-link
+                      >
                     </b-col>
                   </b-row>
                 </div>
@@ -97,7 +101,11 @@
           </b-navbar-nav>
         </b-navbar>
         <div id="__root" class="content-container">
-          <nuxt class="content" />
+          <b-row>
+            <b-col>
+              <nuxt class="content" />
+            </b-col>
+          </b-row>
           <notifications :duration="5000" />
         </div>
       </b-col>

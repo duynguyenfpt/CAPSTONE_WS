@@ -37,7 +37,7 @@
             <i class="fas fa-search" />
             Search
           </b-btn>
-          <b-btn @click="onReload" size="sm" class="ml-2" variant="success">
+          <b-btn @click="onSearchRequest" size="sm" class="ml-2" variant="success">
             <i class="fa fa-sync pr-1" />
             Reload
           </b-btn>
@@ -46,6 +46,7 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
+        small
         responsive
         hover
         striped

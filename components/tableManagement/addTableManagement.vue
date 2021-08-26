@@ -577,7 +577,8 @@ export default {
           username: this.username,
           password: this.password,
           databaseName: this.dbName,
-          databaseType: this.dbType
+          databaseType: this.dbType,
+          sid: this.sid
         }
         const res = await checkConnection(data)
         if (res.statusCode === '403') {

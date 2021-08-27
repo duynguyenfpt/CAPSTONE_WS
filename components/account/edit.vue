@@ -8,7 +8,7 @@
       <b-row>
         <b-col>
           <label class="form-label">Username</label>
-          <b-input size="sm" v-model="username" />
+          <b-input size="sm" v-model="username" disabled/>
           <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
           <label class="form-label">Email</label>
           <b-input size="sm" v-model="email" />
@@ -136,6 +136,8 @@ export default {
       }
       if (this.role === null) {
         this.msg.role = 'Please select role'
+      } else {
+        this.msg.role = ''
       }
       if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '' && this.msg.role === '') {
         try {

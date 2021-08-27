@@ -34,7 +34,7 @@
             <b-form-input
               id="input-live"
               size="sm"
-              v-model="keyDefault"
+              v-model="defaultKey"
             ></b-form-input>
             <p class="msg-error" v-if="msg.defaultKey">{{ msg.defaultKey }}</p>
           </b-col>
@@ -83,7 +83,7 @@ export default {
       this.validateTableName(value)
     },
     defaultKey (value) {
-      this.tableName = value
+      this.defaultKey = value
       this.validateDefaultKey(value)
     }
   },
@@ -96,7 +96,7 @@ export default {
       }
     },
     validateDefaultKey (value) {
-      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
+      if (/^[a-zA-Z_][\w-.,]{0,127}$/.test(value)) {
         this.msg.defaultKey = ''
       } else {
         this.msg.defaultKey = 'Invalid default key'
@@ -152,7 +152,6 @@ export default {
             } else {
               this.$notify({ type: 'error', text: 'Add table failed' })
             }
-            this.$router.go()
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

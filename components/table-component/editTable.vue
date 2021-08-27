@@ -23,7 +23,20 @@
               size="sm"
               v-model="tableName"
             ></b-form-input>
-            <p class="msg-error" v-if="msg">{{ msg }}</p>
+            <p class="msg-error" v-if="msg.tableName">{{ msg.tableName }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="text-center">Default Key</label>
+          </b-col>
+          <b-col>
+            <b-form-input
+              id="input-live"
+              size="sm"
+              v-model="defaultKey"
+            ></b-form-input>
+            <p class="msg-error" v-if="msg.defaultKey">{{ msg.defaultKey }}</p>
           </b-col>
         </b-row>
         <b-row class="text-center pt-3">
@@ -53,24 +66,39 @@ export default {
   data: () => ({
     isLoading: false,
     tableName: null,
+    defaultKey: null,
     dbName: null,
     isVisible: false,
     idItem: 0,
     isLoadingCreate: false,
-    msg: null
+    msg: {
+      tableName: null,
+      defaultKey: null
+    }
   }),
   watch: {
     tableName (value) {
       this.tableName = value
       this.validateTableName(value)
+    },
+    defaultKey (value) {
+      this.defaultKey = value
+      this.validateDefaultKey(value)
     }
   },
   methods: {
     validateTableName (value) {
       if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
-        this.msg = ''
+        this.msg.tableName = ''
       } else {
-        this.msg = 'Invalid table name'
+        this.msg.tableName = 'Invalid table name'
+      }
+    },
+    validateDefaultKey (value) {
+      if (/^[a-zA-Z_][\w-.,]{0,127}$/.test(value)) {
+        this.msg.defaultKey = ''
+      } else {
+        this.msg.defaultKey = 'Invalid default key'
       }
     },
     async show (id) {
@@ -84,7 +112,9 @@ export default {
       } else {
         this.dbName = res.data.databaseInfo.databaseName
         this.tableName = res.data.tableName
-        this.msg = null
+        this.defaultKey = res.data.defaultKey
+        this.msg.tableName = null
+        this.msg.defaultKey = null
         this.isLoading = false
         this.isLoadingCreate = false
       }
@@ -94,13 +124,21 @@ export default {
     },
     async editTable () {
       this.validateTableName(this.tableName)
+      this.validateDefaultKey(this.defaultKey)
       if (this.tableName === null) {
-        this.msg = 'Invalid table name'
+        this.msg.tableName = 'Invalid table name'
       }
-      if (this.msg === '') {
+      if (this.defaultKey === null) {
+        this.msg.defaultKey = 'Invalid default key'
+      }
+      if (this.msg.tableName === '' && this.msg.defaultKey === '') {
         try {
           this.isLoadingCreate = true
-          const res = await editTable(this.tableName)
+          const body = {
+            tableName: this.tableName,
+            defaultKey: this.defaultKey
+          }
+          const res = await editTable(this.idItem, body)
           if (res.statusCode === '403') {
             this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
             this.isVisible = false
@@ -111,7 +149,6 @@ export default {
             } else {
               this.$notify({ type: 'error', text: 'Update table failed' })
             }
-            this.$router.go()
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

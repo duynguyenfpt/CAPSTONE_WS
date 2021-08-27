@@ -118,7 +118,7 @@ export default {
       idItem: 0
     }
   },
-  async mounted () {
+  async created () {
     const resAcc = await getAllAccount()
     if (resAcc.statusCode === '403') {
       this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })

@@ -253,14 +253,7 @@ export default {
       if (this.alias === null) {
         this.msg.alias = 'Invalid alias'
       }
-      console.log('LCC: ', this.msg.databaseName)
-      console.log('LCC: ', this.msg.port)
-      console.log('LCC: ', this.msg.username)
-      console.log('LCC: ', this.msg.password)
-      console.log('LCC: ', this.msg.sid)
-      console.log('LCC: ', this.msg.alias)
       if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '' && this.msg.alias === '') {
-        console.log('LCC')
         try {
           this.isLoadingUpdate = true
           const config = {

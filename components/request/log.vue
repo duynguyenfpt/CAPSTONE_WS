@@ -14,7 +14,7 @@
         <div class="comment my-1">
           <div class="header pl-2 py-1">
             <span class="font-weight-bold">{{ note.createdBy }}</span>
-            <span class="font-italic">commented on {{ format(new Date(note.id.time), `dd-mm-yyyy hh:mm`) }}</span>
+            <span class="font-italic">commented on {{ format(new Date(note.id.time), `yyyy-MM-dd`) }}</span>
           </div>
           <div class="pl-3 py-1">{{ note.content }}</div>
         </div>
@@ -128,7 +128,7 @@ export default {
             this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
             this.isVisible = false
           } else {
-            this.show(this.idItem)
+            await this.show(this.idItem)
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

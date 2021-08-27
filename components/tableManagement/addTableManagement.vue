@@ -265,8 +265,8 @@ export default {
       this.alias = value
       this.validateAlias(value)
     },
-    keyDefault (value) {
-      this.keyDefault = value
+    defaultKey (value) {
+      this.defaultKey = value
       this.validateKeyDefault(value)
     }
   },
@@ -326,10 +326,10 @@ export default {
       }
     },
     validateKeyDefault (value) {
-      if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
-        this.msg.keyDefault = ''
+      if (/^[a-zA-Z_][\w-.,]{0,127}$/.test(value)) {
+        this.msg.defaultKey = ''
       } else {
-        this.msg.keyDefault = 'Invalid key default'
+        this.msg.defaultKey = 'Invalid key default'
       }
     },
     chooseHost () {
@@ -363,7 +363,7 @@ export default {
       this.sid = null
       this.alias = null
       this.isOracle = false
-      this.keyDefault = null
+      this.defaultKey = null
       this.msg.db = ''
       this.msg.tb = ''
       this.msg.host = ''
@@ -373,7 +373,7 @@ export default {
       this.msg.dbType = ''
       this.msg.sid = ''
       this.msg.alias = ''
-      this.msg.keyDefault = ''
+      this.msg.defaultKey = ''
     },
     async createTableInfo () {
       if (this.msg.db === '' && this.msg.tb === '') {
@@ -390,7 +390,7 @@ export default {
             table: this.table,
             sid: this.sid,
             alias: this.alias,
-            keyDefault: this.keyDefault
+            defaultKey: this.defaultKey
           }
           const res = await createTable(config)
           if (res.statusCode === '403') {
@@ -445,7 +445,7 @@ export default {
       this.validatePortNumber(this.port)
       this.validateUsername(this.username)
       this.validatePassword(this.password)
-      this.validateKeyDefault(this.keyDefault)
+      this.validateKeyDefault(this.defaultKey)
       if (this.databaseName === null) {
         this.msg.db = 'Invalid database name'
       }
@@ -470,8 +470,8 @@ export default {
       if (this.alias === null) {
         this.msg.alias = 'Invalid alias'
       }
-      if (this.keyDefault === null) {
-        this.msg.alias = 'Invalid key default'
+      if (this.defaultKey === null) {
+        this.msg.defaultKey = 'Invalid key default'
       }
       if ((this.sid === null || this.sid === '') && this.isOracle === true) {
         this.msg.sid = 'Invalid sid'
@@ -489,11 +489,11 @@ export default {
           this.msg.dbType === '' &&
           this.msg.sid === '' &&
           this.msg.alias === '' &&
-          this.msg.keyDefault === ''
+          this.msg.defaultKey === ''
         ) {
           try {
             this.isLoadingCreate = true
-            const info = { databaseInforId: id, tableName: this.table, keyDefault: this.defaultKey }
+            const info = { databaseInforId: id, tableName: this.table, defaultKey: this.defaultKey }
             const res = await createTable(info)
             if (res.statusCode === '403') {
               this.isDeny = true

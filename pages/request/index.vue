@@ -96,10 +96,6 @@
       />
     </section>
     <section name="popup">
-      <request-edit ref="edit" @onUpdated="refreshData" />
-      <request-assign ref="assign" />
-    </section>
-    <section name="popup">
       <request-log ref="log" @onUpdated="refreshData" />
     </section>
   </div>
@@ -117,6 +113,9 @@ const tableFields = [
   },
   {
     key: 'requestType'
+  },
+  {
+    key: 'description'
   },
   {
     key: 'createdBy',
@@ -209,6 +208,9 @@ export default {
             e.modifiedDate = moment(this.request.modifiedDate).format(
               'YYYY-MM-DD'
             )
+            if (e.description === null) {
+              e.description = 'Nothing'
+            }
           })
         }
       } catch (e) {

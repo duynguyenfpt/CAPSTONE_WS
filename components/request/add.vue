@@ -67,6 +67,7 @@
                 >
                 </el-option>
               </el-select>
+              <p class="msg-error" v-if="msg.unique">{{ msg.unique }}</p>
             </div>
           </b-col>
           <b-col cols="4">
@@ -184,7 +185,8 @@ export default {
         database: null,
         table: null,
         toDate: null,
-        fromDate: null
+        fromDate: null,
+        unique: null
       },
       isDeny: false
     }
@@ -268,14 +270,16 @@ export default {
       }
     },
     async addRequest () {
-      if (this.request.type === null) {
-        this.msg.type = 'Please select type'
-      }
       if (this.request.database === null) {
         this.msg.database = 'Please select database'
       }
       if (this.request.table === null) {
         this.msg.table = 'Please select table'
+      }
+      if (this.request.unique === null) {
+        this.msg.unique = 'Please select unique key'
+      } else {
+        this.msg.unique = ''
       }
       if (this.msg.database === '' && this.msg.table === '') {
         if (!this.request.isAll) {
@@ -289,7 +293,7 @@ export default {
           this.msg.toDate = ''
           this.msg.fromDate = ''
         }
-        if (this.msg.toDate === '' && this.msg.fromDate === '') {
+        if (this.msg.toDate === '' && this.msg.fromDate === '' && this.msg.unique === '') {
           try {
             this.isLoadingCreate = true
             const today = new Date()
@@ -299,10 +303,13 @@ export default {
               today.getMinutes() +
               ':' +
               today.getSeconds()
-            let partitions = this.request.partition[0]
-            const lenPart = this.request.partition.length
-            for (let i = 1; i < lenPart; i++) {
-              partitions += ', ' + this.request.partition[i]
+            let partitions = null
+            if (this.request.partition !== null) {
+              partitions = this.request.partition[0]
+              const lenPart = this.request.partition.length
+              for (let i = 1; i < lenPart; i++) {
+                partitions += ', ' + this.request.partition[i]
+              }
             }
             let identities = this.request.unique[0]
             const lenIden = this.request.unique.length

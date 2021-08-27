@@ -11,6 +11,7 @@
           <b-badge :variant="getLastestStatusVariant(row.item.status)">{{ getStatus(row.item.status) }}</b-badge>
         </template>
     </b-table>
+    <div v-if="!isETL">
     <b-row>
       <b-col cols="6">
         <h4>Job Detail</h4>
@@ -26,14 +27,6 @@
       </b-col>
     </b-row>
     <b-table :fields="jobFields" :items="detail">
-      <template #cell(active)>
-        <b-btn size="sm" variant="danger" v-if="isDeactive">
-          <i class="fa fa-power-off" v-if="isDeactive" />
-        </b-btn>
-        <b-btn size="sm" variant="success" v-if="isActive">
-          <i class="fas fa-check" v-if="isActive" />
-        </b-btn>
-      </template>
     </b-table>
     <b-row>
       <b-col cols="6">
@@ -103,6 +96,49 @@
         @input="getDetail"
       />
     </section>
+    </div>
+    <div v-else>
+      <b-row>
+        <b-col>
+          <h4>Query</h4>
+          <p style="margin-left: 10px;">{{ query }}</p>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col v-if="isExecuted">
+          <h4>Sample Data</h4>
+          <b-table
+          sm
+          responsive
+          :items="rows"
+          :fields="resultFields">
+          <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>
+            <strong>Loading...</strong>
+          </div>
+          </template>
+          </b-table>
+        </b-col>
+        <b-col v-else>
+          <div class="text-center" v-if="isFailed">
+            <h5 class="msg-fail">{{ msgErr }}</h5>
+          </div>
+          <div class="text-center" v-else>
+            <b-spinner variant="primary" label="Text Centered"></b-spinner>
+            <h5>{{ msg }}</h5>
+          </div>
+        </b-col>
+      </b-row>
+      <b-row class="pt-3">
+        <b-col cols="6">
+          <b-button size="sm" variant="success" @click="onDownload" v-if="isExecuted">
+            <b-spinner variant="success" v-if="isDownload" small></b-spinner>
+            Download
+          </b-button>
+        </b-col>
+      </b-row>
+    </div>
   </div>
   <div v-else>
     <content-placeholders class="article-card-block">
@@ -119,6 +155,7 @@
 <script>
 import { getJobDetail, getLogByJob, getLastJobLog } from '@/service/job'
 import { getDetailRequest } from '@/service/request'
+import { getResultDetail, downloadData } from '@/service/etl'
 import moment from 'moment'
 
 const jobFields = [
@@ -149,9 +186,6 @@ const jobFields = [
   {
     key: 'executedBy',
     label: 'Executed By'
-  },
-  {
-    key: 'active'
   }
 ]
 const requestFields = [
@@ -239,10 +273,20 @@ export default {
       requestDetail: [],
       loading: false,
       status: null,
-      isActive: false,
-      isDeactive: false,
       progress: 0,
-      isDeny: false
+      isDeny: false,
+      isETL: false,
+      isVisibleResult: false,
+      idItem: 0,
+      isLoading: false,
+      resultFields: [],
+      rows: [],
+      isExecuted: false,
+      msg: '',
+      isDownload: false,
+      isFailed: false,
+      msgErr: '',
+      query: null
     }
   },
   methods: {
@@ -287,13 +331,6 @@ export default {
           this.isDeny = true
         } else {
           this.detail = res.data
-          if (this.detail.active === true) {
-            this.isActive = true
-            this.isDeactive = false
-          } else {
-            this.isActive = false
-            this.isDeactive = true
-          }
           this.detail.forEach(item => {
             item.server = item.serverDomain + ' - ' + item.serverHost
             item.createdDate = moment(item.createdDate).format('YYYY-MM-DD')
@@ -303,37 +340,104 @@ export default {
           if (resRequest.statusCode === '403') {
             this.isDeny = true
           } else {
+            this.requestDetail = resRequest.data
             resRequest.data.createdDate = moment(this.requestDetail.createdDate).format(
               'YYYY-MM-DD'
             )
             resRequest.data.modifiedDate = moment(this.requestDetail.modifiedDate).format(
               'YYYY-MM-DD'
             )
-            this.requestDetail = resRequest.data
-            if (this.listLogDetail) {
-              this.listLogDetail.forEach((e) => {
-                e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
-              })
-            }
-            const resList = await getLogByJob(
-              this.id,
-              this.pagination.page,
-              this.pagination.limit
-            )
-            if (resList.statusCode === '403') {
-              this.isDeny = true
+            if (this.requestDetail.requestType === 'ETLRequest') {
+              this.isETL = true
+              this.query = this.detail[0].query
+              this.idItem = requestId
+              this.isVisibleResult = true
+              this.isLoading = true
+              this.msg = ''
+              this.rows = []
+              try {
+                const res = await getResultDetail(this.idItem)
+                if (res.statusCode === '403') {
+                  this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+                  this.isVisibleResult = false
+                } else {
+                  if (res.code === '200') {
+                    if (res.data.status === 'successed') {
+                      const totalArray = res.data.content.split('\n')
+                      const header = []
+                      header.push({
+                        key: 'no'
+                      })
+                      totalArray.forEach((element, index) => {
+                        if (index === 0) {
+                          // eslint-disable-next-line array-callback-return
+                          element.split(',').map(item => {
+                            header.push({
+                              key: item
+                            })
+                          })
+                        } else {
+                          const tempRow = element.split(',')
+                          const objData = {}
+                          header.forEach((item, i) => {
+                            if (item.key === 'no') {
+                              objData[`${item.key}`] = index
+                            } else {
+                              objData[`${item.key}`] = tempRow[i - 1]
+                            }
+                          })
+                          this.rows.push(objData)
+                        }
+                      })
+                      this.resultFields = header
+                      this.isExecuted = true
+                    } else {
+                      if (res.data.status === 'failed') {
+                        this.isExecuted = false
+                        this.isFailed = true
+                        this.msgErr = 'Query is failed'
+                      } else {
+                        this.isExecuted = false
+                        this.msg = 'Query is executing'
+                      }
+                    }
+                    this.isLoading = false
+                  } else {
+                    this.isExecuted = true
+                    this.msg = 'Query is failed'
+                  }
+                }
+              } catch (e) {
+                this.isExecuted = true
+                this.msg = e.message
+              }
             } else {
-              this.pagination.total = resList.metaData.totalItem
-              this.listLogDetail = resList.data
-              const resLast = await getLastJobLog(this.id)
-              if (resLast.statusCode === '403') {
+              this.isETL = false
+              if (this.listLogDetail) {
+                this.listLogDetail.forEach((e) => {
+                  e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
+                })
+              }
+              const resList = await getLogByJob(
+                this.id,
+                this.pagination.page,
+                this.pagination.limit
+              )
+              if (resList.statusCode === '403') {
                 this.isDeny = true
               } else {
-                if (resLast.data !== null) {
-                  if (resLast.data.step !== null && resLast.data.numberStep !== null) {
-                    this.progress = (resLast.data.step * 100) / resLast.data.numberStep
+                this.pagination.total = resList.metaData.totalItem
+                this.listLogDetail = resList.data
+                const resLast = await getLastJobLog(this.id)
+                if (resLast.statusCode === '403') {
+                  this.isDeny = true
+                } else {
+                  if (resLast.data !== null) {
+                    if (resLast.data.step !== null && resLast.data.numberStep !== null) {
+                      this.progress = (resLast.data.step * 100) / resLast.data.numberStep
+                    }
+                    this.status = resLast.data.status
                   }
-                  this.status = resLast.data.status
                 }
               }
             }
@@ -350,9 +454,44 @@ export default {
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
+    },
+    async onDownload () {
+      try {
+        this.isDownload = true
+        const res = await downloadData(this.idItem)
+        if (res.statusCode === '403') {
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisibleResult = false
+        } else {
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Download result succeeded' })
+            const fileURL = window.URL.createObjectURL(new Blob([res]))
+            const fileLink = document.createElement('a')
+            fileLink.href = fileURL
+            fileLink.setAttribute('download', 'file.csv')
+            document.body.appendChild(fileLink)
+            fileLink.click()
+          } else {
+            this.$notify({ type: 'error', text: 'Download result failed' })
+          }
+        }
+      } catch (e) {
+        this.$notify({ type: 'error', text: e.message })
+      } finally {
+        this.isDownload = false
+      }
     }
   }
 }
 </script>
 
-<style></style>
+<style>
+.msg-fail {
+  color: red;
+}
+
+.query {
+  margin-left: 45px;
+  margin-bottom: 10px;
+}
+</style>

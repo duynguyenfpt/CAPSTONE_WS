@@ -2,9 +2,9 @@
 <div v-if="!isDeny">
  <div v-if="table">
      <h1 class="text-center">Table Detail</h1>
-     <b-table :fields="fields" :items="[table]"></b-table>
+     <b-table small :fields="fields" :items="[table]"></b-table>
      <h4 class="text-center">Table Schema</h4>
-     <b-table :fields="schemaFields" :items="litSchema" :busy="loading">
+     <b-table small :fields="schemaFields" :items="litSchema" :busy="loading">
        <template #table-busy>
           <content-placeholders class="article-card-block">
             <content-placeholders-text :lines="2" />

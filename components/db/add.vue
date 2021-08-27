@@ -16,6 +16,7 @@
               v-model="serverInforId"
               @input="chooseHost"
               size="sm"
+              placeholder="Please select an option"
             ></v-select>
             <p class="msg-error" v-if="msg.serverInforId">
               {{ msg.serverInforId }}
@@ -111,7 +112,7 @@ import vSelect from 'vue-select'
 Vue.component('v-select', vSelect)
 export default {
   data: () => ({
-    dbHosts: [{ value: null, text: 'Please select an option' }],
+    dbHosts: [],
     dbTypes: [
       { value: null, text: 'Please select an option' },
       { value: 'mysql', text: 'MySql' },
@@ -144,24 +145,6 @@ export default {
     }
   }),
 
-  async mounted () {
-    this.isLoading = true
-    const hosts = await getAllServers()
-    if (hosts.statusCode === '403') {
-      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-      this.isVisible = false
-    } else {
-    // eslint-disable-next-line array-callback-return
-      hosts.data.map((item) => {
-        this.dbHosts.push({
-          value: item.id,
-          text: item.serverDomain + ' - ' + item.serverHost
-        })
-      })
-    }
-    this.isLoading = false
-  },
-
   watch: {
     databaseName (value) {
       this.databaseName = value
@@ -191,24 +174,36 @@ export default {
 
   methods: {
     async show () {
-      this.isVisible = true
-      this.port = null
-      this.username = null
-      this.password = null
-      this.databaseName = null
-      this.databaseType = null
-      this.serverInforId = null
-      this.sid = null
-      this.alias = null
-      this.isOracle = false
-      this.msg.databaseName = ''
-      this.msg.port = ''
-      this.msg.username = ''
-      this.msg.password = ''
-      this.msg.serverInforId = ''
-      this.msg.databaseType = ''
-      this.msg.sid = ''
-      this.msg.alias = ''
+      const hosts = await getAllServers()
+      if (hosts.statusCode === '403') {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
+      } else {
+        this.dbHosts = hosts.data.map((item) => {
+          return {
+            value: item.id,
+            text: item.serverDomain + ' - ' + item.serverHost
+          }
+        })
+        this.isVisible = true
+        this.port = null
+        this.username = null
+        this.password = null
+        this.databaseName = null
+        this.databaseType = null
+        this.serverInforId = null
+        this.sid = null
+        this.alias = null
+        this.isOracle = false
+        this.msg.databaseName = ''
+        this.msg.port = ''
+        this.msg.username = ''
+        this.msg.password = ''
+        this.msg.serverInforId = ''
+        this.msg.databaseType = ''
+        this.msg.sid = ''
+        this.msg.alias = ''
+      }
     },
     validateDBName (value) {
       if (/^[a-zA-Z_][\w-]{0,127}$/.test(value)) {
@@ -367,7 +362,7 @@ export default {
           }
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Test connection failed' })
       } finally {
         this.isLoadingCheck = false
       }

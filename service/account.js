@@ -8,6 +8,13 @@ export const getAllAccount =
         limit: 1000
       }
     })
+export const getAccounts =
+    () => http.get('api/list_account', {
+      params: {
+        page: 1,
+        limit: 1000
+      }
+    })
 export const updateAccount = (id, data) => http.put(`api/accounts/${id}`, data)
 export const getAccountDetail = (id) => http.get(`api/accounts/${id}`)
 export const createAccount = (data) => http.post('api/accounts/', data)

@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { getAllAccount } from '@/service/account'
+import { getAccounts } from '@/service/account'
 import { shareEtl } from '@/service/etl'
 import Vue from 'vue'
 import vSelect from 'vue-select'
@@ -70,7 +70,7 @@ export default {
       this.isLoading = true
       this.isLoadingShare = false
       this.accounts = []
-      const res = await getAllAccount()
+      const res = await getAccounts()
       if (res.statusCode === '403') {
         this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
         this.isVisibleShare = false

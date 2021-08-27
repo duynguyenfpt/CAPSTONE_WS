@@ -1,6 +1,6 @@
 <template>
 <div>
-  <b-modal v-model="isVisible" title="View Log" hide-footer>
+  <b-modal v-model="isVisible" title="View Note" hide-footer>
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
@@ -25,7 +25,7 @@
             <b-form-textarea
               id="textarea-small"
               size="sm"
-              placeholder="Write log..."
+              placeholder="Write note..."
               v-model="note"
             ></b-form-textarea>
           </b-col>
@@ -128,7 +128,7 @@ export default {
             this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
             this.isVisible = false
           } else {
-            await this.show(this.idItem)
+            this.show(this.idItem)
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

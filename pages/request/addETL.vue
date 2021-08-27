@@ -117,6 +117,7 @@
           <div v-if="isSuccess">
             <h4 class="text-center" v-if="isDisplay">Sample Data</h4>
             <b-table
+              small
               style="max-width: 1000px"
               responsive
               hover
@@ -377,7 +378,7 @@ export default {
                   this.msgErr = 'Query is failed'
                   this.msgFailed = e.message
                 }
-                await this.sleep(5000)
+                await this.sleep(2000)
               }
             } else {
               this.$notify({ type: 'error', text: 'Create ETL failed' })

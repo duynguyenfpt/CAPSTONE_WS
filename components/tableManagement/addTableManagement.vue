@@ -19,6 +19,7 @@
             :options="opsDb"
             v-model="db"
             @input="fillData"
+            placeholder="Please select an option"
             size="sm"
           >
             <b-spinner v-if="isLoadingFill" variant="primary" small></b-spinner>
@@ -42,6 +43,7 @@
             @input="chooseHost"
             size="sm"
             :disabled="isChoseDb"
+            placeholder="Please select an option"
           >
           </v-select>
           <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
@@ -196,21 +198,19 @@ export default {
     if (dbs.statusCode === '403') {
       this.isDeny = true
     } else {
-    // eslint-disable-next-line array-callback-return
-      dbs.data.map((item) => {
-        this.opsDb.push({ value: item.id, text: item.databaseName })
+      this.opsDb = dbs.data.map((item) => {
+        return { value: item.id, text: item.databaseName }
       })
     }
     const hosts = await getAllServers()
     if (hosts.statusCode === '403') {
       this.isDeny = true
     } else {
-    // eslint-disable-next-line array-callback-return
-      hosts.data.map((item) => {
-        this.opsHost.push({
+      this.opsHost = hosts.data.map((item) => {
+        return {
           value: item.id,
           text: item.serverHost + ' - ' + item.serverDomain
-        })
+        }
       })
     }
     this.db = null

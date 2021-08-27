@@ -1,6 +1,7 @@
 <template>
   <div v-show="!isDeny">
     <b-table
+      small
       responsive
       hover
       striped
@@ -12,7 +13,7 @@
         {{ countRecord(item.index) }}
       </template>
       <template #cell(status)="row">
-        <b-badge :variant="getLastestStatusVariant(row.item.status)">{{row.item.status}}</b-badge>
+        <b-badge class="w-100" :variant="getLastestStatusVariant(row.item.status)">{{row.item.status}}</b-badge>
       </template>
     </b-table>
   </div>
@@ -51,7 +52,8 @@ const TableFields = [
     key: 'numberStep'
   },
   {
-    key: 'message'
+    key: 'message',
+    tdClass: 'max-width-250'
   },
   {
     key: 'status'
@@ -122,3 +124,10 @@ export default {
   }
 }
 </script>
+<style>
+.max-width-250 {
+  max-width: 250px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+</style>

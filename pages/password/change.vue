@@ -12,6 +12,7 @@
         <b-form-input
           v-model="currentPass"
           type="password"
+          size="sm"
         ></b-form-input>
         <p class="msg-error" v-if="msg.current">{{ msg.current }}</p>
       </b-form-group>
@@ -22,6 +23,7 @@
         <b-form-input
           v-model="newPass"
           type="password"
+          size="sm"
         ></b-form-input>
         <p class="msg-error" v-if="msg.new">{{ msg.new }}</p>
       </b-form-group>
@@ -32,6 +34,7 @@
         <b-form-input
           v-model="confirmPass"
           type="password"
+          size="sm"
         ></b-form-input>
         <p class="msg-error" v-if="msg.confirm">{{ msg.confirm }}</p>
       </b-form-group>

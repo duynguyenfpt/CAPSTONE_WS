@@ -52,7 +52,6 @@ export default {
             this.$notify({ type: 'success', text: 'Active account succeeded' })
           } else {
             this.$notify({ type: 'error', text: 'Active account  failed' })
-            this.$router.go()
           }
         }
       } catch (e) {

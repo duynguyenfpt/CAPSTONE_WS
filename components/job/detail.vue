@@ -6,7 +6,7 @@
         <h4>Request Detail</h4>
       </b-col>
     </b-row>
-    <b-table :fields="requestFields" :items="[requestDetail]">
+    <b-table small :fields="requestFields" :items="[requestDetail]">
       <template #cell(status)="row">
           <b-badge :variant="getLastestStatusVariant(row.item.status)">{{ getStatus(row.item.status) }}</b-badge>
         </template>
@@ -26,7 +26,7 @@
         >
       </b-col>
     </b-row>
-    <b-table :fields="jobFields" :items="detail">
+    <b-table small responsive hover striped :fields="jobFields" :items="detail">
     </b-table>
     <b-row>
       <b-col cols="6">
@@ -71,6 +71,7 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
+        small
         responsive
         hover
         striped
@@ -82,7 +83,7 @@
           {{ countRecord(item.index) }}
         </template>
         <template #cell(status)="row">
-          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{
+          <b-badge class="w-100" :variant="getLastestStatusVariant(row.item.status)">{{
             row.item.status
           }}</b-badge>
         </template>
@@ -108,7 +109,7 @@
         <b-col v-if="isExecuted">
           <h4>Sample Data</h4>
           <b-table
-          sm
+          small
           responsive
           :items="rows"
           :fields="resultFields">

@@ -71,58 +71,55 @@ export default {
     },
     isDeny: false
   }),
-  async mounted () {
-    // get username
-    const accounts = await getListAccount(1, 100)
-    if (accounts.statusCode === '403') {
-      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-      this.isVisible = false
-    } else {
-    // eslint-disable-next-line array-callback-return
-      accounts.data.map((acc) => {
-        this.opsAccount.push({ value: acc.username, text: acc.username })
-      })
-    }
-  },
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      this.msg.account = ''
-      this.msg.status = ''
-      try {
-        const res = await getDetailRequest(id)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
-        } else {
-          this.request.requestType = res.data.requestType
-          this.request.status = res.data.status
-          this.request.account = res.data.approvedBy
-          if (this.request.status === '0') {
-            this.opsStatus = [
-              { value: '0', text: 'Pending' },
-              { value: '2', text: 'Rejected' },
-              { value: '1', text: 'Approved' }
-            ]
+      const accounts = await getListAccount(1, 100)
+      if (accounts.statusCode === '403') {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        this.isVisible = false
+      } else {
+        // eslint-disable-next-line array-callback-return
+        accounts.data.map((acc) => {
+          this.opsAccount.push({ value: acc.username, text: acc.username })
+        })
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        this.msg.account = ''
+        this.msg.status = ''
+        try {
+          const res = await getDetailRequest(id)
+          if (res.statusCode === '403') {
+            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.isVisible = false
+          } else {
+            this.request.requestType = res.data.requestType
+            this.request.status = res.data.status
+            this.request.account = res.data.approvedBy
+            if (this.request.status === '0') {
+              this.opsStatus = [
+                { value: '0', text: 'Pending' },
+                { value: '2', text: 'Rejected' },
+                { value: '1', text: 'Approved' }
+              ]
+            }
+            if (this.request.status === '1') {
+              this.opsStatus = [
+                { value: '1', text: 'Approved' }
+              ]
+            }
+            if (this.request.status === '2') {
+              this.opsStatus = [
+                { value: '2', text: 'Rejected' },
+                { value: '1', text: 'Approved' }
+              ]
+            }
           }
-          if (this.request.status === '1') {
-            this.opsStatus = [
-              { value: '1', text: 'Approved' }
-            ]
-          }
-          if (this.request.status === '2') {
-            this.opsStatus = [
-              { value: '2', text: 'Rejected' },
-              { value: '1', text: 'Approved' }
-            ]
-          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: e.message })
+        } finally {
+          this.isLoading = false
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.isLoading = false
       }
     },
     chooseAccount () {

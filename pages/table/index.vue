@@ -36,6 +36,7 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
+        small
         responsive
         hover
         striped
@@ -120,7 +121,9 @@ const tableFields = [
     key: 'modifiedDate'
   },
   {
-    key: 'action'
+    key: 'action',
+    thClass: 'text-center',
+    tdClass: 'text-center'
   }
 ]
 

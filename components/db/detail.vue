@@ -4,7 +4,7 @@
     <b-col class="text-center">
         <h1>Database Detail</h1>
       </b-col>
-    <b-table :fields="dbFields" :items="[detail]"></b-table>
+    <b-table small :fields="dbFields" :items="[detail]"></b-table>
 
     <b-row>
       <b-col cols="10">
@@ -19,6 +19,7 @@
 
     <section name="view" class="pt-3">
       <b-table
+        small
         responsive
         hover
         striped
@@ -139,7 +140,9 @@ const tbFields = [
     key: 'modifiedDate'
   },
   {
-    key: 'action'
+    key: 'action',
+    tdClass: 'text-center',
+    thClass: 'text-center'
   }
 ]
 

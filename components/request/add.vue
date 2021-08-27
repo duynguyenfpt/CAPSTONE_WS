@@ -196,9 +196,8 @@ export default {
     if (res.statusCode === '403') {
       this.isDeny = true
     } else {
-      // eslint-disable-next-line array-callback-return
-      res.data.map((item) => {
-        this.opsDb.push({ value: item.id, text: item.databaseName })
+      this.opsDb = res.data.map((item) => {
+        return { value: item.id, text: item.databaseName }
       })
       this.resetData()
     }
@@ -237,10 +236,8 @@ export default {
         if (res.statusCode === '403') {
           this.isDeny = true
         } else {
-          this.opsTb = [{ value: null, text: 'Please select an option' }]
-          // eslint-disable-next-line array-callback-return
-          res.data.map((item) => {
-            this.opsTb.push({ value: item.id, text: item.tableName })
+          this.opsTb = res.data.map((item) => {
+            return { value: item.id, text: item.tableName }
           })
           this.request.table = null
           this.msg.database = ''

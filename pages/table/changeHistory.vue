@@ -52,6 +52,7 @@
     <!-- Get list Tables change history -->
     <b-row class="pt-4">
       <b-table
+      small
       responsive
       hover
       striped

@@ -68,14 +68,14 @@
         </template>
         <template #cell(viewLog)="item">
           <b-btn @click="log(item.item.id)" size="sm" variant="primary">
-            View Log
+            View Note
           </b-btn>
         </template>
         <template #cell(no)="item">
           {{ countRecord(item.index) }}
         </template>
         <template #cell(status)="row">
-          <b-badge :variant="getStatusVariant(row.item.status)">
+          <b-badge class="w-100" :variant="getStatusVariant(row.item.status)">
             {{ getStatus(row.item.status) }}
           </b-badge>
         </template>
@@ -98,6 +98,9 @@
     <section name="popup">
       <request-log ref="log" @onUpdated="refreshData" />
     </section>
+    <section name="popup">
+      <request-edit ref="edit" @onUpdated="refreshData" />
+    </section>
   </div>
   <div v-else>
     <common-deny />
@@ -115,7 +118,8 @@ const tableFields = [
     key: 'requestType'
   },
   {
-    key: 'description'
+    key: 'description',
+    tdClass: 'max-width-250'
   },
   {
     key: 'createdBy',
@@ -136,7 +140,9 @@ const tableFields = [
     key: 'modifiedDate'
   },
   {
-    key: 'action'
+    key: 'action',
+    tdClass: 'text-center',
+    thClass: 'text-center'
   },
   {
     key: 'viewLog'
@@ -186,7 +192,7 @@ export default {
         case '2':
           return 'danger'
         default:
-          return null
+          return 'secondary'
       }
     },
     async getList () {
@@ -208,9 +214,6 @@ export default {
             e.modifiedDate = moment(this.request.modifiedDate).format(
               'YYYY-MM-DD'
             )
-            if (e.description === null) {
-              e.description = 'Nothing'
-            }
           })
         }
       } catch (e) {
@@ -225,9 +228,6 @@ export default {
       } else {
         this.$refs.edit.show(id)
       }
-    },
-    onAssign () {
-      this.$refs.assign.onShow()
     },
     log (id) {
       this.$refs.log.show(id)
@@ -248,7 +248,7 @@ export default {
       } else if (status === '2') {
         return 'Rejected'
       }
-      return null
+      return 'Pending'
     },
     async searchRequest () {
       this.loading = true
@@ -291,4 +291,10 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.max-width-250 {
+  max-width: 250px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+</style>

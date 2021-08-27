@@ -36,6 +36,7 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
+      small
         responsive
         hover
         striped
@@ -69,6 +70,7 @@
             size="sm"
             variant="danger"
             @click="deactiveAccount(item.item.id)"
+            v-b-tooltip="`Deactive account`"
             v-if="item.item.active"
           >
             <i class="fas fa-toggle-off"></i>
@@ -77,6 +79,7 @@
             size="sm"
             variant="info"
             @click="activeAccount(item.item.id)"
+            v-b-tooltip="`Active account`"
             v-if="!item.item.active"
           >
             <i class="fas fa-toggle-on"></i>
@@ -142,7 +145,9 @@ const accountFields = [
     key: 'phone'
   },
   {
-    key: 'action'
+    key: 'action',
+    thClass: 'text-center',
+    tdClass: 'text-center'
   }
 ]
 

@@ -93,6 +93,7 @@
             :options="opsAccount"
             v-model="account"
             size="sm"
+            placeholder="Please select an account"
           ></v-select>
         </b-form-group>
         <b-row class="pt-3">
@@ -146,7 +147,7 @@ export default {
         { value: 'engineer', text: 'Engineer' },
         { value: 'admin', text: 'Admin' }
       ],
-      opsAccount: [{ value: null, text: 'Please select an account' }],
+      opsAccount: [],
       isCopied: false,
       isSelected: false,
       dataArr: [],
@@ -261,9 +262,8 @@ export default {
           this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
           this.isVisible = false
         } else {
-        // eslint-disable-next-line array-callback-return
-          res.data.map((item) => {
-            this.opsAccount.push({ value: item.id, text: item.username })
+          this.opsAccount = res.data.map((item) => {
+            return { value: item.id, text: item.username }
           })
         }
       } else {

@@ -92,6 +92,7 @@
         <b-col sm="8" v-if="isExecuted">
           <h4 class="text-center" v-if="isDisplay">Sample Data</h4>
           <b-table
+          small
           responsive
           hover
           striped

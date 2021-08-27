@@ -36,6 +36,7 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
+        small
         responsive
         hover
         striped
@@ -51,18 +52,22 @@
         </template>
 
         <template #cell(active)>
-          <b-btn size="sm" variant="danger" v-if="isDeactive">
-            <i class="fa fa-power-off" v-if="isDeactive" />
-          </b-btn>
-          <b-btn size="sm" variant="success" v-if="isActive">
-            <i class="fas fa-check" v-if="isActive" />
-          </b-btn>
+          <div class="w-100 text-center">
+            <b-badge size="sm" variant="danger" v-if="isDeactive">
+              <i class="fa fa-power-off" v-if="isDeactive" />
+            </b-badge>
+            <b-badge size="sm" variant="success" v-if="isActive">
+              <i class="fas fa-check" v-if="isActive" />
+            </b-badge>
+          </div>
         </template>
 
         <template #cell(status)="row">
-          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{
-            row.item.status
-          }}</b-badge>
+          <b-badge
+            class="w-100"
+            :variant="getLastestStatusVariant(row.item.status)"
+            >{{ row.item.status }}</b-badge
+          >
         </template>
 
         <template #cell(action)="item">
@@ -76,7 +81,12 @@
           <b-btn @click="editJob(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
-          <b-btn size="sm" variant="warning">
+          <b-btn
+            size="sm"
+            variant="warning"
+            v-b-tooltip="`Restart job`"
+            disabled
+          >
             <i class="fa fa-retweet"></i>
           </b-btn>
         </template>
@@ -109,7 +119,7 @@
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
@@ -138,10 +148,13 @@ const jobFields = [
     key: 'status'
   },
   {
-    key: 'active'
+    key: 'active',
+    thClass: 'text-center'
   },
   {
-    key: 'action'
+    key: 'action',
+    thClass: 'text-center',
+    tdClass: 'text-center'
   }
 ]
 

@@ -8,7 +8,7 @@ export const searchLog = (page, limit, userName, fromDate, toDate) => http.get('
     page: page,
     limit: limit,
     userName: userName,
-    fromDate: fromDate,
-    toDate: toDate
+    startDate: fromDate,
+    endDate: toDate
   }
 })

@@ -106,21 +106,6 @@ export default {
     },
     isDeny: false
   }),
-
-  async mounted () {
-    this.isLoading = true
-    const hosts = await getAllServers()
-    if (hosts.statusCode === '403') {
-      this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-      this.isVisible = false
-    } else {
-      this.options = hosts.data.map(item => {
-        return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
-      })
-    }
-    this.isLoading = false
-  },
-
   watch: {
     databaseName (value) {
       this.databaseName = value
@@ -150,35 +135,44 @@ export default {
 
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      const res = await getDatabaseDetail(id)
-      if (res.statusCode === '403') {
+      const hosts = await getAllServers()
+      if (hosts.statusCode === '403') {
         this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
         this.isVisible = false
       } else {
-        this.serverInforId = res.data.serverInfor.id
-        this.port = res.data.port
-        this.databaseName = res.data.databaseName
-        this.username = res.data.username
-        this.password = res.data.password
-        this.databaseType = res.data.databaseType
-        this.alias = res.data.alias
-        if (this.databaseType === 'oracle') {
-          this.isOracle = true
-          this.sid = res.data.sid
+        this.options = hosts.data.map(item => {
+          return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
+        })
+        this.idItem = id
+        this.isLoading = true
+        this.isVisible = true
+        const res = await getDatabaseDetail(id)
+        if (res.statusCode === '403') {
+          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.isVisible = false
         } else {
-          this.isOracle = false
-          this.sid = ''
+          this.serverInforId = res.data.serverInfor.id
+          this.port = res.data.port
+          this.databaseName = res.data.databaseName
+          this.username = res.data.username
+          this.password = res.data.password
+          this.databaseType = res.data.databaseType
+          this.alias = res.data.alias
+          if (this.databaseType === 'oracle') {
+            this.isOracle = true
+            this.sid = res.data.sid
+          } else {
+            this.isOracle = false
+            this.sid = ''
+          }
+          this.isLoading = false
+          this.msg.databaseName = ''
+          this.msg.port = ''
+          this.msg.username = ''
+          this.msg.password = ''
+          this.msg.sid = ''
+          this.msg.alias = ''
         }
-        this.isLoading = false
-        this.msg.databaseName = ''
-        this.msg.port = ''
-        this.msg.username = ''
-        this.msg.password = ''
-        this.msg.sid = ''
-        this.msg.alias = ''
       }
     },
     validateDBName (value) {

@@ -38,6 +38,7 @@
         </section>
         <section name="view" class="pt-3">
           <b-table
+            small
             responsive
             hover
             striped
@@ -120,6 +121,7 @@
         </section>
         <section name="view" class="pt-3">
           <b-table
+            small
             responsive
             hover
             striped
@@ -183,6 +185,7 @@
         </section>
         <section name="view" class="pt-3" v-show="!isDenyAccountRight">
           <b-table
+            small
             responsive
             hover
             striped
@@ -252,7 +255,9 @@ const rightFields = [
     key: 'description'
   },
   {
-    key: 'action'
+    key: 'action',
+    thClass: 'text-center',
+    tdClass: 'text-center'
   }
 ]
 

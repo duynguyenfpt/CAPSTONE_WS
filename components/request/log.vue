@@ -123,12 +123,12 @@ export default {
             requestId: this.idItem,
             content: this.note
           }
-          const res = createLog(data)
+          const res = await createLog(data)
           if (res.statusCode === '403') {
             this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
             this.isVisible = false
           } else {
-            this.show(this.idItem)
+            await this.show(this.idItem)
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

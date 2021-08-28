@@ -591,7 +591,7 @@ export default {
           }
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Test connection failed' })
       } finally {
         this.isLoadingCheck = false
       }

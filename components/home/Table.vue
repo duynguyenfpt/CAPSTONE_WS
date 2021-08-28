@@ -42,14 +42,17 @@ const TableFields = [
     label: 'Table'
   },
   {
-    key: 'step'
+    key: 'step',
+    tdClass: 'text-center'
   },
   {
     key: 'requestType',
     label: 'Request'
   },
   {
-    key: 'numberStep'
+    key: 'numberStep',
+    tdClass: 'text-center',
+    thClass: 'text-center'
   },
   {
     key: 'message',

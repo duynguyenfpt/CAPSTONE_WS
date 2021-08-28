@@ -36,7 +36,7 @@ export default {
         method: 'DELETE',
         path: 'database_infor'
       }
-      const resDb = checkPermission(dataDb)
+      const resDb = await checkPermission(dataDb)
       if (!resDb.data.success) {
         this.$notify({
           type: 'error',

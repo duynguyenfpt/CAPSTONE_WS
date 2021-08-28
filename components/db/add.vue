@@ -188,9 +188,9 @@ export default {
         method: 'POST',
         path: 'database_infor'
       }
-      const resCon = checkPermission(dataCon)
-      const resServer = checkPermission(dataServer)
-      const resDb = checkPermission(dataDb)
+      const resCon = await checkPermission(dataCon)
+      const resServer = await checkPermission(dataServer)
+      const resDb = await checkPermission(dataDb)
       if (
         !resCon.data.success ||
         !resServer.data.success ||

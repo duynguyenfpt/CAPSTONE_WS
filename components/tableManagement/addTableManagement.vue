@@ -363,7 +363,7 @@ export default {
         path: 'table'
       }
       const res = await checkPermission(data)
-      if (!res.data.success || !resServer.data.success || !resDb.data.success || resDbCreate.data.success) {
+      if (!res.data.success || !resServer.data.success || !resDb.data.success || !resDbCreate.data.success) {
         this.isDeny = true
       }
     },
@@ -420,9 +420,7 @@ export default {
       if (id !== null) {
         this.isLoadingFill = true
         const res = await getDatabaseDetail(id)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.isLoadingFill = false
           this.dbName = res.data.databaseName
           this.host = res.data.serverInfor.id
@@ -502,19 +500,15 @@ export default {
             this.isLoadingCreate = true
             const info = { databaseInforId: id, tableName: this.table, defaultKey: this.defaultKey }
             const res = await createTable(info)
-            if (res.statusCode === '403') {
-              this.isDeny = true
+            this.isLoadingCreate = false
+            if (res.code === '201') {
+              this.$notify({ type: 'success', text: 'Add table succeeded' })
+              this.resetData()
             } else {
-              this.isLoadingCreate = false
-              if (res.code === '201') {
-                this.$notify({ type: 'success', text: 'Add table succeeded' })
-                this.resetData()
-              } else {
-                this.$notify({ type: 'error', text: 'Add table failed' })
-              }
+              this.$notify({ type: 'error', text: 'Add table failed' })
             }
           } catch (e) {
-            this.$notify({ type: 'error', text: e.message })
+            this.$notify({ type: 'error', text: 'Add table failed' })
           }
         }
       } else {
@@ -545,28 +539,20 @@ export default {
               alias: this.alias
             }
             const resDb = await createDatabase(db)
-            if (resDb.statusCode === '403') {
-              this.isDeny = true
-            } else {
-              if (resDb.code === '201') {
-                const tb = {
-                  databaseInforId: resDb.data.id,
-                  tableName: this.table,
-                  defaultKey: this.defaultKey
-                }
-                this.isLoadingCreate = true
-                const resq = await createTable(tb)
-                if (resq.statusCode === '403') {
-                  this.isDeny = true
-                } else {
-                  this.isLoadingCreate = false
-                  if (resq.code) {
-                    this.$notify({ type: 'success', text: 'Add table succeeded' })
-                    this.resetData()
-                  } else {
-                    this.$notify({ type: 'error', text: 'Add table failed' })
-                  }
-                }
+            if (resDb.code === '201') {
+              const tb = {
+                databaseInforId: resDb.data.id,
+                tableName: this.table,
+                defaultKey: this.defaultKey
+              }
+              this.isLoadingCreate = true
+              const resq = await createTable(tb)
+              this.isLoadingCreate = false
+              if (resq.code === '201') {
+                this.$notify({ type: 'success', text: 'Add table succeeded' })
+                this.resetData()
+              } else {
+                this.$notify({ type: 'error', text: 'Add table failed' })
               }
             }
           } catch (e) {
@@ -588,14 +574,10 @@ export default {
           sid: this.sid
         }
         const res = await checkConnection(data)
-        if (res.statusCode === '403') {
-          this.isDeny = true
+        if (res.code === '200' && res.data.success) {
+          this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {
-          if (res.code === '200' && res.data.success) {
-            this.$notify({ type: 'success', text: 'Test connection succeeded.' })
-          } else {
-            this.$notify({ type: 'error', text: 'Test connection failed' })
-          }
+          this.$notify({ type: 'error', text: 'Test connection failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: 'Test connection failed' })

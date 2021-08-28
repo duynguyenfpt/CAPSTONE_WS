@@ -37,6 +37,7 @@
 
 <script>
 import { createServer } from '@/service/server'
+import { checkPermission } from '~/service/right'
 export default {
   data () {
     return {
@@ -81,11 +82,23 @@ export default {
       }
     },
     async show () {
-      this.isVisible = true
-      this.serverHost = null
-      this.serverDomain = null
-      this.msg.host = null
-      this.msg.domain = null
+      const data = {
+        method: 'POST',
+        path: 'server_infor'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+      } else {
+        this.isVisible = true
+        this.serverHost = null
+        this.serverDomain = null
+        this.msg.host = null
+        this.msg.domain = null
+      }
     },
     onClose () {
       this.isVisible = false
@@ -107,23 +120,16 @@ export default {
             serverDomain: this.serverDomain
           }
           const data = await createServer(config)
-          if (data.statusCode === '403') {
-            this.$notify({
-              type: 'error',
-              text: 'Error occurred! - Access Denied'
-            })
+          this.isLoadingCreate = false
+          this.isVisible = false
+          this.$emit('onAdded', data)
+          if (data.code === '201') {
+            this.$notify({ type: 'success', text: 'Add server succeeded' })
           } else {
-            this.isLoadingCreate = false
-            this.isVisible = false
-            this.$emit('onAdded', data)
-            if (data.code === '201') {
-              this.$notify({ type: 'success', text: 'Add server succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Add server failed' })
-            }
+            this.$notify({ type: 'error', text: 'Add server failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Add server failed' })
         } finally {
           this.isLoadingCreate = false
           this.isVisible = false

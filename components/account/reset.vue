@@ -60,10 +60,10 @@ export default {
         if (res.code === '200') {
           this.$notify({ type: 'success', text: 'Reset password succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Reset password  failed' })
+          this.$notify({ type: 'error', text: 'Reset password failed' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: 'Reset password  failed' })
+        this.$notify({ type: 'error', text: 'Reset password failed' })
       } finally {
         this.isLoading = false
         this.isVisible = false

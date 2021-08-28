@@ -327,9 +327,7 @@ export default {
         const forLoop = async (_) => {
           for (let index = 0; index < this.tables.length; index++) {
             const colData = await getColumnByTable(this.tables[index].table_id)
-            if (colData.statusCode === '403') {
-              this.isDeny = true
-            } else {
+            if (colData.code === '200') {
               const colItem = []
               colData.data.forEach((item) => {
                 colItem.push({ value: item, text: item })
@@ -396,25 +394,24 @@ export default {
       try {
         this.isLoadingCreate = true
         const res = await createMerge(dataStr)
-        if (res.statusCode === '403') {
-          this.isDeny = true
+        this.isLoadingCreate = false
+        if (res.code === '201') {
+          this.$notify({
+            type: 'success',
+            text: 'Create merge request succeeded'
+          })
+          this.$router.push({ path: '/request' })
         } else {
-          this.isLoadingCreate = false
-          if (res.code === '201') {
-            this.$notify({
-              type: 'success',
-              text: 'Create merge request succeeded'
-            })
-            this.$router.push({ path: '/request' })
-          } else {
-            this.$notify({
-              type: 'error',
-              text: 'Create merge request failed'
-            })
-          }
+          this.$notify({
+            type: 'error',
+            text: 'Create merge request failed'
+          })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({
+          type: 'error',
+          text: 'Create merge request failed'
+        })
       } finally {
         this.isLoadingCreate = false
       }

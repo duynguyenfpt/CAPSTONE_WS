@@ -145,7 +145,7 @@ export default {
   async created () {
     await this.checkPermission()
     if (!this.isDeny) {
-      this.getList()
+      await this.getList()
     }
   },
 

@@ -63,10 +63,10 @@ export default {
         if (res.code === '200') {
           this.$notify({ type: 'success', text: 'Active account succeeded' })
         } else {
-          this.$notify({ type: 'error', text: 'Active account  failed' })
+          this.$notify({ type: 'error', text: 'Active account failed' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: 'Active account  failed' })
+        this.$notify({ type: 'error', text: 'Active account failed' })
       } finally {
         this.isLoading = false
         this.isVisible = false

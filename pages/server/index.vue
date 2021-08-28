@@ -157,9 +157,11 @@ export default {
     isDeny: false
   }),
 
-  created () {
-    this.checkPermission()
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getList()
+    }
   },
 
   methods: {
@@ -168,7 +170,7 @@ export default {
         method: 'GET',
         path: 'server_infor'
       }
-      const res = checkPermission(data)
+      const res = await checkPermission(data)
       if (!res.data.success) {
         this.isDeny = true
       }

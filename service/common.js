@@ -28,17 +28,6 @@ http.interceptors.response.use(
     if (statusCode === 401 || statusCode === '401') {
       window.location.href = '/login'
     }
-    if (error.message.includes('403')) {
-      return {
-        statusCode: '403',
-        message: 'Access denied'
-      }
-    }
-    if (error.message.includes('422')) {
-      return {
-        statusCode: '422',
-        message: 'Can not add rights for yourself'
-      }
-    }
+    return Promise.reject(error)
   }
 )

@@ -27,6 +27,8 @@ export const actions = {
   async login ({ commit }, user) {
     try {
       const data = await login(user)
+      console.log('LCC: ', data.code)
+      console.log('LCC: ', data.message)
       if (data) {
         localStorage.setItem('token', data.data.token)
         commit('setToken', data.data.token)

@@ -240,7 +240,7 @@ import {
   searchRight,
   checkPermission
 } from '@/service/right'
-import { getAccounts, searchAccount } from '@/service/account'
+import { getListAccount, searchAccount } from '@/service/account'
 
 const rightFields = [
   {
@@ -380,7 +380,7 @@ export default {
     async checkPermissionAccount () {
       const data = {
         method: 'GET',
-        path: 'list_account'
+        path: 'account'
       }
       const res = await checkPermission(data)
       if (!res.data.success) {
@@ -390,7 +390,7 @@ export default {
     async getAccountList () {
       this.loadingAccount = true
       try {
-        const resAccount = await getAccounts(
+        const resAccount = await getListAccount(
           this.paginationAccount.page,
           this.paginationAccount.limit
         )

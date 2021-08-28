@@ -159,6 +159,7 @@ import { getAllTableByDb, getColumnByTable } from '~/service/table.service'
 import { createRequestSync } from '~/service/request'
 import Vue from 'vue'
 import vSelect from 'vue-select'
+import { checkPermission } from '~/service/right'
 
 Vue.component('v-select', vSelect)
 export default {
@@ -193,15 +194,16 @@ export default {
       tableName: null
     }
   },
-  async mounted () {
-    const res = await getAllDbType()
-    if (res.statusCode === '403') {
-      this.isDeny = true
-    } else {
-      this.opsDb = res.data.map((item) => {
-        return { value: item.id, text: item.databaseName }
-      })
-      this.resetData()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      const res = await getAllDbType()
+      if (res.code === '200') {
+        this.opsDb = res.data.map((item) => {
+          return { value: item.id, text: item.databaseName }
+        })
+        this.resetData()
+      }
     }
   },
   methods: {
@@ -231,13 +233,36 @@ export default {
         this.msg.toDate = 'Please select a date'
       }
     },
+    async checkPermission () {
+      const dataDb = {
+        method: 'GET',
+        path: 'database_infor'
+      }
+      const dataTb = {
+        method: 'GET',
+        path: 'table'
+      }
+      const dataCol = {
+        method: 'GET',
+        path: 'column'
+      }
+      const dataReq = {
+        method: 'POST',
+        path: 'requests'
+      }
+      const resDb = await checkPermission(dataDb)
+      const resTb = await checkPermission(dataTb)
+      const resCol = await checkPermission(dataCol)
+      const resReq = await checkPermission(dataReq)
+      if (!resDb.data.success || !resTb.data.success || !resCol.data.success || !resReq.data.success) {
+        this.isDeny = true
+      }
+    },
     async fillData () {
       const id = this.request.database
       if (id !== null) {
         const res = await getAllTableByDb(id, 1, 1000)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.opsTb = res.data.map((item) => {
             return { value: item.id + '-' + item.tableName, text: item.tableName }
           })
@@ -255,9 +280,7 @@ export default {
       this.tableName = table[1]
       if (this.tableId !== null) {
         const res = await getColumnByTable(this.tableId)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.opsUniqueKey = res.data.map((item) => {
             return { value: item, label: item }
           })
@@ -329,21 +352,17 @@ export default {
               description: 'Sync ' + this.tableName
             }
             const res = await createRequestSync(req)
-            if (res.statusCode === '403') {
-              this.isDeny = true
+            if (res.code === '201') {
+              this.$notify({
+                type: 'success',
+                text: 'Create request succeeded'
+              })
+              this.resetData()
             } else {
-              if (res.code === '201') {
-                this.$notify({
-                  type: 'success',
-                  text: 'Create request succeeded'
-                })
-                this.resetData()
-              } else {
-                this.$notify({ type: 'error', text: 'Create request failed' })
-              }
+              this.$notify({ type: 'error', text: 'Create request failed' })
             }
           } catch (e) {
-            this.$notify({ type: 'error', text: e.message })
+            this.$notify({ type: 'error', text: 'Create request failed' })
           } finally {
             this.isLoadingCreate = false
           }

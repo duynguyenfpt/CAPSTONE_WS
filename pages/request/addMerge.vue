@@ -381,6 +381,7 @@ export default {
               type: 'success',
               text: 'Create merge request succeeded'
             })
+            this.$router.push({ path: '/request' })
           } else {
             this.$notify({
               type: 'error',

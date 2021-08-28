@@ -11,10 +11,12 @@
         <b-button
           size="sm"
           v-b-toggle.sidebar-right
-          variant="success"
+          variant="info"
           @click="showAllResults"
-          >History</b-button
         >
+          <i class="fa fa-history" />
+          History
+        </b-button>
       </b-col>
       <b-sidebar id="sidebar-right" title="Old Result" right shadow>
         <div class="px-2 py-2">
@@ -24,9 +26,15 @@
               v-for="(item, index) in results"
               :key="index"
             >
-              <div style="cursor: pointer; overflow: hidden; text-overflow: ellipsis;" @click="showResult(item.request.id)">
+              <div
+                style="cursor: pointer; overflow: hidden; text-overflow: ellipsis;"
+                @click="showResult(item.request.id)"
+                @contextmenu="copyToClipboard($event, item.query)"
+              >
                 <div class="d-flex w-100 justify-content-between">
-                  <b-badge variant="processing" class="mb-1">{{ index + 1 }}</b-badge>
+                  <b-badge variant="processing" class="mb-1">{{
+                    index + 1
+                  }}</b-badge>
                   <small class="text-muted">{{
                     format(new Date(item.createdDate), `yyyy-MM-dd`)
                   }}</small>
@@ -93,35 +101,39 @@
         </b-col>
       </b-row>
       <b-row class="pt-2">
-        <b-col sm="1"></b-col>
-        <b-col sm="8" class="text-right">
+        <b-col cols="1" />
+        <b-col cols="4">
+          <b-btn variant="warning" @click="onDownload" v-if="isDisplay">
+            <i v-if="isDownload" class="fa fa-spin fa-spinner" />
+            <i v-else class="fa fa-download" />
+            Download
+          </b-btn>
+        </b-col>
+        <b-col sm="4" class="text-right">
           <b-btn
-            size="sm"
-            variant="primary"
+            variant="success"
             class="btn-add-request"
-            @click="createETL"
+            @click="submitETL"
             :disabled="!isExecuted"
           >
-            <b-spinner
-              v-if="isLoadingCreate"
-              variant="primary"
-              small
-            ></b-spinner>
+            <i v-if="isLoadingCreate" class="fa fa-spin fa-spinner" />
+            <i v-else class="fa fa-play" />
             Submit
           </b-btn>
         </b-col>
       </b-row>
+      <hr />
       <b-row class="pt-2">
-        <b-col sm="1"></b-col>
-        <b-col sm="8" v-if="isExecuted">
+        <b-col cols="12" v-if="isExecuted">
           <div v-if="isSuccess">
             <h4 class="text-center" v-if="isDisplay">Sample Data</h4>
             <b-table
               small
-              style="max-width: 1000px"
+              class="w-100"
               responsive
               hover
               striped
+              bordered
               :items="rows"
               :fields="resultFields"
             >
@@ -132,21 +144,6 @@
                 </div>
               </template>
             </b-table>
-            <div class="text-right">
-              <b-button
-                size="sm"
-                variant="success"
-                @click="onDownload"
-                v-if="isDisplay"
-              >
-                <b-spinner
-                  variant="success"
-                  v-if="isDownload"
-                  small
-                ></b-spinner>
-                Download
-              </b-button>
-            </div>
           </div>
           <div v-if="isFailed">
             <h5 class="text-center msg-fail">{{ msgErr }}</h5>
@@ -169,7 +166,7 @@
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 <script>
@@ -180,9 +177,12 @@ import {
   downloadData
 } from '@/service/etl'
 import { format } from 'date-fns'
+import { saveAs } from 'file-saver'
+
 export default {
   data () {
     return {
+      eltID: null,
       query: null,
       standardItems: [
         'select',
@@ -297,119 +297,111 @@ export default {
         this.searchMatch = []
       }
     },
-    async createETL () {
-      this.validateQuery(this.inputValue)
-      if (this.message.query === '') {
-        try {
-          this.isLoadingCreate = true
-          const data = {
-            query: this.inputValue
-          }
-          const res = await createEtl(data)
-          if (res.statusCode === '403') {
-            this.isDeny = true
-          } else {
-            this.isLoadingCreate = false
-            this.isFailed = false
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Create ETL succeeded' })
-              const id = res.data.request.id
-              this.isExecuted = false
-              this.variant = 'primary'
-              let isRunning = true
-              while (isRunning) {
-                this.rows = []
-                try {
-                  const resResult = await getResultDetail(id)
-                  if (resResult.statusCode === '403') {
-                    this.isDeny = true
-                  } else {
-                    if (resResult.code === '200') {
-                      const header = []
-                      if (resResult.data.status === 'successed') {
-                        header.push({
-                          key: 'no'
-                        })
-                        const totalArray = resResult.data.content.split('\n')
-                        this.isExecuted = true
-                        this.isSuccess = true
-                        totalArray.forEach((element, index) => {
-                          if (index === 0) {
-                            // eslint-disable-next-line array-callback-return
-                            element.split(',').map(item => {
-                              header.push({
-                                key: item
-                              })
-                            })
-                          } else {
-                            const tempRow = element.split(',')
-                            const objData = {}
-                            header.forEach((item, i) => {
-                              if (item.key === 'no') {
-                                objData[`${item.key}`] = index
-                              } else {
-                                objData[`${item.key}`] = tempRow[i - 1]
-                              }
-                            })
-                            this.rows.push(objData)
-                          }
-                        })
-                        this.isExecuted = true
-                        this.resultFields = header
-                        isRunning = false
-                        this.isDisplay = true
-                      } else {
-                        if (resResult.data.status === 'failed') {
-                          this.isExecuted = true
-                          this.isFailed = true
-                          this.msgErr = 'Query is failed'
-                          this.msgFailed = resResult.data.content
-                          this.isSuccess = false
-                        } else {
-                          this.isExecuted = false
-                          this.msg = 'Query is executing'
-                        }
-                      }
-                    }
-                  }
-                } catch (e) {
-                  this.isExecuted = true
-                  this.isFailed = true
-                  this.msgErr = 'Query is failed'
-                  this.msgFailed = e.message
-                }
-                await this.sleep(2000)
-              }
-            } else {
-              this.$notify({ type: 'error', text: 'Create ETL failed' })
-            }
-          }
-        } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
-        } finally {
-          this.isLoadingCreate = false
+
+    reset () {
+      this.msgFailed = ''
+      this.msgErr = ''
+      this.eltID = null
+    },
+
+    async submitETL () {
+      this.reset()
+      if (!this.validateQuery(this.inputValue)) return
+
+      this.isLoadingCreate = true
+      this.isFailed = false
+      try {
+        const res = await createEtl({ query: this.inputValue })
+        if (res.statusCode === '403') {
+          this.isDeny = true
+          throw new Error('query denied')
         }
+        this.isLoadingCreate = false
+        if (res.code !== '201') return
+        this.$notify({ type: 'success', text: 'Create ETL succeeded' })
+
+        const id = res.data.request.id
+        this.eltID = id
+        let isRunning = true
+
+        this.rows = []
+        this.msg = 'Query is executing'
+        this.isExecuted = false
+        while (isRunning) {
+          try {
+            const result = await getResultDetail(id)
+            if (result.statusCode === '403') {
+              this.isDeny = true
+              throw new Error('query denied')
+            }
+            if (result.code !== '200') return
+
+            switch (result.data.status) {
+              case 'failed':
+                this.isFailed = true
+                this.isExecuted = true
+                this.isSuccess = false
+                throw new Error(result.data.content)
+              case 'successed': {
+                const headers = [{ key: 'no', class: 'align-top' }]
+                const arr = result.data.content.split('\n')
+                arr.forEach((row, idx) => {
+                  if (idx === 0) {
+                    row.split(',').forEach((e) => {
+                      headers.push({ key: e, class: 'align-top' })
+                    })
+                    return
+                  }
+                  const tmp = row.split(',')
+                  const data = {}
+                  headers.forEach((header, idx) => {
+                    if (header.key === 'no') {
+                      data[header.key] = idx
+                    } else {
+                      data[header.key] = tmp[idx - 1]
+                    }
+                  })
+                  this.rows.push(data)
+                })
+                this.isExecuted = true
+                this.resultFields = headers
+                isRunning = false
+                this.isDisplay = true
+                this.isSuccess = true
+              }
+            }
+          } catch (e) {
+            isRunning = false
+            throw e
+          }
+          await this.sleep(2000)
+        }
+      } catch (e) {
+        this.isFailed = true
+        this.msgErr = 'Query is failed'
+        this.msgFailed = e.message
+        this.isSuccess = false
+      } finally {
+        this.isLoadingCreate = false
       }
     },
     async onDownload () {
+      if (!this.eltID) return
       try {
         this.isDownload = true
-        const res = await downloadData(this.idItem)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
-          if (res.code === '200') {
-            this.$notify({ type: 'success', text: 'Download result succeeded' })
-            const fileURL = window.URL.createObjectURL(new Blob([res]))
-            const fileLink = document.createElement('a')
-            fileLink.href = fileURL
-            fileLink.setAttribute('download', 'file.csv')
-            document.body.appendChild(fileLink)
-            fileLink.click()
-          } else {
-            this.$notify({ type: 'error', text: 'Download result failed' })
-          }
-        }
+        const res = await downloadData(this.eltID)
+        console.log(res)
+        const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
+        console.log('blob')
+        const name = `${new Date().getTime()}.csv`
+        console.log(name)
+        saveAs(blob, name)
+        console.log('save')
+        this.$notify({
+          type: 'success',
+          text: 'Download result succeeded'
+        })
+        console.log('notify')
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })
       } finally {
@@ -424,9 +416,18 @@ export default {
     validateQuery (value) {
       if (/^(\s*)$/.test(value)) {
         this.message.query = 'Invalid etl'
+        return false
       } else {
         this.message.query = ''
+        return true
       }
+    },
+
+    copyToClipboard (e, text) {
+      e.preventDefault()
+      this.$notify({ type: 'info', text: 'Copied to clipboard' })
+      this.inputValue = text
+      navigator.clipboard.writeText(text)
     }
   },
   computed: {

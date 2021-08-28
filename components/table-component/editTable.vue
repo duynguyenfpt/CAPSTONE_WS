@@ -58,6 +58,7 @@
 
 <script>
 import { editTable, getTableDetail } from '@/service/table.service'
+import { checkPermission } from '~/service/right'
 
 export default {
   props: {
@@ -102,21 +103,32 @@ export default {
       }
     },
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      const res = await getTableDetail(this.idItem)
-      if (res.statusCode === '403') {
+      const dataGet = {
+        method: 'GET',
+        path: 'table_infor'
+      }
+      const resGet = await checkPermission(dataGet)
+      const dataPut = {
+        method: 'PUT',
+        path: 'table_infor'
+      }
+      const resPut = await checkPermission(dataPut)
+      if (!resGet.data.success || !resPut.data.success) {
         this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
       } else {
-        this.dbName = res.data.databaseInfo.databaseName
-        this.tableName = res.data.tableName
-        this.defaultKey = res.data.defaultKey
-        this.msg.tableName = null
-        this.msg.defaultKey = null
-        this.isLoading = false
-        this.isLoadingCreate = false
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        const res = await getTableDetail(this.idItem)
+        if (res.code === '200') {
+          this.dbName = res.data.databaseInfo.databaseName
+          this.tableName = res.data.tableName
+          this.defaultKey = res.data.defaultKey
+          this.msg.tableName = null
+          this.msg.defaultKey = null
+          this.isLoading = false
+          this.isLoadingCreate = false
+        }
       }
     },
     onClose () {
@@ -139,19 +151,14 @@ export default {
             defaultKey: this.defaultKey
           }
           const res = await editTable(this.idItem, body)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onUpdated')
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Update table succeeded' })
           } else {
-            this.$emit('onUpdated')
-            if (res.code === '200') {
-              this.$notify({ type: 'success', text: 'Update table succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Update table failed' })
-            }
+            this.$notify({ type: 'error', text: 'Update table failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Update table failed' })
         } finally {
           this.isLoadingCreate = false
           this.isVisible = false

@@ -7,9 +7,7 @@
             <h2 class="text-center">Forgot Password</h2>
             <div class="login-form">
               <div class="form-group">
-                <label for="exampleInputEmail1"
-                  >Username</label
-                >
+                <label for="exampleInputEmail1">Username</label>
                 <input
                   type="email"
                   class="form-control"
@@ -19,7 +17,11 @@
                 <span class="msg-error">{{ msg.username }}</span>
               </div>
               <div class="text-center">
-                <button class="btn btn-login float-center" @click="onForgot" :disabled="isLoading">
+                <button
+                  class="btn btn-login float-center"
+                  @click="onForgot"
+                  :disabled="isLoading"
+                >
                   <b-spinner
                     v-if="isLoading"
                     variant="primary"
@@ -58,8 +60,7 @@
                     src="https://static.pexels.com/photos/33972/pexels-photo.jpg"
                     alt="First slide"
                   />
-                  <div class="carousel-caption d-none d-md-block">
-                  </div>
+                  <div class="carousel-caption d-none d-md-block"></div>
                 </div>
                 <div class="carousel-item">
                   <img
@@ -67,8 +68,7 @@
                     src="https://images.pexels.com/photos/7097/people-coffee-tea-meeting.jpg"
                     alt="First slide"
                   />
-                  <div class="carousel-caption d-none d-md-block">
-                  </div>
+                  <div class="carousel-caption d-none d-md-block"></div>
                 </div>
                 <div class="carousel-item">
                   <img
@@ -76,8 +76,7 @@
                     src="https://images.pexels.com/photos/872957/pexels-photo-872957.jpeg"
                     alt="First slide"
                   />
-                  <div class="carousel-caption d-none d-md-block">
-                  </div>
+                  <div class="carousel-caption d-none d-md-block"></div>
                 </div>
               </div>
             </div>
@@ -122,7 +121,10 @@ export default {
           this.isLoading = true
           const res = await forgotPassword(this.username)
           if (res.code === '200') {
-            this.$notify({ type: 'success', text: 'We sent a new password to your email' })
+            this.$notify({
+              type: 'success',
+              text: 'We sent a new password to your email'
+            })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: e.message })

@@ -36,7 +36,7 @@
     </section>
     <section name="view" class="pt-3">
       <b-table
-      small
+        small
         responsive
         hover
         striped
@@ -121,12 +121,13 @@
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
 <script>
 import { getListAccount, searchAccount } from '@/service/account'
+import { checkPermission } from '~/service/right'
 
 const accountFields = [
   {
@@ -169,11 +170,24 @@ export default {
     isDeny: false
   }),
 
-  created () {
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getList()
+    }
   },
 
   methods: {
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'account'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getList () {
       this.loading = true
       try {
@@ -181,9 +195,7 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.accounts = res.data
           this.accounts.forEach((e) => {
             if (e.role === 'admin') {
@@ -197,9 +209,11 @@ export default {
             }
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -241,9 +255,7 @@ export default {
           this.pagination.limit,
           this.keySearch
         )
-        if (result.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (result.code === '200') {
           this.accounts = result.data
           this.accounts.forEach((e) => {
             if (e.role === 'admin') {
@@ -257,9 +269,11 @@ export default {
             }
           })
           this.pagination.total = result.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

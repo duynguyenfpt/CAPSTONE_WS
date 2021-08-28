@@ -1,5 +1,6 @@
 import { http } from './common'
 
+export const checkPermission = (data) => http.post('api/check_permission', data)
 export const getList = (page, limit) => http.get('api/rights', { params: { page, limit } })
 export const getAll =
     () => http.get('api/rights', {

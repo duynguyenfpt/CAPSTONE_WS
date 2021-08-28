@@ -37,7 +37,12 @@
             <i class="fas fa-search" />
             Search
           </b-btn>
-          <b-btn @click="onSearchRequest" size="sm" class="ml-2" variant="success">
+          <b-btn
+            @click="onSearchRequest"
+            size="sm"
+            class="ml-2"
+            variant="success"
+          >
             <i class="fa fa-sync pr-1" />
             Reload
           </b-btn>
@@ -62,7 +67,12 @@
           >
             <i class="fa fa-pen" />
           </b-btn>
-          <b-btn size="sm" @click="reset(item.item.id)" variant="danger">
+          <b-btn
+            size="sm"
+            @click="reset(item.item.id)"
+            variant="danger"
+            disabled
+          >
             <i class="fa fa-power-off" aria-hidden="true"></i>
           </b-btn>
         </template>
@@ -110,6 +120,7 @@
 <script>
 import { getRequest, searchRequest } from '@/service/request'
 import moment from 'moment'
+import { checkPermission } from '~/service/right'
 const tableFields = [
   {
     key: 'no'
@@ -179,8 +190,11 @@ export default {
       { value: '2', text: 'Rejected' }
     ]
   }),
-  created () {
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getList()
+    }
   },
   methods: {
     getStatusVariant (status) {
@@ -195,6 +209,16 @@ export default {
           return 'secondary'
       }
     },
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'request'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getList () {
       this.loading = true
       try {
@@ -202,9 +226,7 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.request = res.data
           this.pagination.total = res.metaData.totalItem
           this.request.forEach((e) => {
@@ -215,9 +237,11 @@ export default {
               'YYYY-MM-DD'
             )
           })
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -260,9 +284,7 @@ export default {
           this.keyStatus,
           this.keyApproved
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.request = res.data
           this.pagination.total = res.metaData.totalItem
           this.request.forEach((e) => {
@@ -273,9 +295,11 @@ export default {
               'YYYY-MM-DD'
             )
           })
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

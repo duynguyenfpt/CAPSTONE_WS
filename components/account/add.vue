@@ -117,8 +117,8 @@
 </template>
 
 <script>
-import { getAllAccount, createAccount } from '@/service/account'
-import { getAll } from '@/service/right'
+import { getAccounts, createAccount } from '@/service/account'
+import { getAll, checkPermission } from '@/service/right'
 import Vue from 'vue'
 import vSelect from 'vue-select'
 
@@ -180,20 +180,34 @@ export default {
   },
   methods: {
     async show () {
-      this.isVisible = true
-      this.email = null
-      this.username = null
-      this.phone = null
-      this.role = null
-      this.account = null
-      this.value = []
-      this.right = 0
-      this.isCopied = false
-      this.isSelected = false
-      this.msg.username = null
-      this.msg.email = null
-      this.msg.phone = null
-      this.msg.role = null
+      const data = {
+        method: 'POST',
+        path: 'account'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+        this.isLoading = false
+        this.isVisible = false
+      } else {
+        this.isVisible = true
+        this.email = null
+        this.username = null
+        this.phone = null
+        this.role = null
+        this.account = null
+        this.value = []
+        this.right = 0
+        this.isCopied = false
+        this.isSelected = false
+        this.msg.username = null
+        this.msg.email = null
+        this.msg.phone = null
+        this.msg.role = null
+      }
     },
     chooseRole () {
       if (this.role === null) {
@@ -235,36 +249,84 @@ export default {
       if (this.right === 1) {
         this.isSelected = true
         this.isCopied = false
-        const res = await getAll()
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        const data = {
+          method: 'GET',
+          path: 'right'
+        }
+        const resPermission = checkPermission(data)
+        if (!resPermission.data.success) {
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred! - Access Denied'
+          })
           this.isVisible = false
         } else {
-          const states = res.data.map(item => {
-            return { id: item.id, name: item.path + ' - ' + item.method }
-          })
-          const initials = res.data.map(item => {
-            return item.path + ' - ' + item.method
-          })
-          states.forEach((right, index) => {
-            this.dataArr.push({
-              label: right.name,
-              key: right.id,
-              initial: initials[index]
+          try {
+            const res = await getAll()
+            if (res.code === '200') {
+              const states = res.data.map((item) => {
+                return { id: item.id, name: item.path + ' - ' + item.method }
+              })
+              const initials = res.data.map((item) => {
+                return item.path + ' - ' + item.method
+              })
+              states.forEach((right, index) => {
+                this.dataArr.push({
+                  label: right.name,
+                  key: right.id,
+                  initial: initials[index]
+                })
+              })
+            } else {
+              this.$notify({
+                type: 'error',
+                text: 'Error occurred!'
+              })
+              this.isVisible = false
+            }
+          } catch (e) {
+            this.$notify({
+              type: 'error',
+              text: 'Error occurred!'
             })
-          })
+            this.isVisible = false
+          }
         }
       } else if (this.right === 2) {
         this.isSelected = false
         this.isCopied = true
-        const res = await getAllAccount()
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+        const data = {
+          method: 'GET',
+          path: 'list_account'
+        }
+        const resPermission = checkPermission(data)
+        if (!resPermission.data.success) {
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred! - Access Denied'
+          })
           this.isVisible = false
         } else {
-          this.opsAccount = res.data.map((item) => {
-            return { value: item.id, text: item.username }
-          })
+          try {
+            const res = await getAccounts()
+            if (res.code === '200') {
+              this.opsAccount = res.data.map((item) => {
+                return { value: item.id, text: item.username }
+              })
+            } else {
+              this.$notify({
+                type: 'error',
+                text: 'Error occurred!'
+              })
+              this.isVisible = false
+            }
+          } catch (e) {
+            this.$notify({
+              type: 'error',
+              text: 'Error occurred!'
+            })
+            this.isVisible = false
+          }
         }
       } else {
         this.isSelected = false
@@ -315,20 +377,17 @@ export default {
             }
           }
           const res = await createAccount(data)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isLoadingCreate = false
-            this.isVisible = false
+          this.$emit('onAdded')
+          if (res.code === '201') {
+            this.$notify({
+              type: 'success',
+              text: 'Create account succeeded'
+            })
           } else {
-            this.$emit('onAdded')
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Create account succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Create account failed' })
-            }
+            this.$notify({ type: 'error', text: 'Create account failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Create account failed' })
         } finally {
           this.isLoadingCreate = false
           this.isVisible = false
@@ -373,20 +432,20 @@ export default {
 }
 
 .el-transfer-panel {
-    border: 1px solid #EBEEF5;
-    border-radius: 4px;
-    overflow: hidden;
-    background: #FFF;
-    display: inline-block;
-    width: 245px;
-    max-height: 100%;
-    box-sizing: border-box;
-    position: relative;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  display: inline-block;
+  width: 245px;
+  max-height: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .el-transfer__buttons {
-    display: inline-block;
-    vertical-align: middle;
-    padding: 0 15px;
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 15px;
 }
 </style>

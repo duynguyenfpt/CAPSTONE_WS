@@ -35,6 +35,7 @@
 
 <script>
 import { getTableDetail, getSchemaByTableId } from '@/service/table.service'
+import { checkPermission } from '~/service/right'
 
 import moment from 'moment'
 
@@ -110,17 +111,33 @@ export default {
     loading: false,
     isDeny: false
   }),
-  created () {
-    this.getDetail()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      this.getDetail()
+    }
   },
   methods: {
+    async checkPermission () {
+      const dataGet = {
+        method: 'GET',
+        path: 'table_infor'
+      }
+      const resGet = await checkPermission(dataGet)
+      const dataGetSchema = {
+        method: 'GET',
+        path: 'current_table_schema'
+      }
+      const resSchema = await checkPermission(dataGetSchema)
+      if (!resGet.data.success || !resSchema.data.success) {
+        this.isDeny = true
+      }
+    },
     async getDetail () {
       try {
         this.loading = true
         const res = await getTableDetail(this.id)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.tableList = res.data
           if (this.tableList.databaseInfo.databaseType === 'mysql') {
             this.tableList.databaseInfo.databaseType = 'MySql'
@@ -132,9 +149,7 @@ export default {
             this.tableList.databaseInfo.databaseType = 'Oracle'
           }
           const resSchema = await getSchemaByTableId(this.id, this.pagination.page, this.pagination.limit)
-          if (resSchema.statusCode === '403') {
-            this.isDeny = true
-          } else {
+          if (resSchema.code === '200') {
             this.litSchema = resSchema.data
             this.pagination.total = resSchema.metaData.totalItem
             this.table = res.data
@@ -152,7 +167,7 @@ export default {
           }
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

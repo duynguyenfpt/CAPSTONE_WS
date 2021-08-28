@@ -43,7 +43,12 @@
         </b-col>
         <b-col class="text-right">
           <label></label>
-          <b-btn @click="onSearchLog()" variant="primary" size="sm" style="margin-top: 32px; width: 75px">
+          <b-btn
+            @click="onSearchLog()"
+            variant="primary"
+            size="sm"
+            style="margin-top: 32px; width: 75px"
+          >
             Fillter
           </b-btn>
         </b-col>
@@ -80,13 +85,14 @@
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
 <script>
 import { getAllLog, searchLog } from '@/service/log'
 import moment from 'moment'
+import { checkPermission } from '~/service/right'
 
 const TableFields = [
   {
@@ -136,13 +142,26 @@ export default {
     isDeny: false
   }),
 
-  created () {
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getList()
+    }
   },
 
   methods: {
     dateDisabled () {
       this.min = this.fromDate
+    },
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'action_log'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
     },
     async getList () {
       this.loading = true
@@ -151,17 +170,17 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.logs = res.data
           this.logs.forEach((e) => {
             e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -182,17 +201,17 @@ export default {
           this.keyFrom,
           this.keyTo
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.logs = res.data
           this.logs.forEach((e) => {
             e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

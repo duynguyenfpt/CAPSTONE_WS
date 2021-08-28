@@ -125,7 +125,7 @@ export default {
             this.$notify({ type: 'error', text: 'Change password failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Change password failed' })
         } finally {
           this.isLoading = false
         }

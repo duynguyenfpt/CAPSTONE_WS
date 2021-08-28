@@ -8,9 +8,7 @@
             <div class="login-form">
               <p class="msg-error-login" v-if="msg">{{ msg }}</p>
               <div class="form-group">
-                <label for="exampleInputEmail1"
-                  >Username</label
-                >
+                <label for="exampleInputEmail1">Username</label>
                 <input
                   type="text"
                   class="form-control"
@@ -20,9 +18,7 @@
                 <span class="msg-error">{{ error_mgs.username }}</span>
               </div>
               <div class="form-group">
-                <label for="exampleInputPassword1"
-                  >Password</label
-                >
+                <label for="exampleInputPassword1">Password</label>
                 <input
                   type="password"
                   class="form-control"
@@ -34,7 +30,11 @@
 
               <div>
                 <b-link to="forgot">Forgot password?</b-link>
-                <button class="btn btn-login float-right" @click="onLogin" :disabled="isLoading">
+                <button
+                  class="btn btn-login float-right"
+                  @click="onLogin"
+                  :disabled="isLoading"
+                >
                   <b-spinner
                     v-if="isLoading"
                     variant="primary"
@@ -73,8 +73,7 @@
                     src="https://static.pexels.com/photos/33972/pexels-photo.jpg"
                     alt="First slide"
                   />
-                  <div class="carousel-caption d-none d-md-block">
-                  </div>
+                  <div class="carousel-caption d-none d-md-block"></div>
                 </div>
                 <div class="carousel-item">
                   <img
@@ -82,8 +81,7 @@
                     src="https://images.pexels.com/photos/7097/people-coffee-tea-meeting.jpg"
                     alt="First slide"
                   />
-                  <div class="carousel-caption d-none d-md-block">
-                  </div>
+                  <div class="carousel-caption d-none d-md-block"></div>
                 </div>
               </div>
             </div>
@@ -95,7 +93,6 @@
 </template>
 
 <script>
-
 export default {
   layout: 'auth',
   data: () => ({

@@ -1,6 +1,6 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Confirm" hide-footer>
+  <div>
+    <b-modal v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
           <p>Do you want to reset password for this account?</p>
@@ -9,18 +9,21 @@
       <b-row class="pt-3">
         <b-col class="text-right">
           <b-button size="sm" variant="danger" @click="onReset">
-            <b-spinner v-if="isLoading" variant="danger" small></b-spinner>Reset</b-button>
+            <b-spinner v-if="isLoading" variant="danger" small></b-spinner
+            >Reset</b-button
+          >
           <b-button size="sm" variant="light" @click="onClose">
             Cancel
           </b-button>
         </b-col>
       </b-row>
-  </b-modal>
-</div>
+    </b-modal>
+  </div>
 </template>
 
 <script>
 import { resetAccount } from '@/service/account'
+import { checkPermission } from '@/service/right'
 export default {
   data: () => ({
     isVisible: false,
@@ -29,8 +32,22 @@ export default {
   }),
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
+      const data = {
+        method: 'POST',
+        path: 'reset_password'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+        this.isLoading = false
+        this.isVisible = false
+      } else {
+        this.idItem = id
+        this.isVisible = true
+      }
     },
     onClose () {
       this.isVisible = false
@@ -39,20 +56,14 @@ export default {
       try {
         this.isLoading = this.idItem
         const res = await resetAccount(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
+        this.$emit('onReseted')
+        if (res.code === '200') {
+          this.$notify({ type: 'success', text: 'Reset password succeeded' })
         } else {
-          this.$emit('onReseted')
-          if (res.code === '200') {
-            this.$notify({ type: 'success', text: 'Reset password succeeded' })
-          } else {
-            this.$notify({ type: 'error', text: 'Reset password  failed' })
-            this.$router.go()
-          }
+          this.$notify({ type: 'error', text: 'Reset password failed' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Reset password failed' })
       } finally {
         this.isLoading = false
         this.isVisible = false

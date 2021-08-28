@@ -107,6 +107,7 @@
 
 <script>
 import { getListServer, searchServer } from '@/service/server'
+import { checkPermission } from '@/service/right'
 import moment from 'moment'
 
 const serverFields = [
@@ -156,11 +157,24 @@ export default {
     isDeny: false
   }),
 
-  created () {
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getList()
+    }
   },
 
   methods: {
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'server_infor'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getList () {
       this.loading = true
       try {
@@ -168,18 +182,18 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.servers = res.data
           this.servers.forEach((e) => {
             e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
             e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -215,18 +229,18 @@ export default {
           this.pagination.limit,
           this.keySearch
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.servers = res.data
           this.servers.forEach((e) => {
             e.createdDate = e.createdDate ? moment(e.createdDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
             e.modifiedDate = e.modifiedDate ? moment(e.modifiedDate).format('YYYY-MM-DD') : 'YYYY-MM-DD'
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

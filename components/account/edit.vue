@@ -1,42 +1,54 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Edit Account" hide-footer>
-    <div v-if="isLoading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col>
-          <label class="form-label">Username</label>
-          <b-input size="sm" v-model="username" disabled/>
-          <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-          <label class="form-label">Email</label>
-          <b-input size="sm" v-model="email" />
-          <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
-          <label class="form-label">Role</label>
-          <b-form-select v-model="role" :options="roles" size="sm" @change="chooseRole"></b-form-select>
-          <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
-          <label class="form-label">Phone</label>
-          <b-input size="sm" v-model="phone" />
-          <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
-        </b-col>
-      </b-row>
-      <b-row class="pt-3">
-        <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onUpdateAcc">
-            <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
-          <b-button size="sm" variant="light" @click="onClose">
-            Cancel
-          </b-button>
-        </b-col>
-      </b-row>
-    </div>
-  </b-modal>
-</div>
+  <div>
+    <b-modal v-model="isVisible" title="Edit Account" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col>
+            <label class="form-label">Username</label>
+            <b-input size="sm" v-model="username" disabled />
+            <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
+            <label class="form-label">Email</label>
+            <b-input size="sm" v-model="email" />
+            <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
+            <label class="form-label">Role</label>
+            <b-form-select
+              v-model="role"
+              :options="roles"
+              size="sm"
+              @change="chooseRole"
+            ></b-form-select>
+            <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
+            <label class="form-label">Phone</label>
+            <b-input size="sm" v-model="phone" />
+            <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="onUpdateAcc">
+              <b-spinner
+                v-if="isLoadingUpdate"
+                variant="primary"
+                small
+              ></b-spinner
+              >Update</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
+  </div>
 </template>
 
 <script>
 import { getAccountDetail, updateAccount } from '@/service/account'
+import { checkPermission } from '@/service/right'
 
 export default {
   data: () => ({
@@ -77,23 +89,42 @@ export default {
   },
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      const res = await getAccountDetail(this.idItem)
-      if (res.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      const dataEdit = {
+        method: 'PUT',
+        path: 'account'
+      }
+      const resEdit = await checkPermission(dataEdit)
+      const dataDetail = {
+        method: 'GET',
+        path: 'account'
+      }
+      const resDetail = await checkPermission(dataDetail)
+      if (!resEdit.data.success || !resDetail.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+        this.isLoading = false
         this.isVisible = false
       } else {
-        this.username = res.data.username
-        this.email = res.data.email
-        this.phone = res.data.phone
-        this.role = res.data.role
-        this.isLoading = false
-        this.msg.role = null
-        this.msg.username = null
-        this.msg.phone = null
-        this.msg.email = null
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        const res = await getAccountDetail(this.idItem)
+        if (res.code === '200') {
+          this.username = res.data.username
+          this.email = res.data.email
+          this.phone = res.data.phone
+          this.role = res.data.role
+          this.isLoading = false
+          this.msg.role = null
+          this.msg.username = null
+          this.msg.phone = null
+          this.msg.email = null
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+          this.isVisible = false
+        }
       }
     },
     chooseRole () {
@@ -111,7 +142,11 @@ export default {
       }
     },
     validateEmail (value) {
-      if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) {
+      if (
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+          value
+        )
+      ) {
         this.msg.email = ''
       } else {
         this.msg.email = 'Invalid email address'
@@ -139,7 +174,12 @@ export default {
       } else {
         this.msg.role = ''
       }
-      if (this.msg.username === '' && this.msg.email === '' && this.msg.phone === '' && this.msg.role === '') {
+      if (
+        this.msg.username === '' &&
+        this.msg.email === '' &&
+        this.msg.phone === '' &&
+        this.msg.role === ''
+      ) {
         try {
           this.isLoadingUpdate = true
           const data = {
@@ -149,19 +189,14 @@ export default {
             phone: this.phone
           }
           const res = await updateAccount(this.idItem, data)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onUpdated', data)
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Update account succeeded' })
           } else {
-            this.$emit('onUpdated', data)
-            if (res.code) {
-              this.$notify({ type: 'success', text: 'Update account succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Update account failed' })
-            }
+            this.$notify({ type: 'error', text: 'Update account failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Update account failed' })
         } finally {
           this.isLoadingUpdate = false
           this.isVisible = false

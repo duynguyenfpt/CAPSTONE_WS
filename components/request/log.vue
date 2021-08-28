@@ -60,6 +60,7 @@
 <script>
 import { getLogByRequest, createLog } from '@/service/request'
 import { format } from 'date-fns'
+import { checkPermission } from '~/service/right'
 export default {
   data: () => ({
     notes: [],
@@ -82,29 +83,40 @@ export default {
       }
     },
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      this.note = null
-      this.msg = null
-      try {
-        const res = await getLogByRequest(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
-        } else {
-          this.notes = res.data
-          if (res.data.length > 6) {
-            this.shortNotes = res.data.splice(0, 6)
-            this.isReadMore = true
-          } else {
-            this.shortNotes = res.data
+      const dataGet = {
+        method: 'GET',
+        path: 'note'
+      }
+      const dataPost = {
+        method: 'POST',
+        path: 'note'
+      }
+      const resGet = await checkPermission(dataGet)
+      const resPost = await checkPermission(dataPost)
+      if (!resGet.data.success || !resPost.data.success) {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      } else {
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        this.note = null
+        this.msg = null
+        try {
+          const res = await getLogByRequest(this.idItem)
+          if (res.code === '200') {
+            this.notes = res.data
+            if (res.data.length > 6) {
+              this.shortNotes = res.data.splice(0, 6)
+              this.isReadMore = true
+            } else {
+              this.shortNotes = res.data
+            }
           }
+        } catch (e) {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+        } finally {
+          this.isLoading = false
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.isLoading = false
       }
     },
     readMore () {
@@ -124,14 +136,12 @@ export default {
             content: this.note
           }
           const res = await createLog(data)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
-          } else {
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Add note succeeded' })
             await this.show(this.idItem)
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Add note failed' })
         } finally {
           this.isLoadingCreate = false
         }

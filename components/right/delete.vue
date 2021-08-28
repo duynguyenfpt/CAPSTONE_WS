@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { deleteRight } from '@/service/right'
+import { checkPermission, deleteRight } from '@/service/right'
 export default {
   data: () => ({
     isVisible: false,
@@ -29,8 +29,20 @@ export default {
   }),
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
+      const data = {
+        method: 'DELETE',
+        path: 'right'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+      } else {
+        this.idItem = id
+        this.isVisible = true
+      }
     },
     onClose () {
       this.isVisible = false
@@ -39,19 +51,14 @@ export default {
       try {
         this.isLoading = true
         const res = await deleteRight(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
+        this.$emit('onDeleted')
+        if (res.code === '200') {
+          this.$notify({ type: 'success', text: 'Delete right succeeded' })
         } else {
-          this.$emit('onDeleted')
-          if (res.code === '200') {
-            this.$notify({ type: 'success', text: 'Delete right succeeded' })
-          } else {
-            this.$notify({ type: 'error', text: 'Delete right failed' })
-          }
+          this.$notify({ type: 'error', text: 'Delete right failed' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Delete right failed' })
       } finally {
         this.isLoading = false
         this.isVisible = false

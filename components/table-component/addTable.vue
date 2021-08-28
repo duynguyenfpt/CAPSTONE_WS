@@ -59,6 +59,7 @@
 <script>
 import { addTable } from '@/service/table.service'
 import { getDatabaseDetail } from '@/service/db'
+import { checkPermission } from '~/service/right'
 
 export default {
   props: {
@@ -103,22 +104,33 @@ export default {
       }
     },
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      const res = await getDatabaseDetail(this.idItem)
-      if (res.statusCode === '403') {
+      const dataDb = {
+        method: 'GET',
+        path: 'database_infor'
+      }
+      const resDb = await checkPermission(dataDb)
+      const dataSer = {
+        method: 'POST',
+        path: 'server_infor'
+      }
+      const resSer = await checkPermission(dataSer)
+      if (!resDb.data.succeess || resSer.data.succeess) {
         this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
       } else {
-        this.dbName = res.data.databaseName
-        this.tableName = null
-        this.defaultKey = null
-        this.msg = {
-          tableName: '',
-          defaultKey: ''
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        const res = await getDatabaseDetail(this.idItem)
+        if (res.code === '200') {
+          this.dbName = res.data.databaseName
+          this.tableName = null
+          this.defaultKey = null
+          this.msg = {
+            tableName: '',
+            defaultKey: ''
+          }
+          this.isLoading = false
         }
-        this.isLoading = false
       }
     },
     onClose () {
@@ -142,19 +154,14 @@ export default {
             defaultKey: this.defaultKey
           }
           const res = await addTable(body)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onAdded')
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Add table succeeded' })
           } else {
-            this.$emit('onAdded')
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Add table succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Add table failed' })
-            }
+            this.$notify({ type: 'error', text: 'Add table failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Add table failed' })
         } finally {
           this.loading = false
           this.isVisible = false

@@ -1,5 +1,6 @@
 <template>
   <div v-show="!isDeny">
+    <h3 class="my-4">Lastest Jobs History</h3>
     <b-table
       small
       responsive
@@ -13,7 +14,11 @@
         {{ countRecord(item.index) }}
       </template>
       <template #cell(status)="row">
-        <b-badge class="w-100" :variant="getLastestStatusVariant(row.item.status)">{{row.item.status}}</b-badge>
+        <b-badge
+          class="w-100"
+          :variant="getLastestStatusVariant(row.item.status)"
+          >{{ row.item.status }}</b-badge
+        >
       </template>
     </b-table>
   </div>
@@ -22,6 +27,7 @@
 <script>
 import { getAllJobLog } from '@/service/job'
 import moment from 'moment'
+import { checkPermission } from '~/service/right'
 
 const TableFields = [
   {
@@ -67,8 +73,11 @@ const TableFields = [
 ]
 
 export default {
-  created () {
-    this.getAllJobLog()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getAllJobLog()
+    }
   },
   data () {
     return {
@@ -103,20 +112,33 @@ export default {
           return 'secondary'
       }
     },
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'job_log'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getAllJobLog () {
       try {
         this.loading = true
-        const res = await getAllJobLog(this.pagination.page, this.pagination.limit)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        const res = await getAllJobLog(
+          this.pagination.page,
+          this.pagination.limit
+        )
+        if (res.code === '200') {
           this.logs = res.data
           this.logs.forEach((e) => {
             e.createdTime = moment(e.createdTime).format('YYYY-MM-DD hh:mm:ss')
           })
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

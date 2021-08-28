@@ -1,36 +1,43 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Update Server" hide-footer>
-    <div v-if="isLoading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col>
-          <slabel class="form-label">Server Host</slabel>
-          <b-input size="sm" v-model="serverHost" />
-          <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
-          <label class="form-label">Server Domain</label>
-          <b-input size="sm" v-model="serverDomain" />
-          <p class="msg-error" v-if="msg.domain">{{ msg.domain }}</p>
-        </b-col>
-      </b-row>
-      <b-row class="pt-3">
-        <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onUpdateServer">
-            <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
-          <b-button size="sm" variant="light" @click="onClose">
-            Cancel
-          </b-button>
-        </b-col>
-      </b-row>
-    </div>
-  </b-modal>
+  <div>
+    <b-modal v-model="isVisible" title="Update Server" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col>
+            <slabel class="form-label">Server Host</slabel>
+            <b-input size="sm" v-model="serverHost" />
+            <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
+            <label class="form-label">Server Domain</label>
+            <b-input size="sm" v-model="serverDomain" />
+            <p class="msg-error" v-if="msg.domain">{{ msg.domain }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="onUpdateServer">
+              <b-spinner
+                v-if="isLoadingUpdate"
+                variant="primary"
+                small
+              ></b-spinner
+              >Update</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import { getServer, updateServer } from '@/service/server'
+import { checkPermission } from '~/service/right'
 export default {
   data: () => ({
     serverHost: null,
@@ -63,27 +70,50 @@ export default {
       }
     },
     validateHost (value) {
-      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
+      if (
+        /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+          value
+        )
+      ) {
         this.msg.host = ''
       } else {
         this.msg.host = 'Invalid server domain'
       }
     },
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      const res = await getServer(this.idItem)
-      if (res.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
-        this.isLoading = false
+      const dataGet = {
+        method: 'GET',
+        path: 'server_infor'
+      }
+      const dataPut = {
+        method: 'PUT',
+        path: 'server_infor'
+      }
+      const resGet = checkPermission(dataGet)
+      const resPut = checkPermission(dataPut)
+      if (!resGet.data.success || !resPut.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
       } else {
-        this.serverHost = res.data.serverHost
-        this.serverDomain = res.data.serverDomain
-        this.isLoading = false
-        this.msg.domain = null
-        this.msg.host = null
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        const res = await getServer(this.idItem)
+        if (res.code === '200') {
+          this.serverHost = res.data.serverHost
+          this.serverDomain = res.data.serverDomain
+          this.isLoading = false
+          this.msg.domain = null
+          this.msg.host = null
+        } else {
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred!'
+          })
+          this.isVisible = false
+        }
       }
     },
     onClose () {
@@ -98,22 +128,19 @@ export default {
             serverDomain: this.serverDomain
           }
           const data = await updateServer(this.idItem, config)
-          if (data.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+          this.$emit('onUpdated', data)
+          if (data.code === '200') {
             this.isLoadingUpdate = false
             this.isVisible = false
+            this.$notify({
+              type: 'success',
+              text: 'Update server succeeded'
+            })
           } else {
-            this.isLoadingUpdate = false
-            this.isVisible = false
-            this.$emit('onUpdated', data)
-            if (data.code === '200') {
-              this.$notify({ type: 'success', text: 'Update server succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Update server failed' })
-            }
+            this.$notify({ type: 'error', text: 'Update server failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Update server failed' })
         } finally {
           this.isLoadingUpdate = false
           this.isVisible = false

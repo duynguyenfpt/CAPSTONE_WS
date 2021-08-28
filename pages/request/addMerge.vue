@@ -169,7 +169,7 @@
           v-show="step == 1"
           class="px-3"
         >
-        <i class="fa fa-arrow-left"/>
+          <i class="fa fa-arrow-left" />
           Back
         </b-btn>
         <b-btn
@@ -180,7 +180,7 @@
           class="btn-add-request"
         >
           Continue
-          <i class="fa fa-arrow-right"/>
+          <i class="fa fa-arrow-right" />
         </b-btn>
         <b-btn
           variant="success"
@@ -190,7 +190,7 @@
           class="btn-add-request"
         >
           <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
-          <i class="fa fa-folder-plus"/>
+          <i class="fa fa-folder-plus" />
           Create
         </b-btn>
       </b-col>
@@ -206,6 +206,7 @@ import { getAllDbType } from '@/service/db'
 import { getColumnByTable } from '@/service/table.service'
 import { createMerge } from '@/service/merge'
 import VSelect from 'vue-select'
+import { checkPermission } from '~/service/right'
 
 export default {
   components: { VSelect },
@@ -237,7 +238,10 @@ export default {
     isLoading: false
   }),
   async created () {
-    await this.getAllDB()
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getAllDB()
+    }
   },
   watch: {
     mergeTableName (value) {
@@ -246,6 +250,26 @@ export default {
     }
   },
   methods: {
+    async checkPermission () {
+      const data = {
+        method: 'POST',
+        path: 'merge_request'
+      }
+      const res = await checkPermission(data)
+      const dataDb = {
+        method: 'GET',
+        path: 'database_infor'
+      }
+      const resDb = await checkPermission(dataDb)
+      const dataCol = {
+        method: 'GET',
+        path: 'column'
+      }
+      const resCol = await checkPermission(dataCol)
+      if (!res.data.success || !resDb.data.success || resCol.data.success) {
+        this.isDeny = true
+      }
+    },
     validateTableName (value) {
       if (/^[a-zA-Z_][\w-.]{0,127}$/.test(value)) {
         this.msg.tableName = ''
@@ -255,14 +279,14 @@ export default {
     },
     async getAllDB () {
       const dbs = await getAllDbType()
-      if (dbs.statusCode === '403') {
-        this.isDeny = true
-      } else {
+      if (dbs.code === '200') {
         this.dbs = dbs.data
         this.dbs.forEach((db) => {
           this.tableOf[db.alias] = db.tables
           db.tables.forEach((table) => this.tableMap.set(table.id, table))
         })
+      } else {
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       }
     },
     addTable () {
@@ -303,9 +327,7 @@ export default {
         const forLoop = async (_) => {
           for (let index = 0; index < this.tables.length; index++) {
             const colData = await getColumnByTable(this.tables[index].table_id)
-            if (colData.statusCode === '403') {
-              this.isDeny = true
-            } else {
+            if (colData.code === '200') {
               const colItem = []
               colData.data.forEach((item) => {
                 colItem.push({ value: item, text: item })
@@ -372,25 +394,24 @@ export default {
       try {
         this.isLoadingCreate = true
         const res = await createMerge(dataStr)
-        if (res.statusCode === '403') {
-          this.isDeny = true
+        this.isLoadingCreate = false
+        if (res.code === '201') {
+          this.$notify({
+            type: 'success',
+            text: 'Create merge request succeeded'
+          })
+          this.$router.push({ path: '/request' })
         } else {
-          this.isLoadingCreate = false
-          if (res.code === '201') {
-            this.$notify({
-              type: 'success',
-              text: 'Create merge request succeeded'
-            })
-            this.$router.push({ path: '/request' })
-          } else {
-            this.$notify({
-              type: 'error',
-              text: 'Create merge request failed'
-            })
-          }
+          this.$notify({
+            type: 'error',
+            text: 'Create merge request failed'
+          })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({
+          type: 'error',
+          text: 'Create merge request failed'
+        })
       } finally {
         this.isLoadingCreate = false
       }

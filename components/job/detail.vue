@@ -1,155 +1,171 @@
 <template>
-<div v-if="!isDeny">
-  <div v-if="detail">
-    <b-row>
-      <b-col cols="6">
-        <h4>Request Detail</h4>
-      </b-col>
-    </b-row>
-    <b-table small :fields="requestFields" :items="[requestDetail]">
-      <template #cell(status)="row">
-          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{ getStatus(row.item.status) }}</b-badge>
-        </template>
-    </b-table>
-    <div v-if="!isETL">
-    <b-row>
-      <b-col cols="6">
-        <h4>Job Detail</h4>
-      </b-col>
-      <b-col class="text-right">
-        <span>Lastest Status</span>
-        <b-badge
-          :variant="getLastestStatusVariant(status)"
-          class="text-center badge-status"
-          v-model="status"
-          >{{ status }}</b-badge
-        >
-      </b-col>
-    </b-row>
-    <b-table small responsive hover striped :fields="jobFields" :items="detail">
-    </b-table>
-    <b-row>
-      <b-col cols="6">
-        <div class="d-flex align-items-center">
-          <h4>Job Log</h4>
-          <b-progress
-            class="min-width-300"
-            :value="progress"
-            v-model="progress"
-            :max="100"
-            show-progress
-            animated
-          ></b-progress>
-        </div>
-      </b-col>
-      <b-col class="text-right">
-        <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
-          <i class="fa fa-sync pr-1" />
-          Refresh
-        </b-btn>
-      </b-col>
-    </b-row>
-    <section name="action">
+  <div v-if="!isDeny">
+    <div v-if="detail">
       <b-row>
-        <b-col cols="6"></b-col>
-        <b-col cols="6" class="text-right">
-          <b-input-group>
-            <b-input
-              size="sm"
-              placeholder="Search"
-              v-model="textSearch"
-              @keyup.enter="searchDB(textSearch)"
-            />
-            <b-input-group-append>
-              <b-btn size="sm" variant="primary" @click="searchDB(textSearch)">
-                <i class="fas fa-search" />
-              </b-btn>
-            </b-input-group-append>
-          </b-input-group>
+        <b-col cols="6">
+          <h4>Request Detail</h4>
         </b-col>
       </b-row>
-    </section>
-    <section name="view" class="pt-3">
-      <b-table
-        small
-        responsive
-        hover
-        striped
-        :items="listLogDetail"
-        :fields="logFields"
-        :busy="loading"
-      >
-        <template #cell(no)="item">
-          {{ countRecord(item.index) }}
-        </template>
+      <b-table small :fields="requestFields" :items="[requestDetail]">
         <template #cell(status)="row">
-          <b-badge class="w-100" :variant="getLastestStatusVariant(row.item.status)">{{
-            row.item.status
+          <b-badge :variant="getLastestStatusVariant(row.item.status)">{{
+            getStatus(row.item.status)
           }}</b-badge>
         </template>
       </b-table>
-      <b-pagination
-        :per-page="pagination.limit"
-        v-model="pagination.page"
-        :total-rows="pagination.total"
-        align="right"
-        size="sm"
-        @input="getDetail"
-      />
-    </section>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col>
-          <h4>Query</h4>
-          <p style="margin-left: 10px;">{{ query }}</p>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col v-if="isExecuted">
-          <h4>Sample Data</h4>
-          <b-table
+      <div v-if="!isETL">
+        <b-row>
+          <b-col cols="6">
+            <h4>Job Detail</h4>
+          </b-col>
+          <b-col class="text-right">
+            <span>Lastest Status</span>
+            <b-badge
+              :variant="getLastestStatusVariant(status)"
+              class="text-center badge-status"
+              v-model="status"
+              >{{ status }}</b-badge
+            >
+          </b-col>
+        </b-row>
+        <b-table
           small
           responsive
-          :items="rows"
-          :fields="resultFields">
-          <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>
-            <strong>Loading...</strong>
-          </div>
-          </template>
+          hover
+          striped
+          :fields="jobFields"
+          :items="detail"
+        >
+        </b-table>
+        <b-row>
+          <b-col cols="6">
+            <div class="d-flex align-items-center">
+              <h4>Job Log</h4>
+              <b-progress
+                class="min-width-300"
+                :value="progress"
+                v-model="progress"
+                :max="100"
+                show-progress
+                animated
+              ></b-progress>
+            </div>
+          </b-col>
+          <b-col class="text-right">
+            <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
+              <i class="fa fa-sync pr-1" />
+              Refresh
+            </b-btn>
+          </b-col>
+        </b-row>
+        <section name="action">
+          <b-row>
+            <b-col cols="6"></b-col>
+            <b-col cols="6" class="text-right">
+              <b-input-group>
+                <b-input
+                  size="sm"
+                  placeholder="Search"
+                  v-model="textSearch"
+                  @keyup.enter="searchDB(textSearch)"
+                />
+                <b-input-group-append>
+                  <b-btn
+                    size="sm"
+                    variant="primary"
+                    @click="searchDB(textSearch)"
+                  >
+                    <i class="fas fa-search" />
+                  </b-btn>
+                </b-input-group-append>
+              </b-input-group>
+            </b-col>
+          </b-row>
+        </section>
+        <section name="view" class="pt-3">
+          <b-table
+            small
+            responsive
+            hover
+            striped
+            :items="listLogDetail"
+            :fields="logFields"
+            :busy="loading"
+          >
+            <template #cell(no)="item">
+              {{ countRecord(item.index) }}
+            </template>
+            <template #cell(status)="row">
+              <b-badge
+                class="w-100"
+                :variant="getLastestStatusVariant(row.item.status)"
+                >{{ row.item.status }}</b-badge
+              >
+            </template>
           </b-table>
-        </b-col>
-        <b-col v-else>
-          <div class="text-center" v-if="isFailed">
-            <h5 class="msg-fail">{{ msgErr }}</h5>
-          </div>
-          <div class="text-center" v-else>
-            <b-spinner variant="primary" label="Text Centered"></b-spinner>
-            <h5>{{ msg }}</h5>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row class="pt-3">
-        <b-col cols="6">
-          <b-button size="sm" variant="success" @click="onDownload" v-if="isExecuted">
-            <b-spinner variant="success" v-if="isDownload" small></b-spinner>
-            Download
-          </b-button>
-        </b-col>
-      </b-row>
+          <b-pagination
+            :per-page="pagination.limit"
+            v-model="pagination.page"
+            :total-rows="pagination.total"
+            align="right"
+            size="sm"
+            @input="getDetail"
+          />
+        </section>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col>
+            <h4>Query</h4>
+            <p style="margin-left: 10px;">{{ query }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col v-if="isExecuted">
+            <h4>Sample Data</h4>
+            <b-table small responsive :items="rows" :fields="resultFields">
+              <template #table-busy>
+                <div class="text-center text-danger my-2">
+                  <b-spinner class="align-middle"></b-spinner>
+                  <strong>Loading...</strong>
+                </div>
+              </template>
+            </b-table>
+          </b-col>
+          <b-col v-else>
+            <div class="text-center" v-if="isFailed">
+              <h5 class="msg-fail">{{ msgErr }}</h5>
+            </div>
+            <div class="text-center" v-else>
+              <b-spinner variant="primary" label="Text Centered"></b-spinner>
+              <h5>{{ msg }}</h5>
+            </div>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col cols="6">
+            <b-button
+              size="sm"
+              variant="success"
+              @click="onDownload"
+              v-if="isExecuted"
+            >
+              <b-spinner variant="success" v-if="isDownload" small></b-spinner>
+              Download
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </div>
+    <div v-else>
+      <content-placeholders class="article-card-block">
+        <content-placeholders-text :lines="3" />
+        <content-placeholders-text :lines="18" />
+      </content-placeholders>
     </div>
   </div>
   <div v-else>
-    <content-placeholders class="article-card-block">
-      <content-placeholders-text :lines="3" />
-      <content-placeholders-text :lines="18" />
-    </content-placeholders>
-  </div>
-  </div>
-  <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
@@ -159,6 +175,7 @@ import { getDetailRequest } from '@/service/request'
 import { getResultDetail, downloadData } from '@/service/etl'
 import moment from 'moment'
 import { saveAs } from 'file-saver'
+import { checkPermission } from '~/service/right'
 
 const jobFields = [
   {
@@ -256,8 +273,11 @@ export default {
     id: {}
   },
 
-  created () {
-    this.getDetail()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getDetail()
+    }
   },
 
   data () {
@@ -323,46 +343,62 @@ export default {
         return 'Approved'
       } else if (status === '2') {
         return 'Rejected'
-      } return null
+      }
+      return null
+    },
+    async checkPermission () {
+      const dataJob = {
+        method: 'GET',
+        path: 'job_detail'
+      }
+      const dataReq = {
+        method: 'GET',
+        path: 'request'
+      }
+      const resJob = await checkPermission(dataJob)
+      const resReq = await checkPermission(dataReq)
+      if (!resJob.data.success || !resReq.data.success) {
+        this.isDeny = true
+      }
     },
     async getDetail () {
       try {
         this.loading = true
         const res = await getJobDetail(this.id)
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.detail = res.data
-          this.detail.forEach(item => {
+          this.detail.forEach((item) => {
             item.server = item.serverDomain + ' - ' + item.serverHost
             item.createdDate = moment(item.createdDate).format('YYYY-MM-DD')
           })
           const requestId = this.detail[0].requestId
           const resRequest = await getDetailRequest(requestId)
-          if (resRequest.statusCode === '403') {
-            this.isDeny = true
-          } else {
+          if (resRequest.code === '200') {
             this.requestDetail = resRequest.data
-            resRequest.data.createdDate = moment(this.requestDetail.createdDate).format(
-              'YYYY-MM-DD'
-            )
-            resRequest.data.modifiedDate = moment(this.requestDetail.modifiedDate).format(
-              'YYYY-MM-DD'
-            )
+            resRequest.data.createdDate = moment(
+              this.requestDetail.createdDate
+            ).format('YYYY-MM-DD')
+            resRequest.data.modifiedDate = moment(
+              this.requestDetail.modifiedDate
+            ).format('YYYY-MM-DD')
             if (this.requestDetail.requestType === 'ETLRequest') {
-              this.isETL = true
-              this.query = this.detail[0].query
-              this.idItem = requestId
-              this.isVisibleResult = true
-              this.isLoading = true
-              this.msg = ''
-              this.rows = []
-              try {
-                const res = await getResultDetail(this.idItem)
-                if (res.statusCode === '403') {
-                  this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-                  this.isVisibleResult = false
-                } else {
+              const dataEtl = {
+                method: 'GET',
+                path: 'etl_request'
+              }
+              const resEtl = await checkPermission(dataEtl)
+              if (!resEtl.data.success) {
+                this.isDeny = true
+              } else {
+                this.isETL = true
+                this.query = this.detail[0].query
+                this.idItem = requestId
+                this.isVisibleResult = true
+                this.isLoading = true
+                this.msg = ''
+                this.rows = []
+                try {
+                  const res = await getResultDetail(this.idItem)
                   if (res.code === '200') {
                     if (res.data.status === 'successed') {
                       const totalArray = res.data.content.split('\n')
@@ -373,7 +409,7 @@ export default {
                       totalArray.forEach((element, index) => {
                         if (index === 0) {
                           // eslint-disable-next-line array-callback-return
-                          element.split(',').map(item => {
+                          element.split(',').map((item) => {
                             header.push({
                               key: item
                             })
@@ -408,37 +444,53 @@ export default {
                     this.isExecuted = true
                     this.msg = 'Query is failed'
                   }
+                } catch (e) {
+                  this.isExecuted = true
+                  this.msg = e.message
                 }
-              } catch (e) {
-                this.isExecuted = true
-                this.msg = e.message
               }
             } else {
               this.isETL = false
-              if (this.listLogDetail) {
-                this.listLogDetail.forEach((e) => {
-                  e.createdAt = moment(e.createdAt).format('YYYY-MM-DD hh:mm:ss')
-                })
+              const dataLog = {
+                method: 'GET',
+                path: 'job_log'
               }
-              const resList = await getLogByJob(
-                this.id,
-                this.pagination.page,
-                this.pagination.limit
-              )
-              if (resList.statusCode === '403') {
+              const dataLast = {
+                method: 'GET',
+                path: 'last_job_log'
+              }
+              const resLog = await checkPermission(dataLog)
+              const resLast = await checkPermission(dataLast)
+              if (!resLog.data.success || !resLast.data.success) {
                 this.isDeny = true
               } else {
-                this.pagination.total = resList.metaData.totalItem
-                this.listLogDetail = resList.data
-                const resLast = await getLastJobLog(this.id)
-                if (resLast.statusCode === '403') {
-                  this.isDeny = true
-                } else {
-                  if (resLast.data !== null) {
-                    if (resLast.data.step !== null && resLast.data.numberStep !== null) {
-                      this.progress = (resLast.data.step * 100) / resLast.data.numberStep
+                if (this.listLogDetail) {
+                  this.listLogDetail.forEach((e) => {
+                    e.createdAt = moment(e.createdAt).format(
+                      'YYYY-MM-DD hh:mm:ss'
+                    )
+                  })
+                }
+                const resList = await getLogByJob(
+                  this.id,
+                  this.pagination.page,
+                  this.pagination.limit
+                )
+                if (resList.code === '200') {
+                  this.pagination.total = resList.metaData.totalItem
+                  this.listLogDetail = resList.data
+                  const resLast = await getLastJobLog(this.id)
+                  if (resLast.code === '200') {
+                    if (resLast.data !== null) {
+                      if (
+                        resLast.data.step !== null &&
+                      resLast.data.numberStep !== null
+                      ) {
+                        this.progress =
+                        (resLast.data.step * 100) / resLast.data.numberStep
+                      }
+                      this.status = resLast.data.status
                     }
-                    this.status = resLast.data.status
                   }
                 }
               }
@@ -446,7 +498,7 @@ export default {
           }
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -458,22 +510,26 @@ export default {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1
     },
     async onDownload () {
-      try {
-        this.isDownload = true
-        const res = await downloadData(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisibleResult = false
-        } else {
+      const data = {
+        method: 'GET',
+        path: 'dowload_csv'
+      }
+      const resPermission = await checkPermission(data)
+      if (!resPermission.data.success) {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      } else {
+        try {
+          this.isDownload = true
+          const res = await downloadData(this.idItem)
           const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
           const name = `${new Date().getTime()}.csv`
           saveAs(blob, name)
           this.$notify({ type: 'success', text: 'Download result succeeded' })
+        } catch (e) {
+          this.$notify({ type: 'error', text: 'Download result failed' })
+        } finally {
+          this.isDownload = false
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.isDownload = false
       }
     }
   }

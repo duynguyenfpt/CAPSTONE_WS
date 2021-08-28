@@ -225,7 +225,7 @@
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
@@ -237,7 +237,8 @@ import {
   createRightForAcc,
   deleteRightForAcc,
   getAllRightByAcc,
-  searchRight
+  searchRight,
+  checkPermission
 } from '@/service/right'
 import { getListAccount, searchAccount } from '@/service/account'
 
@@ -334,12 +335,29 @@ export default {
     isDenyAccountRight: false
   }),
 
-  created () {
-    this.getRightList()
-    this.getAccountList()
+  async created () {
+    await this.checkPermissionRight()
+    if (!this.isDenyRight) {
+      await this.getRightList()
+      await this.checkPermissionAccount()
+      if (!this.isDenyAccount) {
+        await this.getAccountList()
+      }
+    }
   },
 
   methods: {
+    async checkPermissionRight () {
+      const data = {
+        method: 'GET',
+        path: 'right'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDenyRight = true
+        this.isDenyAccountRight = true
+      }
+    },
     async getRightList () {
       this.loadingRight = true
       try {
@@ -347,16 +365,26 @@ export default {
           this.paginationRight.page,
           this.paginationRight.limit
         )
-        if (resRight.statusCode === '403') {
-          this.isDenyRight = true
-        } else {
+        if (resRight.code === '200') {
           this.rights = resRight.data
           this.paginationRight.total = resRight.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loadingRight = false
+      }
+    },
+    async checkPermissionAccount () {
+      const data = {
+        method: 'GET',
+        path: 'account'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDenyAccount = true
       }
     },
     async getAccountList () {
@@ -366,9 +394,7 @@ export default {
           this.paginationAccount.page,
           this.paginationAccount.limit
         )
-        if (resAccount.statusCode === '403') {
-          this.isDenyAccount = true
-        } else {
+        if (resAccount.code === '200') {
           this.accounts = resAccount.data
           this.accounts.forEach((e) => {
             if (e.role === 'admin') {
@@ -382,9 +408,11 @@ export default {
             }
           })
           this.paginationAccount.total = resAccount.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loadingAccount = false
       }
@@ -417,54 +445,69 @@ export default {
     },
     async showRightByAccount (record) {
       this.loadingAccountRight = true
-      try {
-        this.rightUpdate = []
-        if (record.id) {
-          this.account = record.id
+      if (!this.isDenyAccountRight) {
+        try {
+          this.rightUpdate = []
+          if (record.id) {
+            this.account = record.id
+          }
+          const res = await getRightByAcc(
+            this.account,
+            this.paginationAccountRight.page,
+            this.paginationAccountRight.limit
+          )
+          if (res.code === '200') {
+            this.isDenyAccountRight = false
+            this.accountRight = res.data
+            const resAll = await getAllRightByAcc(this.account)
+            // eslint-disable-next-line array-callback-return
+            resAll.data.map((item) => {
+              this.rightUpdate.push(item.id)
+            })
+            this.oldRight = this.rightUpdate
+            this.paginationAccountRight.total = res.metaData.totalItem
+            const resRight = await getAll()
+            this.opsRight = resRight.data.map((item) => {
+              return { value: item.id, label: item.path + ' - ' + item.method }
+            })
+            this.isChoseAcc = false
+          } else {
+            this.$notify({ type: 'error', text: 'Error occurred!' })
+          }
+        } catch (e) {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+        } finally {
+          this.loadingAccountRight = false
         }
-        const res = await getRightByAcc(
-          this.account,
-          this.paginationAccountRight.page,
-          this.paginationAccountRight.limit
-        )
-        if (res.statusCode === '403') {
-          this.isDenyAccountRight = true
-        } else {
-          this.isDenyAccountRight = false
-          this.accountRight = res.data
-          const resAll = await getAllRightByAcc(this.account)
-          // eslint-disable-next-line array-callback-return
-          resAll.data.map((item) => {
-            this.rightUpdate.push(item.id)
-          })
-          this.oldRight = this.rightUpdate
-          this.paginationAccountRight.total = res.metaData.totalItem
-          const resRight = await getAll()
-          this.opsRight = resRight.data.map((item) => {
-            return { value: item.id, label: item.path + ' - ' + item.method }
-          })
-          this.isChoseAcc = false
-        }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.loadingAccountRight = false
+      }
+    },
+    async checkPermissionRightAccount () {
+      const dataCreate = {
+        method: 'POST',
+        path: 'account_right'
+      }
+      const resCreate = await checkPermission(dataCreate)
+      const dataDel = {
+        method: 'DELETE',
+        path: 'account_right'
+      }
+      const resDel = await checkPermission(dataDel)
+      if (!resCreate.data.success || !resDel.data.success) {
+        this.isDenyAccountRight = true
       }
     },
     async addRightByAccount () {
-      try {
-        const data = {
-          accountId: this.account,
-          rightIds: this.rightUpdate
-        }
-        const dataDel = {
-          rightIds: this.oldRight
-        }
-        const resDel = await deleteRightForAcc(this.account, dataDel)
-        const res = await createRightForAcc(data)
-        if (resDel.statusCode === '403' || res.statusCode === '403') {
-          this.isDenyAccountRight = true
-        } else {
+      if (!this.isDenyAccountRight) {
+        try {
+          const data = {
+            accountId: this.account,
+            rightIds: this.rightUpdate
+          }
+          const dataDel = {
+            rightIds: this.oldRight
+          }
+          const resDel = await deleteRightForAcc(this.account, dataDel)
+          const res = await createRightForAcc(data)
           if (res.code === '201' && resDel.code === '200') {
             this.$notify({
               type: 'success',
@@ -474,33 +517,33 @@ export default {
             this.$notify({ type: 'error', text: 'Update right failed' })
           }
           this.loadingAccountRight = true
-        }
-        try {
-          const res = await searchRight(
-            this.account,
-            this.paginationAccountRight.page,
-            this.paginationAccountRight.limit
-          )
-          if (res.statusCode === '403') {
-            this.isDenyRight = true
-          } else {
-            this.accountRight = res.data
-            this.paginationAccountRight.total = res.metaData.totalItem
-            const resRight = await getAll()
-            this.opsRight = resRight.data.map((item) => {
-              return { value: item.id, label: item.path + ' - ' + item.method }
-            })
+          try {
+            const res = await searchRight(
+              this.account,
+              this.paginationAccountRight.page,
+              this.paginationAccountRight.limit
+            )
+            if (res.code === '200') {
+              this.accountRight = res.data
+              this.paginationAccountRight.total = res.metaData.totalItem
+              const resRight = await getAll()
+              this.opsRight = resRight.data.map((item) => {
+                return { value: item.id, label: item.path + ' - ' + item.method }
+              })
+            } else {
+              this.$notify({ type: 'error', text: 'Error occurred!' })
+            }
+          } catch (e) {
+            this.$notify({ type: 'error', text: 'Error occurred!' })
+          } finally {
+            this.loadingAccountRight = false
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Update right failed' })
         } finally {
-          this.loadingAccountRight = false
+          this.rightUpdate = null
+          this.isChoseAcc = true
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.rightUpdate = null
-        this.isChoseAcc = true
       }
     },
     async searchRight () {
@@ -511,10 +554,14 @@ export default {
           this.paginationRight.limit,
           this.textRight
         )
-        this.rights = resRight.data
-        this.paginationRight.total = resRight.metaData.totalItem
+        if (resRight.code === '200') {
+          this.rights = resRight.data
+          this.paginationRight.total = resRight.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+        }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loadingRight = false
       }
@@ -532,9 +579,7 @@ export default {
           this.paginationAccount.limit,
           this.textAccount
         )
-        if (resAcc.statusCode === '403') {
-          this.isDenyAccount = true
-        } else {
+        if (resAcc.code === '200') {
           this.accounts = resAcc.data
           this.accounts.forEach((e) => {
             if (e.role === 'admin') {
@@ -548,9 +593,11 @@ export default {
             }
           })
           this.paginationAccount.total = resAcc.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loadingAccount = false
       }

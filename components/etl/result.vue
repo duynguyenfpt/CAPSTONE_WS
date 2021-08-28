@@ -51,6 +51,7 @@
 
 <script>
 import { getResultDetail, downloadData } from '@/service/etl'
+import { saveAs } from 'file-saver'
 export default {
   data: () => ({
     isVisibleResult: false,
@@ -139,17 +140,10 @@ export default {
           this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
           this.isVisibleResult = false
         } else {
-          if (res.code === '200') {
-            this.$notify({ type: 'success', text: 'Download result succeeded' })
-            const fileURL = window.URL.createObjectURL(new Blob([res]))
-            const fileLink = document.createElement('a')
-            fileLink.href = fileURL
-            fileLink.setAttribute('download', 'file.csv')
-            document.body.appendChild(fileLink)
-            fileLink.click()
-          } else {
-            this.$notify({ type: 'error', text: 'Download result failed' })
-          }
+          const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
+          const name = `${new Date().getTime()}.csv`
+          saveAs(blob, name)
+          this.$notify({ type: 'success', text: 'Download result succeeded' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: e.message })

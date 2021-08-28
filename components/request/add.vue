@@ -188,7 +188,9 @@ export default {
         fromDate: null,
         unique: null
       },
-      isDeny: false
+      isDeny: false,
+      tableId: null,
+      tableName: null
     }
   },
   async mounted () {
@@ -237,7 +239,7 @@ export default {
           this.isDeny = true
         } else {
           this.opsTb = res.data.map((item) => {
-            return { value: item.id, text: item.tableName }
+            return { value: item.id + '-' + item.tableName, text: item.tableName }
           })
           this.request.table = null
           this.msg.database = ''
@@ -248,9 +250,11 @@ export default {
       }
     },
     async fillTable () {
-      const id = this.request.table
-      if (id !== null) {
-        const res = await getColumnByTable(id)
+      const table = this.request.table.split('-')
+      this.tableId = table[0]
+      this.tableName = table[1]
+      if (this.tableId !== null) {
+        const res = await getColumnByTable(this.tableId)
         if (res.statusCode === '403') {
           this.isDeny = true
         } else {
@@ -315,13 +319,14 @@ export default {
             }
             const req = {
               requestType: 'SyncTable',
-              tableId: this.request.table,
+              tableId: this.tableId,
               isAll: this.request.isAll,
               fromDate: this.request.fromDate,
               toDate: this.request.toDate,
               timeRequest: time,
               partitionBy: partitions,
-              identityId: identities
+              identityId: identities,
+              description: 'Sync ' + this.tableName
             }
             const res = await createRequestSync(req)
             if (res.statusCode === '403') {

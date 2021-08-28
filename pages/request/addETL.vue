@@ -18,7 +18,7 @@
           History
         </b-button>
       </b-col>
-      <b-sidebar id="sidebar-right" title="Old Result" right shadow>
+      <b-sidebar id="sidebar-right" title="History" right shadow>
         <div class="px-2 py-2">
           <b-list-group>
             <b-list-group-item
@@ -390,13 +390,9 @@ export default {
       try {
         this.isDownload = true
         const res = await downloadData(this.eltID)
-        console.log(res)
         const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
-        console.log('blob')
         const name = `${new Date().getTime()}.csv`
-        console.log(name)
         saveAs(blob, name)
-        console.log('save')
         this.$notify({
           type: 'success',
           text: 'Download result succeeded'

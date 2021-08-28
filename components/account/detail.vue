@@ -57,14 +57,13 @@ export default {
           type: 'error',
           text: 'Error occurred! - Access Denied'
         })
-        this.isVisible = false
       } else {
         this.idItem = id
         this.isVisible = true
         this.isLoading = true
         try {
           const res = await getAccountDetail(this.idItem)
-          if (res.data.code === '200') {
+          if (res.code === '200') {
             this.config = res.data
             if (this.config.role === 'admin') {
               this.config.role = 'Admin'

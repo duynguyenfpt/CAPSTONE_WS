@@ -54,7 +54,7 @@ export default {
         path: 'server_infor'
       }
       const res = await checkPermission(data)
-      if (!res.data.seuccees) {
+      if (!res.data.success) {
         this.$notify({
           type: 'error',
           text: 'Error occurred! - Access Denied'

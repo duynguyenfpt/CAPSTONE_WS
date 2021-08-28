@@ -156,10 +156,14 @@ export default {
         method: 'GET',
         path: 'server_infor'
       }
-      const resDbGet = checkPermission(dataDbGet)
-      const resDbPut = checkPermission(dataDbPut)
-      const resServer = checkPermission(dataServer)
-      if (!resDbGet.data.success || !resDbPut.data.success || !resServer.data.success) {
+      const resDbGet = await checkPermission(dataDbGet)
+      const resDbPut = await checkPermission(dataDbPut)
+      const resServer = await checkPermission(dataServer)
+      if (
+        !resDbGet.data.success ||
+        !resDbPut.data.success ||
+        !resServer.data.success
+      ) {
         this.$notify({
           type: 'error',
           text: 'Error occurred! - Access Denied'

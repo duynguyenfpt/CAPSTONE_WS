@@ -42,8 +42,6 @@ export default {
           type: 'error',
           text: 'Error occurred! - Access Denied'
         })
-        this.isLoading = false
-        this.isVisible = false
       } else {
         this.idItem = id
         this.isVisible = true

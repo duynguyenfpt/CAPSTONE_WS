@@ -19,7 +19,6 @@
             :options="opsDb"
             v-model="db"
             @input="fillData"
-            placeholder="Please select an option"
             size="sm"
           >
             <b-spinner v-if="isLoadingFill" variant="primary" small></b-spinner>
@@ -370,8 +369,9 @@ export default {
     async getAllDb () {
       const dbs = await getAllDbType()
       if (dbs.code === '200') {
-        this.opsDb = dbs.data.map((item) => {
-          return { value: item.id, text: item.databaseName }
+        // eslint-disable-next-line array-callback-return
+        dbs.data.map((item) => {
+          this.opsDb.push({ value: item.id, text: item.databaseName })
         })
       }
     },

@@ -266,7 +266,7 @@ export default {
         path: 'column'
       }
       const resCol = await checkPermission(dataCol)
-      if (!res.data.success || !resDb.data.success || resCol.data.success) {
+      if (!res.data.success || !resDb.data.success || !resCol.data.success) {
         this.isDeny = true
       }
     },

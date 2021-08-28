@@ -9,7 +9,12 @@
       <b-row>
         <b-col cols="4" class="text-left">
           <b-input-group>
-            <b-input size="sm" placeholder="Search" v-model="textSearch" @keyup.enter="onSearchDB()"/>
+            <b-input
+              size="sm"
+              placeholder="Search"
+              v-model="textSearch"
+              @keyup.enter="onSearchDB()"
+            />
             <b-input-group-append>
               <b-btn size="sm" variant="primary" @click="onSearchDB()">
                 <i class="fas fa-search" />
@@ -51,18 +56,10 @@
           >
             <i class="fa fa-eye" />
           </b-btn>
-          <b-btn
-            @click="editDb(item.item.id)"
-            size="sm"
-            variant="info"
-          >
+          <b-btn @click="editDb(item.item.id)" size="sm" variant="info">
             <i class="fa fa-pen" />
           </b-btn>
-          <b-btn
-            size="sm"
-            variant="danger"
-            @click="deleteDb(item.item.id)"
-          >
+          <b-btn size="sm" variant="danger" @click="deleteDb(item.item.id)">
             <i class="fa fa-trash" />
           </b-btn>
         </template>
@@ -83,7 +80,7 @@
       />
     </section>
     <section name="popup">
-      <db-add ref="add" @onAdded="onReload"/>
+      <db-add ref="add" @onAdded="onReload" />
     </section>
     <section name="popup">
       <db-edit ref="edit" @onUpdated="refreshData" />
@@ -94,11 +91,11 @@
       </b-modal>
     </section>
     <section name="popup">
-      <db-delete ref="delete" @onDeleted="onReload"/>
+      <db-delete ref="delete" @onDeleted="onReload" />
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
@@ -107,6 +104,7 @@ import DatabaseDetail from '~/components/db/detail.vue'
 import { getListDatabase } from '@/service/db'
 import moment from 'moment'
 import { searchDB } from '@/service/shemaChangeHistory'
+import { checkPermission } from '~/service/right'
 
 const TableFields = [
   {
@@ -163,11 +161,24 @@ export default {
     isDeny: false
   }),
 
-  created () {
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getList()
+    }
   },
 
   methods: {
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'database_infor'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getList () {
       this.loading = true
       try {
@@ -175,9 +186,7 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.dbs = res.data
           this.dbs.forEach((e) => {
             if (e.databaseType === 'mysql') {
@@ -191,7 +200,8 @@ export default {
             }
           })
           this.dbs.forEach((e) => {
-            e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+            e.serverInfor =
+              e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
           })
           this.dbs.forEach((e) => {
             if (e.createdDate === null) {
@@ -201,9 +211,11 @@ export default {
             }
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -240,12 +252,11 @@ export default {
           this.pagination.limit,
           this.keyword
         )
-        if (result.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (result.code === '200') {
           this.dbs = result.data
           this.dbs.forEach((e) => {
-            e.serverInfor = e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
+            e.serverInfor =
+              e.serverInfor.serverDomain + ' - ' + e.serverInfor.serverHost
           })
           this.dbs.forEach((e) => {
             if (e.databaseType === 'mysql') {
@@ -262,9 +273,11 @@ export default {
             e.createdDate = moment(e.created_date).format('YYYY-MM-DD')
           })
           this.pagination.total = result.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

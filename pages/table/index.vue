@@ -86,12 +86,13 @@
     </section>
   </div>
   <div v-else>
-    <common-deny/>
+    <common-deny />
   </div>
 </template>
 
 <script>
 import { getListTable, searchTable } from '@/service/table.service'
+import { checkPermission } from '@/service/right'
 import moment from 'moment'
 const tableFields = [
   {
@@ -143,10 +144,23 @@ export default {
       isDeny: false
     }
   },
-  created () {
-    this.getListTable()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      await this.getListTable()
+    }
   },
   methods: {
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'table'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getListTable () {
       this.loading = true
       try {
@@ -154,9 +168,7 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.tableList = res.data
           this.pagination.total = res.metaData.totalItem
           this.tableList.forEach((e) => {
@@ -186,9 +198,11 @@ export default {
               e.databaseInfo.databaseType = 'Oracle'
             }
           })
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -215,9 +229,7 @@ export default {
           this.pagination.limit,
           this.keyword
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.tableList = res.data
           this.pagination.total = res.metaData.totalItem
           this.tableList.forEach((e) => {
@@ -247,9 +259,11 @@ export default {
               e.databaseInfo.databaseType = 'Oracle'
             }
           })
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

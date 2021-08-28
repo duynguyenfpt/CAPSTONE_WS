@@ -1,79 +1,88 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Edit Database" hide-footer>
-    <div v-if="isLoading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col>
-          <label class="form-label">Host</label>
-          <v-select
-            class="select-sm"
-            :reduce="(text) => text.value"
-            label="text"
-            :options="options"
-            v-model="serverInforId"
-            size="sm"
-          ></v-select>
-        </b-col>
-        <b-col>
-          <label class="form-label">Port</label>
-          <b-input size="sm" v-model="port" />
-          <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <label class="form-label">Database</label>
-          <b-input size="sm" v-model="databaseName" />
-          <p class="msg-error" v-if="msg.databaseName">{{ msg.databaseName }}</p>
-          <label class="form-label">Username</label>
-          <b-input size="sm" v-model="username" />
-          <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-          <label class="form-label">Password</label>
-          <b-input size="sm" v-model="password" type="password" />
-          <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
-          <label class="form-label">Database Type</label>
-          <b-form-select
-            v-model="databaseType"
-            :options="dbTypes"
-            size="sm"
-            @change="chooseDbType"
-          ></b-form-select>
-        </b-col>
-      </b-row>
-      <b-row>
+  <div>
+    <b-modal v-model="isVisible" title="Edit Database" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col>
+            <label class="form-label">Host</label>
+            <v-select
+              class="select-sm"
+              :reduce="(text) => text.value"
+              label="text"
+              :options="options"
+              v-model="serverInforId"
+              size="sm"
+            ></v-select>
+          </b-col>
+          <b-col>
+            <label class="form-label">Port</label>
+            <b-input size="sm" v-model="port" />
+            <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <label class="form-label">Database</label>
+            <b-input size="sm" v-model="databaseName" />
+            <p class="msg-error" v-if="msg.databaseName">
+              {{ msg.databaseName }}
+            </p>
+            <label class="form-label">Username</label>
+            <b-input size="sm" v-model="username" />
+            <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
+            <label class="form-label">Password</label>
+            <b-input size="sm" v-model="password" type="password" />
+            <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
+            <label class="form-label">Database Type</label>
+            <b-form-select
+              v-model="databaseType"
+              :options="dbTypes"
+              size="sm"
+              @change="chooseDbType"
+            ></b-form-select>
+          </b-col>
+        </b-row>
+        <b-row>
           <b-col>
             <label class="form-label">Alias</label>
             <b-input size="sm" v-model="alias" />
             <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
           </b-col>
         </b-row>
-      <b-row v-if="isOracle">
-      <b-col>
-        <label class="form-label">SID</label>
-        <b-input size="sm" v-model="sid" />
-        <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
-      </b-col>
-      </b-row>
-      <b-row class="pt-3">
-        <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onUpdateDB">
-            <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
-          <b-button size="sm" variant="light" @click="onClose">
-            Cancel
-          </b-button>
-        </b-col>
-      </b-row>
-    </div>
-  </b-modal>
+        <b-row v-if="isOracle">
+          <b-col>
+            <label class="form-label">SID</label>
+            <b-input size="sm" v-model="sid" />
+            <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="onUpdateDB">
+              <b-spinner
+                v-if="isLoadingUpdate"
+                variant="primary"
+                small
+              ></b-spinner
+              >Update</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import { getDatabaseDetail, updateDatabase } from '@/service/db'
 import { getAllServers } from '@/service/server'
+import { checkPermission } from '~/service/right'
 
 export default {
   data: () => ({
@@ -135,43 +144,74 @@ export default {
 
   methods: {
     async show (id) {
-      const hosts = await getAllServers()
-      if (hosts.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
-      } else {
-        this.options = hosts.data.map(item => {
-          return { value: item.id, text: item.serverDomain + ' - ' + item.serverHost }
+      const dataDbGet = {
+        method: 'GET',
+        path: 'database_infor'
+      }
+      const dataDbPut = {
+        method: 'PUT',
+        path: 'database_infor'
+      }
+      const dataServer = {
+        method: 'GET',
+        path: 'server_infor'
+      }
+      const resDbGet = checkPermission(dataDbGet)
+      const resDbPut = checkPermission(dataDbPut)
+      const resServer = checkPermission(dataServer)
+      if (!resDbGet.data.success || !resDbPut.data.success || !resServer.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
         })
-        this.idItem = id
-        this.isLoading = true
-        this.isVisible = true
-        const res = await getDatabaseDetail(id)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
-        } else {
-          this.serverInforId = res.data.serverInfor.id
-          this.port = res.data.port
-          this.databaseName = res.data.databaseName
-          this.username = res.data.username
-          this.password = res.data.password
-          this.databaseType = res.data.databaseType
-          this.alias = res.data.alias
-          if (this.databaseType === 'oracle') {
-            this.isOracle = true
-            this.sid = res.data.sid
+      } else {
+        const hosts = await getAllServers()
+        if (hosts.code === '200') {
+          this.options = hosts.data.map((item) => {
+            return {
+              value: item.id,
+              text: item.serverDomain + ' - ' + item.serverHost
+            }
+          })
+          this.idItem = id
+          this.isLoading = true
+          this.isVisible = true
+          const res = await getDatabaseDetail(id)
+          if (res.code === '200') {
+            this.serverInforId = res.data.serverInfor.id
+            this.port = res.data.port
+            this.databaseName = res.data.databaseName
+            this.username = res.data.username
+            this.password = res.data.password
+            this.databaseType = res.data.databaseType
+            this.alias = res.data.alias
+            if (this.databaseType === 'oracle') {
+              this.isOracle = true
+              this.sid = res.data.sid
+            } else {
+              this.isOracle = false
+              this.sid = ''
+            }
+            this.isLoading = false
+            this.msg.databaseName = ''
+            this.msg.port = ''
+            this.msg.username = ''
+            this.msg.password = ''
+            this.msg.sid = ''
+            this.msg.alias = ''
           } else {
-            this.isOracle = false
-            this.sid = ''
+            this.$notify({
+              type: 'error',
+              text: 'Error occurred!'
+            })
+            this.isVisible = false
           }
-          this.isLoading = false
-          this.msg.databaseName = ''
-          this.msg.port = ''
-          this.msg.username = ''
-          this.msg.password = ''
-          this.msg.sid = ''
-          this.msg.alias = ''
+        } else {
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred!'
+          })
+          this.isVisible = false
         }
       }
     },
@@ -183,7 +223,11 @@ export default {
       }
     },
     validatePortNumber (value) {
-      if (/^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(value)) {
+      if (
+        /^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/.test(
+          value
+        )
+      ) {
         this.msg.port = ''
       } else {
         this.msg.port = 'Invalid port number'
@@ -247,7 +291,14 @@ export default {
       if (this.alias === null) {
         this.msg.alias = 'Invalid alias'
       }
-      if (this.msg.databaseName === '' && this.msg.port === '' && this.msg.username === '' && this.msg.password === '' && this.msg.sid === '' && this.msg.alias === '') {
+      if (
+        this.msg.databaseName === '' &&
+        this.msg.port === '' &&
+        this.msg.username === '' &&
+        this.msg.password === '' &&
+        this.msg.sid === '' &&
+        this.msg.alias === ''
+      ) {
         try {
           this.isLoadingUpdate = true
           const config = {
@@ -261,21 +312,25 @@ export default {
             alias: this.alias
           }
           const data = await updateDatabase(this.idItem, config)
-          if (data.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.isLoadingUpdate = false
+          this.isVisible = false
+          this.$emit('onUpdated', data)
+          if (data.code === '200') {
+            this.$notify({
+              type: 'success',
+              text: 'Update database succeeded'
+            })
           } else {
-            this.isLoadingUpdate = false
-            this.isVisible = false
-            this.$emit('onUpdated', data)
-            if (data.code === '200') {
-              this.$notify({ type: 'success', text: 'Update database succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Update database failed' })
-            }
+            this.$notify({ type: 'error', text: 'Update database failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred!'
+          })
+          this.isVisible = false
+        } finally {
+          this.isVisible = false
         }
       }
     }

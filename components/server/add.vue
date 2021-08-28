@@ -1,37 +1,37 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Create Server" hide-footer>
-    <div v-if="isLoading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col>
-          <label class="form-label">Server Host</label>
-          <b-input size="sm" v-model="serverHost" />
-          <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
-          <label class="form-label">Server Domain</label>
-          <b-input size="sm" v-model="serverDomain" />
-          <p class="msg-error" v-if="msg.domain">{{ msg.domain }}</p>
-        </b-col>
-      </b-row>
-      <b-row class="pt-3">
-        <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onCreateServer">
-            <b-spinner
-              v-if="isLoadingCreate"
-              variant="primary"
-              small
-            ></b-spinner
-            >Create</b-button
-          >
-          <b-button size="sm" variant="light" @click="onClose">
-            Cancel
-          </b-button>
-        </b-col>
-      </b-row>
-    </div>
-  </b-modal>
+  <div>
+    <b-modal v-model="isVisible" title="Create Server" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col>
+            <label class="form-label">Server Host</label>
+            <b-input size="sm" v-model="serverHost" />
+            <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
+            <label class="form-label">Server Domain</label>
+            <b-input size="sm" v-model="serverDomain" />
+            <p class="msg-error" v-if="msg.domain">{{ msg.domain }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="onCreateServer">
+              <b-spinner
+                v-if="isLoadingCreate"
+                variant="primary"
+                small
+              ></b-spinner
+              >Create</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -70,7 +70,11 @@ export default {
       }
     },
     validateHost (value) {
-      if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value)) {
+      if (
+        /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+          value
+        )
+      ) {
         this.msg.host = ''
       } else {
         this.msg.host = 'Invalid server host'
@@ -104,7 +108,10 @@ export default {
           }
           const data = await createServer(config)
           if (data.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+            this.$notify({
+              type: 'error',
+              text: 'Error occurred! - Access Denied'
+            })
           } else {
             this.isLoadingCreate = false
             this.isVisible = false

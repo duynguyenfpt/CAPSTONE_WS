@@ -11,7 +11,6 @@
       </b-col>
     </b-row>
     <div class="mt-6">
-      <h3 class="my-4">Lastest Jobs History</h3>
       <home-table />
     </div>
   </div>

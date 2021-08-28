@@ -1,58 +1,66 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Edit Right" hide-footer>
-    <div v-if="isLoading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-      <b-row class="pt-2">
-        <b-col cols="4">
-          <label class="form-lab">Path</label>
-        </b-col>
-        <b-col>
-          <b-form-input size="sm" v-model="path"></b-form-input>
-          <p class="msg-error" v-if="msg.path">{{ msg.path }}</p>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
-        <b-col cols="4">
-          <label class="text-center">Method</label>
-        </b-col>
-        <b-col>
-          <b-form-select
-            v-model="method"
-            :options="opsMethod"
-            size="sm"
-            @change="chooseMethod"
-          ></b-form-select>
-          <p class="msg-error" v-if="msg.method">{{ msg.method }}</p>
-        </b-col>
-      </b-row>
-      <b-row class="pt-2">
+  <div>
+    <b-modal v-model="isVisible" title="Edit Right" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab">Path</label>
+          </b-col>
+          <b-col>
+            <b-form-input size="sm" v-model="path"></b-form-input>
+            <p class="msg-error" v-if="msg.path">{{ msg.path }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="text-center">Method</label>
+          </b-col>
+          <b-col>
+            <b-form-select
+              v-model="method"
+              :options="opsMethod"
+              size="sm"
+              @change="chooseMethod"
+            ></b-form-select>
+            <p class="msg-error" v-if="msg.method">{{ msg.method }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
           <b-col cols="4">
             <label class="form-lab">Description</label>
           </b-col>
           <b-col>
             <b-form-input size="sm" v-model="description"></b-form-input>
-            <p class="msg-error" v-if="msg.description">{{ msg.description }}</p>
+            <p class="msg-error" v-if="msg.description">
+              {{ msg.description }}
+            </p>
           </b-col>
         </b-row>
-      <b-row class="pt-3">
-        <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onUpdateRight">
-            <b-spinner v-if="isLoadingUpdate" variant="primary" small></b-spinner>Update</b-button>
-          <b-button size="sm" variant="light" @click="onClose">
-            Cancel
-          </b-button>
-        </b-col>
-      </b-row>
-    </div>
-  </b-modal>
+        <b-row class="pt-3">
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="onUpdateRight">
+              <b-spinner
+                v-if="isLoadingUpdate"
+                variant="primary"
+                small
+              ></b-spinner
+              >Update</b-button
+            >
+            <b-button size="sm" variant="light" @click="onClose">
+              Cancel
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
-import { detailRight, updateRight } from '@/service/right'
+import { checkPermission, detailRight, updateRight } from '@/service/right'
 
 export default {
   data: () => ({
@@ -109,24 +117,52 @@ export default {
       }
     },
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
-      this.isLoading = true
-      const res = await detailRight(this.idItem)
-      if (res.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
+      const dataGet = {
+        method: 'GET',
+        path: 'right'
+      }
+      const resGet = await checkPermission(dataGet)
+      const dataPut = {
+        method: 'PUT',
+        path: 'right'
+      }
+      const resPut = await checkPermission(dataPut)
+      if (!resGet.data.success || !resPut.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
       } else {
-        this.method = res.data.method
-        this.path = res.data.path
-        this.description = res.data.description
-        this.isLoading = false
-        this.msg = {
-          path: null,
-          method: null,
-          description: null
+        this.idItem = id
+        this.isVisible = true
+        this.isLoading = true
+        try {
+          const res = await detailRight(this.idItem)
+          if (res.code === '200') {
+            this.method = res.data.method
+            this.path = res.data.path
+            this.description = res.data.description
+            this.isLoading = false
+            this.msg = {
+              path: null,
+              method: null,
+              description: null
+            }
+            this.isLoadingUpdate = false
+          } else {
+            this.$notify({
+              type: 'error',
+              text: 'Error occurred!'
+            })
+            this.isVisible = false
+          }
+        } catch (e) {
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred!'
+          })
+          this.isVisible = false
         }
-        this.isLoadingUpdate = false
       }
     },
     onClose () {
@@ -145,7 +181,11 @@ export default {
       if (this.path === null) {
         this.msg.path = 'Invalid path'
       }
-      if (this.msg.method === '' && this.msg.path === '' && this.msg.description === '') {
+      if (
+        this.msg.method === '' &&
+        this.msg.path === '' &&
+        this.msg.description === ''
+      ) {
         try {
           this.isLoadingUpdate = true
           const body = {
@@ -154,19 +194,18 @@ export default {
             description: this.description
           }
           const res = await updateRight(this.idItem, body)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onUpdated', res.data)
+          if (res.code === '200') {
+            this.$notify({ type: 'success', text: 'Update right succeeded' })
           } else {
-            this.$emit('onUpdated', res.data)
-            if (res.code === '200') {
-              this.$notify({ type: 'success', text: 'Update right succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Update right failed' })
-            }
+            this.$notify({ type: 'error', text: 'Update right failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({
+            type: 'error',
+            text: 'Error occurred!'
+          })
+          this.isVisible = false
         } finally {
           this.isLoadingUpdate = false
           this.isVisible = false

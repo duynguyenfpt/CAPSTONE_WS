@@ -11,11 +11,7 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input
-            v-model="request"
-            size="sm"
-            disabled
-          ></b-form-input>
+          <b-form-input v-model="request" size="sm" disabled></b-form-input>
         </b-form-group>
         <b-form-group
           label="Executed By"
@@ -33,7 +29,7 @@
             @input="chooseExecutor"
             placeholder="Please select executor"
           ></v-select>
-           <p class="msg-error" v-if="msg.executedBy">{{ msg.executedBy }}</p>
+          <p class="msg-error" v-if="msg.executedBy">{{ msg.executedBy }}</p>
         </b-form-group>
         <b-form-group
           label="Job Schedule"
@@ -41,7 +37,11 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input size="sm" v-model="jobSchedule" :disabled= "isSync"></b-form-input>
+          <b-form-input
+            size="sm"
+            v-model="jobSchedule"
+            :disabled="isSync"
+          ></b-form-input>
         </b-form-group>
         <b-form-group
           label="Max Retry"
@@ -49,10 +49,7 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input
-            size="sm"
-            v-model="maxRetry"
-          ></b-form-input>
+          <b-form-input size="sm" v-model="maxRetry"></b-form-input>
           <p class="msg-error" v-if="msg.maxRetry">{{ msg.maxRetry }}</p>
         </b-form-group>
         <b-form-group
@@ -90,10 +87,11 @@
 </template>
 
 <script>
-import { getAllAccount } from '@/service/account'
+import { getAccounts } from '@/service/account'
 import { getDetailJob, updateJob } from '@/service/job'
 import Vue from 'vue'
 import vSelect from 'vue-select'
+import { checkPermission } from '~/service/right'
 
 Vue.component('v-select', vSelect)
 export default {
@@ -125,45 +123,69 @@ export default {
   },
   methods: {
     async show (id) {
-      const resAcc = await getAllAccount()
-      if (resAcc.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
-      } else {
-        this.executedBys = resAcc.data.map(item => {
-          return { value: item.id, text: item.username }
+      const dataAcc = {
+        method: 'GET',
+        path: 'list_account'
+      }
+      const dataRes = {
+        method: 'GET',
+        path: 'request'
+      }
+      const dataJob = {
+        method: 'PUT',
+        path: 'job'
+      }
+      const resAccount = checkPermission(dataAcc)
+      const resRes = checkPermission(dataRes)
+      const resJob = checkPermission(dataJob)
+      if (
+        !resAccount.data.success ||
+        !resRes.data.success ||
+        !resJob.data.success
+      ) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
         })
-        this.isVisible = true
-        this.idItem = id
-        this.maxRetry = 10
-        this.jobSchedule = '0 0 0 ? * * *'
-        this.isActive = false
-        this.requestId = null
-        this.request = null
-        this.executedBy = null
-        this.msg.executedBy = null
-        try {
-          const res = await getDetailJob(id)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
-          } else {
-            this.request = res.data.request.requestType + ' - All'
-            this.requestId = res.data.request.id
-            this.executedBy = res.data.excutedBy.id
-            this.jobSchedule = res.data.jobSchedule
-            this.maxRetry = res.data.maxRetries
-            this.isActive = res.data.active
-            if (res.data.request.requestType === 'SyncTable') {
-              this.isSync = true
-            } else {
-              this.isSync = false
+      } else {
+        const resAcc = await getAccounts()
+        if (resAcc.code === '200') {
+          this.executedBys = resAcc.data.map((item) => {
+            return { value: item.id, text: item.username }
+          })
+          this.isVisible = true
+          this.idItem = id
+          this.maxRetry = 10
+          this.jobSchedule = '0 0 0 ? * * *'
+          this.isActive = false
+          this.requestId = null
+          this.request = null
+          this.executedBy = null
+          this.msg.executedBy = null
+          try {
+            const res = await getDetailJob(id)
+            if (res.code === '200') {
+              this.request = res.data.request.requestType + ' - All'
+              this.requestId = res.data.request.id
+              this.executedBy = res.data.excutedBy.id
+              this.jobSchedule = res.data.jobSchedule
+              this.maxRetry = res.data.maxRetries
+              this.isActive = res.data.active
+              if (res.data.request.requestType === 'SyncTable') {
+                this.isSync = true
+              } else {
+                this.isSync = false
+              }
             }
+          } catch (e) {
+            this.$notify({
+              type: 'error',
+              text: 'Error occurred!'
+            })
+            this.isVisible = false
+          } finally {
+            this.isLoading = false
           }
-        } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
-        } finally {
-          this.isLoading = false
         }
       }
     },
@@ -199,16 +221,11 @@ export default {
             maxRetries: this.maxRetry
           }
           const data = await updateJob(this.idItem, body)
-          if (data.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onUpdated', data)
+          if (data.code === '200') {
+            this.$notify({ type: 'success', text: 'Update job succeeded' })
           } else {
-            this.$emit('onUpdated', data)
-            if (data.code === '200') {
-              this.$notify({ type: 'success', text: 'Update job succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Update job failed' })
-            }
+            this.$notify({ type: 'error', text: 'Update job failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: 'Update job failed' })

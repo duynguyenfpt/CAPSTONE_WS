@@ -1,48 +1,51 @@
 <template>
-<div>
-  <b-modal v-model="isVisibleShare" title="Share" hide-footer>
-    <div v-if="isLoading" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
-    </div>
-    <div v-else>
-      <b-row>
-        <b-col>
-          <label>Account</label>
-          <div>
-            <el-select class="w-100"
-              v-model="accounts"
-              multiple
-              filterable
-              no-match-text="Data search not found"
-              no-data-text="No data"
-              placeholder="Choose account you want to share">
-              <el-option
-                v-for="item in opsAccount"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row class="pt-3">
-        <b-col class="text-right">
-          <b-button size="sm" variant="primary" @click="onShare">
-            <b-spinner
+  <div>
+    <b-modal v-model="isVisibleShare" title="Share" hide-footer>
+      <div v-if="isLoading" class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col>
+            <label>Account</label>
+            <div>
+              <el-select
+                class="w-100"
+                v-model="accounts"
+                multiple
+                filterable
+                no-match-text="Data search not found"
+                no-data-text="No data"
+                placeholder="Choose account you want to share"
+              >
+                <el-option
+                  v-for="item in opsAccount"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+            </div>
+          </b-col>
+        </b-row>
+        <b-row class="pt-3">
+          <b-col class="text-right">
+            <b-button size="sm" variant="primary" @click="onShare">
+              <b-spinner
                 v-if="isLoadingShare"
                 variant="primary"
                 small
               ></b-spinner>
-            Share
-          </b-button>
-          <b-button size="sm" variant="light" @click="onClose">
-            Close
-          </b-button>
-        </b-col>
-      </b-row>
-    </div>
-  </b-modal>
+              Share
+            </b-button>
+            <b-button size="sm" variant="light" @click="onClose">
+              Close
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -51,6 +54,7 @@ import { getAccounts } from '@/service/account'
 import { shareEtl } from '@/service/etl'
 import Vue from 'vue'
 import vSelect from 'vue-select'
+import { checkPermission } from '~/service/right'
 Vue.component('v-select', vSelect)
 
 export default {
@@ -65,21 +69,35 @@ export default {
 
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisibleShare = true
-      this.isLoading = true
-      this.isLoadingShare = false
-      this.accounts = []
-      const res = await getAccounts()
-      if (res.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisibleShare = false
-      } else {
-        this.config = res.data
-        this.opsAccount = res.data.map((item) => {
-          return { value: item.id, label: item.username }
+      const dataAcc = {
+        method: 'GET',
+        path: 'list_account'
+      }
+      const dataEtl = {
+        method: 'POST',
+        path: 'share'
+      }
+      const resAcc = await checkPermission(dataAcc)
+      const resEtl = await checkPermission(dataEtl)
+      if (!resAcc.data.success || !resEtl.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
         })
-        this.isLoading = false
+      } else {
+        this.idItem = id
+        this.isVisibleShare = true
+        this.isLoading = true
+        this.isLoadingShare = false
+        this.accounts = []
+        const res = await getAccounts()
+        if (res.code === '200') {
+          this.config = res.data
+          this.opsAccount = res.data.map((item) => {
+            return { value: item.id, label: item.username }
+          })
+          this.isLoading = false
+        }
       }
     },
     onClose () {
@@ -94,18 +112,13 @@ export default {
             accountIds: this.accounts
           }
           const res = await shareEtl(data)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisibleShare = false
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Share ETL succeeded' })
           } else {
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Share ETL succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Share ETL failed' })
-            }
+            this.$notify({ type: 'error', text: 'Share ETL failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         } finally {
           this.isVisibleShare = false
         }

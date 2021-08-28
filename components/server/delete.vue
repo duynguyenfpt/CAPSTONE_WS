@@ -1,6 +1,6 @@
 <template>
-<div>
-  <b-modal v-model="isVisible" title="Confirm" hide-footer>
+  <div>
+    <b-modal v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
           <p>Do you want to delete this server?</p>
@@ -9,18 +9,21 @@
       <b-row class="pt-3">
         <b-col class="text-right">
           <b-button size="sm" variant="danger" @click="onDelete">
-            <b-spinner v-if="isLoading" variant="danger" small></b-spinner>Delete</b-button>
+            <b-spinner v-if="isLoading" variant="danger" small></b-spinner
+            >Delete</b-button
+          >
           <b-button size="sm" variant="light" @click="onClose">
             Cancel
           </b-button>
         </b-col>
       </b-row>
-  </b-modal>
-</div>
+    </b-modal>
+  </div>
 </template>
 
 <script>
 import { deleteServer } from '@/service/server'
+import { checkPermission } from '~/service/right'
 export default {
   data: () => ({
     isVisible: false,
@@ -29,8 +32,20 @@ export default {
   }),
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisible = true
+      const data = {
+        method: 'DELETE',
+        path: 'server_infor'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+      } else {
+        this.idItem = id
+        this.isVisible = true
+      }
     },
     onClose () {
       this.isVisible = false
@@ -39,9 +54,7 @@ export default {
       try {
         this.isLoading = true
         const res = await deleteServer(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        } else {
+        if (res.code === '200') {
           this.$emit('onDeleted')
           if (res.code) {
             this.$notify({ type: 'success', text: 'Delete server succeeded' })
@@ -50,7 +63,7 @@ export default {
           }
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Delete server failed' })
       } finally {
         this.isLoading = false
         this.isVisible = false

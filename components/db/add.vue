@@ -108,6 +108,7 @@ import { createDatabase, checkConnection } from '@/service/db'
 import { getAllServers } from '@/service/server'
 import Vue from 'vue'
 import vSelect from 'vue-select'
+import { checkPermission } from '~/service/right'
 
 Vue.component('v-select', vSelect)
 export default {
@@ -142,7 +143,8 @@ export default {
       databaseType: null,
       sid: null,
       alias: null
-    }
+    },
+    isDeny: false
   }),
 
   watch: {
@@ -173,36 +175,66 @@ export default {
   },
 
   methods: {
-    async show () {
-      const hosts = await getAllServers()
-      if (hosts.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
-      } else {
-        this.dbHosts = hosts.data.map((item) => {
-          return {
-            value: item.id,
-            text: item.serverDomain + ' - ' + item.serverHost
-          }
+    async checkPermission () {
+      const dataCon = {
+        method: 'POST',
+        path: 'test_connection'
+      }
+      const dataServer = {
+        method: 'GET',
+        path: 'server_infor'
+      }
+      const dataDb = {
+        method: 'POST',
+        path: 'database_infor'
+      }
+      const resCon = checkPermission(dataCon)
+      const resServer = checkPermission(dataServer)
+      const resDb = checkPermission(dataDb)
+      if (
+        !resCon.data.success ||
+        !resServer.data.success ||
+        !resDb.data.success
+      ) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
         })
-        this.isVisible = true
-        this.port = null
-        this.username = null
-        this.password = null
-        this.databaseName = null
-        this.databaseType = null
-        this.serverInforId = null
-        this.sid = null
-        this.alias = null
-        this.isOracle = false
-        this.msg.databaseName = ''
-        this.msg.port = ''
-        this.msg.username = ''
-        this.msg.password = ''
-        this.msg.serverInforId = ''
-        this.msg.databaseType = ''
-        this.msg.sid = ''
-        this.msg.alias = ''
+        this.isDeny = true
+      }
+    },
+    async show () {
+      await this.checkPermission()
+      if (!this.isDeny) {
+        const hosts = await getAllServers()
+        if (hosts.code === '200') {
+          this.dbHosts = hosts.data.map((item) => {
+            return {
+              value: item.id,
+              text: item.serverDomain + ' - ' + item.serverHost
+            }
+          })
+          this.isVisible = true
+          this.port = null
+          this.username = null
+          this.password = null
+          this.databaseName = null
+          this.databaseType = null
+          this.serverInforId = null
+          this.sid = null
+          this.alias = null
+          this.isOracle = false
+          this.msg.databaseName = ''
+          this.msg.port = ''
+          this.msg.username = ''
+          this.msg.password = ''
+          this.msg.serverInforId = ''
+          this.msg.databaseType = ''
+          this.msg.sid = ''
+          this.msg.alias = ''
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+        }
       }
     },
     validateDBName (value) {
@@ -316,22 +348,16 @@ export default {
             alias: this.alias
           }
           const res = await createDatabase(config)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.isLoadingCreate = false
+          this.isVisible = false
+          this.$emit('onAdded')
+          if (res.code === '201') {
+            this.$notify({
+              type: 'success',
+              text: 'Create database succeeded'
+            })
           } else {
-            this.isLoadingCreate = false
-            this.isVisible = false
-            this.$emit('onAdded')
-            console.log('LCC: ', res.code)
-            if (res.code === '201') {
-              this.$notify({
-                type: 'success',
-                text: 'Create database succeeded'
-              })
-            } else {
-              this.$notify({ type: 'error', text: 'Create database failed' })
-            }
+            this.$notify({ type: 'error', text: 'Create database failed' })
           }
         } catch (e) {
           this.$notify({ type: 'error', text: 'Create database failed' })
@@ -351,15 +377,11 @@ export default {
           sid: this.sid
         }
         const res = await checkConnection(data)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
+        this.isVisible = false
+        if (res.code === '200' && res.data.success) {
+          this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {
-          if (res.code === '200' && res.data.success) {
-            this.$notify({ type: 'success', text: 'Test connection succeeded.' })
-          } else {
-            this.$notify({ type: 'error', text: 'Test connection failed' })
-          }
+          this.$notify({ type: 'error', text: 'Test connection failed' })
         }
       } catch (e) {
         this.$notify({ type: 'error', text: 'Test connection failed' })

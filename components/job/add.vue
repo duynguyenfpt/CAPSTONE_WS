@@ -46,7 +46,11 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input size="sm" v-model="jobSchedule" :disabled= "isSync"></b-form-input>
+          <b-form-input
+            size="sm"
+            v-model="jobSchedule"
+            :disabled="isSync"
+          ></b-form-input>
         </b-form-group>
         <b-form-group
           label="Max Retry"
@@ -54,10 +58,7 @@
           label-align-sm="left"
           label-size="sm"
         >
-          <b-form-input
-            size="sm"
-            v-model="maxRetry"
-          ></b-form-input>
+          <b-form-input size="sm" v-model="maxRetry"></b-form-input>
           <p class="msg-error" v-if="msg.maxRetry">{{ msg.maxRetry }}</p>
         </b-form-group>
         <b-form-group
@@ -95,11 +96,12 @@
 </template>
 
 <script>
-import { getAllAccount } from '@/service/account'
+import { getAccounts } from '@/service/account'
 import { getAllRequestApproved } from '@/service/request'
 import { createJob } from '@/service/job'
 import Vue from 'vue'
 import vSelect from 'vue-select'
+import { checkPermission } from '~/service/right'
 
 Vue.component('v-select', vSelect)
 export default {
@@ -131,29 +133,54 @@ export default {
   },
   methods: {
     async show () {
-      const resAcc = await getAllAccount()
-      if (resAcc.statusCode === '403') {
-        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-        this.isVisible = false
+      const dataAcc = {
+        method: 'GET',
+        path: 'list_account'
+      }
+      const dataRes = {
+        method: 'GET',
+        path: 'request'
+      }
+      const dataJob = {
+        method: 'POST',
+        path: 'job'
+      }
+      const resAccount = checkPermission(dataAcc)
+      const resRes = checkPermission(dataRes)
+      const resJob = checkPermission(dataJob)
+      if (
+        !resAccount.data.success ||
+        !resRes.data.success ||
+        !resJob.data.success
+      ) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
       } else {
-        this.executedBys = resAcc.data.map(e => ({ value: e.id, text: e.username }))
-
-        const resReq = await getAllRequestApproved()
-        if (resReq.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisible = false
-        } else {
-          resReq.data.forEach(item => {
-            this.requests.push({ value: item.id, text: item.requestType + ' - ' + item.id })
-          })
-          this.isVisible = true
-          this.maxRetry = 10
-          this.jobSchedule = '0 0 0 ? * * *'
-          this.isActive = false
-          this.request = null
-          this.executedBy = null
-          this.msg.request = null
-          this.msg.executedBy = null
+        const resAcc = await getAccounts()
+        if (resAcc.code === '200') {
+          this.executedBys = resAcc.data.map((e) => ({
+            value: e.id,
+            text: e.username
+          }))
+          const resReq = await getAllRequestApproved()
+          if (resReq.code === '200') {
+            resReq.data.forEach((item) => {
+              this.requests.push({
+                value: item.id,
+                text: item.requestType + ' - ' + item.id
+              })
+            })
+            this.isVisible = true
+            this.maxRetry = 10
+            this.jobSchedule = '0 0 0 ? * * *'
+            this.isActive = false
+            this.request = null
+            this.executedBy = null
+            this.msg.request = null
+            this.msg.executedBy = null
+          }
         }
       }
     },
@@ -170,7 +197,7 @@ export default {
       } else {
         this.msg.request = ''
         const index = this.request
-        const result = this.requests.find(request => request.value === index)
+        const result = this.requests.find((request) => request.value === index)
         if (result.text.includes('SyncTable')) {
           this.jobSchedule = null
           this.isSync = true
@@ -198,7 +225,11 @@ export default {
       if (this.maxRetry == null) {
         this.msg.executedBy = 'Invalid max retry'
       }
-      if (this.msg.request === '' && this.msg.executedBy === '' && this.msg.maxRetry === '') {
+      if (
+        this.msg.request === '' &&
+        this.msg.executedBy === '' &&
+        this.msg.maxRetry === ''
+      ) {
         try {
           this.isLoadingCreate = true
           const data = {
@@ -208,19 +239,14 @@ export default {
             maxRetries: this.maxRetry
           }
           const res = await createJob(data)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onAdded', res)
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Create job succeeded' })
           } else {
-            this.$emit('onAdded', res)
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Create job succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Create job failed' })
-            }
+            this.$notify({ type: 'error', text: 'Create job failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Create job failed' })
         } finally {
           this.isLoadingCreate = false
           this.isVisible = false

@@ -146,6 +146,7 @@ import {
   checkConnection
 } from '@/service/db'
 import { getAllServers } from '@/service/server'
+import { checkPermission } from '@/service/right'
 import { createTable } from '@/service/table.service'
 import Vue from 'vue'
 import vSelect from 'vue-select'
@@ -192,49 +193,15 @@ export default {
     },
     isDeny: false
   }),
-  async mounted () {
-    this.isLoading = true
-    const dbs = await getAllDbType()
-    if (dbs.statusCode === '403') {
-      this.isDeny = true
-    } else {
-      this.opsDb = dbs.data.map((item) => {
-        return { value: item.id, text: item.databaseName }
-      })
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      this.isLoading = true
+      await this.getAllServer()
+      await this.getAllDb()
+      this.resetData()
+      this.isLoading = false
     }
-    const hosts = await getAllServers()
-    if (hosts.statusCode === '403') {
-      this.isDeny = true
-    } else {
-      this.opsHost = hosts.data.map((item) => {
-        return {
-          value: item.id,
-          text: item.serverHost + ' - ' + item.serverDomain
-        }
-      })
-    }
-    this.db = null
-    this.table = null
-    this.dbName = null
-    this.host = null
-    this.port = null
-    this.username = null
-    this.password = null
-    this.dbType = null
-    this.sid = null
-    this.alias = null
-    this.defaultKey = null
-    this.msg.db = ''
-    this.msg.tb = ''
-    this.msg.host = ''
-    this.msg.username = ''
-    this.msg.password = ''
-    this.msg.port = ''
-    this.msg.dbType = ''
-    this.msg.alias = ''
-    this.msg.sid = ''
-    this.msg.defaultKey = ''
-    this.isLoading = false
   },
   watch: {
     table (value) {
@@ -375,6 +342,50 @@ export default {
       this.msg.alias = ''
       this.msg.defaultKey = ''
     },
+    async checkPermission () {
+      const dataServer = {
+        method: 'GET',
+        path: 'server_infor'
+      }
+      const resServer = await checkPermission(dataServer)
+      const dataDb = {
+        method: 'GET',
+        path: 'database_infor'
+      }
+      const resDb = await checkPermission(dataDb)
+      const dataDbCreate = {
+        method: 'POST',
+        path: 'database_infor'
+      }
+      const resDbCreate = await checkPermission(dataDbCreate)
+      const data = {
+        method: 'POST',
+        path: 'table'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success || !resServer.data.success || !resDb.data.success || resDbCreate.data.success) {
+        this.isDeny = true
+      }
+    },
+    async getAllDb () {
+      const dbs = await getAllDbType()
+      if (dbs.code === '200') {
+        this.opsDb = dbs.data.map((item) => {
+          return { value: item.id, text: item.databaseName }
+        })
+      }
+    },
+    async getAllServer () {
+      const hosts = await getAllServers()
+      if (hosts.code === '200') {
+        this.opsHost = hosts.data.map((item) => {
+          return {
+            value: item.id,
+            text: item.serverHost + ' - ' + item.serverDomain
+          }
+        })
+      }
+    },
     async createTableInfo () {
       if (this.msg.db === '' && this.msg.tb === '') {
         try {
@@ -393,18 +404,14 @@ export default {
             defaultKey: this.defaultKey
           }
           const res = await createTable(config)
-          if (res.statusCode === '403') {
-            this.isDeny = true
+          this.isLoadingCreate = false
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Add table succeeded' })
           } else {
-            this.isLoadingCreate = false
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Add table succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Add table failed' })
-            }
+            this.$notify({ type: 'error', text: 'Add table failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Add table failed' })
         }
       }
     },

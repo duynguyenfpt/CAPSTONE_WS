@@ -3,31 +3,18 @@
   </div>
 </template>
 <script>
+import { getDashboardRequest } from '@/service/dashboard'
 import * as am4core from '@amcharts/amcharts4/core'
 import * as am4charts from '@amcharts/amcharts4/charts'
 import am4themesAnimated from '@amcharts/amcharts4/themes/animated'
 am4core.useTheme(am4themesAnimated)
 export default {
-  mounted () {
+  async mounted () {
+    const res = await getDashboardRequest()
     const chart = am4core.create('chartColum', am4charts.XYChart)
     // chart.scrollbarX = new am4core.Scrollbar()
 
-    chart.data = [{
-      status: 'Pending',
-      value: 3025
-    }, {
-      status: 'Rejejcted',
-      value: 1882
-    }, {
-      status: 'Processing',
-      value: 1809
-    }, {
-      status: 'Success',
-      value: 1322
-    }, {
-      status: 'Fail',
-      value: 1222
-    }]
+    chart.data = res.data
 
     // Create axes
     const categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis())
@@ -74,6 +61,6 @@ export default {
 </script>
 <style lang="css">
 .chartColum {
-  min-height: 460px;
+  min-height: 500px;
 }
 </style>

@@ -52,6 +52,7 @@
 <script>
 import { getResultDetail, downloadData } from '@/service/etl'
 import { saveAs } from 'file-saver'
+import { checkPermission } from '~/service/right'
 export default {
   data: () => ({
     isVisibleResult: false,
@@ -67,17 +68,21 @@ export default {
   }),
   methods: {
     async show (id) {
-      this.idItem = id
-      this.isVisibleResult = true
-      this.isLoading = true
-      this.msg = ''
-      this.rows = []
-      try {
-        const res = await getResultDetail(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisibleResult = false
-        } else {
+      const data = {
+        method: 'GET',
+        path: 'etl_request'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      } else {
+        this.idItem = id
+        this.isVisibleResult = true
+        this.isLoading = true
+        this.msg = ''
+        this.rows = []
+        try {
+          const res = await getResultDetail(this.idItem)
           if (res.code === '200') {
             if (res.data.status === 'successed') {
               const totalArray = res.data.content.split('\n')
@@ -87,7 +92,7 @@ export default {
               })
               totalArray.forEach((element, index) => {
                 if (index === 0) {
-                  // eslint-disable-next-line array-callback-return
+                // eslint-disable-next-line array-callback-return
                   element.split(',').map(item => {
                     header.push({
                       key: item
@@ -123,32 +128,40 @@ export default {
             this.isExecuted = true
             this.msg = 'Query is failed'
           }
+        } catch (e) {
+          this.isExecuted = true
+          this.msg = e.message
         }
-      } catch (e) {
-        this.isExecuted = true
-        this.msg = e.message
       }
     },
     onClose () {
       this.isVisibleResult = false
     },
     async onDownload () {
-      try {
-        this.isDownload = true
-        const res = await downloadData(this.idItem)
-        if (res.statusCode === '403') {
-          this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-          this.isVisibleResult = false
-        } else {
+      const data = {
+        method: 'GET',
+        path: 'dowload_csv'
+      }
+      const resPermission = await checkPermission(data)
+      if (!resPermission.data.success) {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      } else {
+        try {
+          this.isDownload = true
+          const res = await downloadData(this.eltID)
           const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
           const name = `${new Date().getTime()}.csv`
           saveAs(blob, name)
-          this.$notify({ type: 'success', text: 'Download result succeeded' })
+          this.$notify({
+            type: 'success',
+            text: 'Download result succeeded'
+          })
+          console.log('notify')
+        } catch (e) {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+        } finally {
+          this.isDownload = false
         }
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.isDownload = false
       }
     }
   }

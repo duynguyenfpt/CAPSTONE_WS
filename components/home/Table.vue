@@ -1,5 +1,6 @@
 <template>
   <div v-show="!isDeny">
+    <h3 class="my-4">Lastest Jobs History</h3>
     <b-table
       small
       responsive

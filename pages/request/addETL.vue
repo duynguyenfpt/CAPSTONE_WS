@@ -18,7 +18,7 @@
           History
         </b-button>
       </b-col>
-      <b-sidebar id="sidebar-right" title="History" right shadow>
+      <b-sidebar v-show="isShowHistory" id="sidebar-right" title="History" right shadow>
         <div class="px-2 py-2">
           <b-list-group>
             <b-list-group-item
@@ -103,7 +103,7 @@
       <b-row class="pt-2">
         <b-col cols="1" />
         <b-col cols="4">
-          <b-btn variant="warning" @click="onDownload" v-if="isDisplay">
+          <b-btn variant="warning" @click="onDownload" v-if="isDisplay" size="sm">
             <i v-if="isDownload" class="fa fa-spin fa-spinner" />
             <i v-else class="fa fa-download" />
             Download
@@ -111,6 +111,7 @@
         </b-col>
         <b-col sm="4" class="text-right">
           <b-btn
+            size="sm"
             variant="success"
             class="btn-add-request"
             @click="submitETL"
@@ -178,6 +179,7 @@ import {
 } from '@/service/etl'
 import { format } from 'date-fns'
 import { saveAs } from 'file-saver'
+import { checkPermission } from '~/service/right'
 
 export default {
   data () {
@@ -216,15 +218,23 @@ export default {
       isDownload: false,
       isDisplay: false,
       isSuccess: false,
-      isDeny: false
+      isDeny: false,
+      isShowHistory: false
     }
   },
   methods: {
     async showAllResults () {
-      const res = await getAllResults()
-      if (res.statusCode === '403') {
-        this.isDeny = true
+      const data = {
+        method: 'GET',
+        path: 'etl_request'
+      }
+      const resPermission = await checkPermission(data)
+      if (!resPermission.data.success) {
+        this.isShowHistory = false
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
       } else {
+        this.isShowHistory = true
+        const res = await getAllResults()
         this.results = res.data
       }
     },
@@ -310,98 +320,115 @@ export default {
 
       this.isLoadingCreate = true
       this.isFailed = false
-      try {
-        const res = await createEtl({ query: this.inputValue })
-        if (res.statusCode === '403') {
-          this.isDeny = true
-          throw new Error('query denied')
-        }
-        this.isLoadingCreate = false
-        if (res.code !== '201') return
-        this.$notify({ type: 'success', text: 'Create ETL succeeded' })
+      const data = {
+        method: 'POST',
+        path: 'etl_request'
+      }
+      const resPermission = await checkPermission(data)
+      if (!resPermission.data.success) {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      } else {
+        try {
+          const res = await createEtl({ query: this.inputValue })
+          this.isLoadingCreate = false
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Create ETL succeeded' })
 
-        const id = res.data.request.id
-        this.eltID = id
-        let isRunning = true
+            const id = res.data.request.id
+            this.eltID = id
+            let isRunning = true
 
-        this.rows = []
-        this.msg = 'Query is executing'
-        this.isExecuted = false
-        while (isRunning) {
-          try {
-            const result = await getResultDetail(id)
-            if (result.statusCode === '403') {
-              this.isDeny = true
-              throw new Error('query denied')
-            }
-            if (result.code !== '200') return
-
-            switch (result.data.status) {
-              case 'failed':
-                this.isFailed = true
-                this.isExecuted = true
-                this.isSuccess = false
-                throw new Error(result.data.content)
-              case 'successed': {
-                const headers = [{ key: 'no', class: 'align-top' }]
-                const arr = result.data.content.split('\n')
-                arr.forEach((row, idx) => {
-                  if (idx === 0) {
-                    row.split(',').forEach((e) => {
-                      headers.push({ key: e, class: 'align-top' })
-                    })
-                    return
-                  }
-                  const tmp = row.split(',')
-                  const data = {}
-                  headers.forEach((header, idx) => {
-                    if (header.key === 'no') {
-                      data[header.key] = idx
-                    } else {
-                      data[header.key] = tmp[idx - 1]
+            this.rows = []
+            this.msg = 'Query is executing'
+            this.isExecuted = false
+            while (isRunning) {
+              try {
+                const result = await getResultDetail(id)
+                if (result.code === '200') {
+                  switch (result.data.status) {
+                    case 'failed':
+                      this.isFailed = true
+                      this.isExecuted = true
+                      this.isSuccess = false
+                      throw new Error(result.data.content)
+                    case 'successed': {
+                      const headers = [{ key: 'no', class: 'align-top' }]
+                      const arr = result.data.content.split('\n')
+                      arr.forEach((row, idx) => {
+                        if (idx === 0) {
+                          row.split(',').forEach((e) => {
+                            headers.push({ key: e, class: 'align-top' })
+                          })
+                          return
+                        }
+                        const tmp = row.split(',')
+                        const data = {}
+                        headers.forEach((header, idx) => {
+                          if (header.key === 'no') {
+                            data[header.key] = idx
+                          } else {
+                            data[header.key] = tmp[idx - 1]
+                          }
+                        })
+                        this.rows.push(data)
+                      })
+                      this.isExecuted = true
+                      this.resultFields = headers
+                      isRunning = false
+                      this.isDisplay = true
+                      this.isSuccess = true
                     }
-                  })
-                  this.rows.push(data)
-                })
-                this.isExecuted = true
-                this.resultFields = headers
+                  }
+                } else {
+                  this.$notify({ type: 'error', text: 'Error occurred!' })
+                  return
+                }
+              } catch (e) {
                 isRunning = false
-                this.isDisplay = true
-                this.isSuccess = true
+                this.$notify({ type: 'success', text: 'Create ETL failed' })
               }
+              await this.sleep(2000)
             }
-          } catch (e) {
-            isRunning = false
-            throw e
+          } else {
+            this.$notify({ type: 'success', text: 'Create ETL failed' })
+            return
           }
-          await this.sleep(2000)
+        } catch (e) {
+          this.isFailed = true
+          this.msgErr = 'Query is failed'
+          this.msgFailed = e.message
+          this.isSuccess = false
+        } finally {
+          this.isLoadingCreate = false
         }
-      } catch (e) {
-        this.isFailed = true
-        this.msgErr = 'Query is failed'
-        this.msgFailed = e.message
-        this.isSuccess = false
-      } finally {
-        this.isLoadingCreate = false
       }
     },
     async onDownload () {
       if (!this.eltID) return
-      try {
-        this.isDownload = true
-        const res = await downloadData(this.eltID)
-        const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
-        const name = `${new Date().getTime()}.csv`
-        saveAs(blob, name)
-        this.$notify({
-          type: 'success',
-          text: 'Download result succeeded'
-        })
-        console.log('notify')
-      } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
-      } finally {
-        this.isDownload = false
+      const data = {
+        method: 'GET',
+        path: 'dowload_csv'
+      }
+      const resPermission = await checkPermission(data)
+      if (!resPermission.data.success) {
+        this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
+      } else {
+        try {
+          this.isDownload = true
+          const res = await downloadData(this.eltID)
+          const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
+          const name = `${new Date().getTime()}.csv`
+          saveAs(blob, name)
+          this.$notify({
+            type: 'success',
+            text: 'Download result succeeded'
+          })
+          console.log('notify')
+        } catch (e) {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
+        } finally {
+          this.isDownload = false
+        }
       }
     },
     sleep (ms) {

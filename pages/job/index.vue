@@ -125,6 +125,7 @@
 
 <script>
 import { getListJob, searchJob } from '@/service/job'
+import { checkPermission } from '~/service/right'
 const jobFields = [
   {
     key: 'no'
@@ -184,8 +185,11 @@ export default {
     ]
   }),
 
-  created () {
-    this.getList()
+  async created () {
+    await this.checkPermission()
+    if (!this.isDeny) {
+      this.getList()
+    }
   },
 
   methods: {
@@ -203,6 +207,16 @@ export default {
           return 'secondary'
       }
     },
+    async checkPermission () {
+      const data = {
+        method: 'GET',
+        path: 'job'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.isDeny = true
+      }
+    },
     async getList () {
       this.loading = true
       try {
@@ -210,9 +224,7 @@ export default {
           this.pagination.page,
           this.pagination.limit
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.jobs = res.data
           this.jobs.forEach((e) => {
             e.excutedBy = e.excutedBy.username
@@ -227,9 +239,11 @@ export default {
             }
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }
@@ -266,9 +280,7 @@ export default {
           this.pagination.limit,
           this.keyword
         )
-        if (res.statusCode === '403') {
-          this.isDeny = true
-        } else {
+        if (res.code === '200') {
           this.jobs = res.data
           this.jobs.forEach((e) => {
             e.excutedBy = e.excutedBy.username
@@ -283,9 +295,11 @@ export default {
             }
           })
           this.pagination.total = res.metaData.totalItem
+        } else {
+          this.$notify({ type: 'error', text: 'Error occurred!' })
         }
       } catch (e) {
-        this.$notify({ type: 'error', text: e.message })
+        this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false
       }

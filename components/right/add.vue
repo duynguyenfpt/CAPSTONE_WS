@@ -34,14 +34,19 @@
           </b-col>
           <b-col>
             <b-form-input size="sm" v-model="description"></b-form-input>
-            <p class="msg-error" v-if="msg.description">{{ msg.description }}</p>
+            <p class="msg-error" v-if="msg.description">
+              {{ msg.description }}
+            </p>
           </b-col>
         </b-row>
         <b-row class="text-center pt-3">
           <b-col class="text-right">
-            <b-button @click="addRight" variant="primary" size="sm"
-              >
-              <b-spinner v-if="isLoadingCreate" variant="primary" small></b-spinner>
+            <b-button @click="addRight" variant="primary" size="sm">
+              <b-spinner
+                v-if="isLoadingCreate"
+                variant="primary"
+                small
+              ></b-spinner>
               Add right</b-button
             >
             <b-button size="sm" variant="light" @click="onClose">
@@ -55,7 +60,7 @@
 </template>
 
 <script>
-import { createRight } from '@/service/right'
+import { checkPermission, createRight } from '@/service/right'
 export default {
   props: {
     database: {}
@@ -113,17 +118,29 @@ export default {
       }
     },
     async show () {
-      this.isVisible = true
-      this.isLoading = true
-      this.path = null
-      this.method = null
-      this.description = null
-      this.isLoading = false
-      this.isLoadingCreate = false
-      this.msg = {
-        path: null,
-        method: null,
-        description: null
+      const data = {
+        method: 'POST',
+        path: 'right'
+      }
+      const res = await checkPermission(data)
+      if (!res.data.success) {
+        this.$notify({
+          type: 'error',
+          text: 'Error occurred! - Access Denied'
+        })
+      } else {
+        this.isVisible = true
+        this.isLoading = true
+        this.path = null
+        this.method = null
+        this.description = null
+        this.isLoading = false
+        this.isLoadingCreate = false
+        this.msg = {
+          path: null,
+          method: null,
+          description: null
+        }
       }
     },
     onClose () {
@@ -142,7 +159,11 @@ export default {
       if (this.description === null) {
         this.msg.description = 'Invalid description'
       }
-      if (this.msg.method === '' && this.msg.path === '' && this.msg.description === '') {
+      if (
+        this.msg.method === '' &&
+        this.msg.path === '' &&
+        this.msg.description === ''
+      ) {
         try {
           this.isLoadingCreate = true
           const body = {
@@ -151,19 +172,14 @@ export default {
             description: this.description
           }
           const res = await createRight(body)
-          if (res.statusCode === '403') {
-            this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
-            this.isVisible = false
+          this.$emit('onAdded')
+          if (res.code === '201') {
+            this.$notify({ type: 'success', text: 'Add right succeeded' })
           } else {
-            this.$emit('onAdded')
-            if (res.code === '201') {
-              this.$notify({ type: 'success', text: 'Add right succeeded' })
-            } else {
-              this.$notify({ type: 'error', text: 'Add right failed' })
-            }
+            this.$notify({ type: 'error', text: 'Add right failed' })
           }
         } catch (e) {
-          this.$notify({ type: 'error', text: e.message })
+          this.$notify({ type: 'error', text: 'Add right failed' })
         } finally {
           this.loading = false
           this.isVisible = false

@@ -190,8 +190,6 @@ export default {
           type: 'error',
           text: 'Error occurred! - Access Denied'
         })
-        this.isLoading = false
-        this.isVisible = false
       } else {
         this.isVisible = true
         this.email = null
@@ -253,7 +251,7 @@ export default {
           method: 'GET',
           path: 'right'
         }
-        const resPermission = checkPermission(data)
+        const resPermission = await checkPermission(data)
         if (!resPermission.data.success) {
           this.$notify({
             type: 'error',
@@ -299,7 +297,7 @@ export default {
           method: 'GET',
           path: 'list_account'
         }
-        const resPermission = checkPermission(data)
+        const resPermission = await checkPermission(data)
         if (!resPermission.data.success) {
           this.$notify({
             type: 'error',

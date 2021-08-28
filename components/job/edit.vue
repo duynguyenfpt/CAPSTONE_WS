@@ -135,9 +135,9 @@ export default {
         method: 'PUT',
         path: 'job'
       }
-      const resAccount = checkPermission(dataAcc)
-      const resRes = checkPermission(dataRes)
-      const resJob = checkPermission(dataJob)
+      const resAccount = await checkPermission(dataAcc)
+      const resRes = await checkPermission(dataRes)
+      const resJob = await checkPermission(dataJob)
       if (
         !resAccount.data.success ||
         !resRes.data.success ||

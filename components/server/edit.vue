@@ -7,7 +7,7 @@
       <div v-else>
         <b-row>
           <b-col>
-            <slabel class="form-label">Server Host</slabel>
+            <label class="form-label">Server Host</label>
             <b-input size="sm" v-model="serverHost" />
             <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
             <label class="form-label">Server Domain</label>
@@ -89,8 +89,8 @@ export default {
         method: 'PUT',
         path: 'server_infor'
       }
-      const resGet = checkPermission(dataGet)
-      const resPut = checkPermission(dataPut)
+      const resGet = await checkPermission(dataGet)
+      const resPut = await checkPermission(dataPut)
       if (!resGet.data.success || !resPut.data.success) {
         this.$notify({
           type: 'error',

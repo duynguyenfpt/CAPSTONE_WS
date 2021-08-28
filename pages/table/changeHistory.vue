@@ -142,7 +142,6 @@ export default {
     async getAllChangeHistory () {
       try {
         this.loading = true
-        console.log('api')
         const res = await getAllChangeHistory(
           this.pagination.page,
           this.pagination.limit

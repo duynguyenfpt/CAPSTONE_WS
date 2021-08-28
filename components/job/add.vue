@@ -18,6 +18,7 @@
             :options="requests"
             v-model="request"
             @input="chooseRequest"
+            placeholder="Please select a request"
             size="sm"
           ></v-select>
           <p class="msg-error" v-if="msg.request">{{ msg.request }}</p>
@@ -36,7 +37,7 @@
             :options="executedBys"
             size="sm"
             @input="chooseExecutor"
-            placeholder="Please select executor"
+            placeholder="Please select an executor"
           ></v-select>
           <p class="msg-error" v-if="msg.executedBy">{{ msg.executedBy }}</p>
         </b-form-group>
@@ -145,9 +146,9 @@ export default {
         method: 'POST',
         path: 'job'
       }
-      const resAccount = checkPermission(dataAcc)
-      const resRes = checkPermission(dataRes)
-      const resJob = checkPermission(dataJob)
+      const resAccount = await checkPermission(dataAcc)
+      const resRes = await checkPermission(dataRes)
+      const resJob = await checkPermission(dataJob)
       if (
         !resAccount.data.success ||
         !resRes.data.success ||

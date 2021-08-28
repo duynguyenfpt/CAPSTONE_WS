@@ -114,7 +114,7 @@ export default {
         path: 'server_infor'
       }
       const resSer = await checkPermission(dataSer)
-      if (!resDb.data.succeess || resSer.data.succeess) {
+      if (!resDb.data.success || !resSer.data.success) {
         this.$notify({ type: 'error', text: 'Error occurred! - Access Denied' })
       } else {
         this.idItem = id

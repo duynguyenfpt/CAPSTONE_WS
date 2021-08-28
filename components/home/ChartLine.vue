@@ -11,7 +11,6 @@ am4core.useTheme(am4themesAnimated)
 export default {
   async mounted () {
     const res = await getDashboardJob()
-    console.log('LCC: ', res)
     const chart = am4core.create('chartLine', am4charts.XYChart)
 
     // Add data

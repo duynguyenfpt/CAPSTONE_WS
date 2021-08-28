@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isDeny">
+  <div>
     <b-modal v-model="isVisible" title="Detail Right" hide-footer>
       <div v-if="isLoading" class="text-center">
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -50,9 +50,6 @@
         </b-row>
       </div>
     </b-modal>
-  </div>
-  <div v-else>
-    <common-deny />
   </div>
 </template>
 

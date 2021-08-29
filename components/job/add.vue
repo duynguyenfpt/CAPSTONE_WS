@@ -134,10 +134,6 @@ export default {
   },
   methods: {
     async show () {
-      const dataAcc = {
-        method: 'GET',
-        path: 'list_account'
-      }
       const dataRes = {
         method: 'GET',
         path: 'request'
@@ -146,14 +142,9 @@ export default {
         method: 'POST',
         path: 'job'
       }
-      const resAccount = await checkPermission(dataAcc)
       const resRes = await checkPermission(dataRes)
       const resJob = await checkPermission(dataJob)
-      if (
-        !resAccount.data.success ||
-        !resRes.data.success ||
-        !resJob.data.success
-      ) {
+      if (!resRes.data.success || !resJob.data.success) {
         this.$notify({
           type: 'error',
           text: 'Error occurred! - Access Denied'

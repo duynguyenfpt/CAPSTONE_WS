@@ -84,7 +84,8 @@ export default {
       account: null,
       status: null
     },
-    isDeny: false
+    isDeny: false,
+    description: null
   }),
   methods: {
     async show (id) {
@@ -120,6 +121,7 @@ export default {
               this.request.requestType = res.data.requestType
               this.request.status = res.data.status
               this.request.account = res.data.approvedBy
+              this.description = res.data.description
               if (this.request.status === '0') {
                 this.opsStatus = [
                   { value: '0', text: 'Pending' },
@@ -174,7 +176,8 @@ export default {
           this.isLoadingUpdate = true
           const body = {
             status: this.request.status,
-            approvedBy: this.request.account
+            approvedBy: this.request.account,
+            description: this.description
           }
           const data = await updateRequest(this.idItem, body)
           this.$emit('onUpdated', data)

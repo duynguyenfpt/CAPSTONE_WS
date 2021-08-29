@@ -4,7 +4,7 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-      <b-modal v-model="isVisible" title="Create Database" hide-footer>
+      <b-modal no-close-on-backdrop v-model="isVisible" title="Create Database" hide-footer>
         <b-row>
           <b-col>
             <label class="form-label">Host</label>

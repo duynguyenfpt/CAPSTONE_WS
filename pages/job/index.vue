@@ -116,7 +116,7 @@
       <job-reset ref="reset" @onReseted="refreshData" />
     </section>
     <section name="detail">
-      <b-modal id="detail">
+      <b-modal no-close-on-backdrop id="detail">
         <JobDetail />
       </b-modal>
     </section>

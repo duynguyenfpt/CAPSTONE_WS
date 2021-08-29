@@ -82,10 +82,10 @@
             <i class="fa fa-pen" />
           </b-btn>
           <b-btn
+            @click="resetJob(item.item.id)"
             size="sm"
             variant="warning"
-            v-b-tooltip="`Restart job`"
-            disabled
+            v-b-tooltip="`Reset counter`"
           >
             <i class="fa fa-retweet"></i>
           </b-btn>
@@ -111,6 +111,9 @@
     </section>
     <section name="popup">
       <job-edit ref="edit" @onUpdated="refreshData" />
+    </section>
+    <section name="popup">
+      <job-reset ref="reset" @onReseted="refreshData" />
     </section>
     <section name="detail">
       <b-modal id="detail">
@@ -268,6 +271,9 @@ export default {
     },
     editJob (id) {
       this.$refs.edit.show(id)
+    },
+    resetJob (id) {
+      this.$refs.reset.show(id)
     },
     onReload () {
       this.getList()

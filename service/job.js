@@ -17,3 +17,4 @@ export const searchJob = (page, limit, textSearch) => http.get('api/jobs', {
 })
 export const getAllJobLog =
   (page, limit) => http.get('api/job_logs', { params: { page, limit } })
+export const resetJob = (id) => http.post(`api/jobs/${id}/reset_job`)

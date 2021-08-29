@@ -51,7 +51,13 @@ export default {
     hoverState.properties.fillOpacity = 1
 
     series.columns.template.adapter.add('fill', function (fill, target) {
-      return chart.colors.getIndex(target.dataItem.index)
+      if (['rejected', 'fail'].includes(target.dataItem.categoryX)) {
+        return am4core.color('#a55')
+      } else if (['approved', 'success'].includes(target.dataItem.categoryX)) {
+        return am4core.color('#5a5')
+      } else {
+        return am4core.color('#808080')
+      }
     })
 
     // Cursor

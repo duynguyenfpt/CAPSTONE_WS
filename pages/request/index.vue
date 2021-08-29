@@ -67,14 +67,6 @@
           >
             <i class="fa fa-pen" />
           </b-btn>
-          <b-btn
-            size="sm"
-            @click="reset(item.item.id)"
-            variant="danger"
-            disabled
-          >
-            <i class="fa fa-power-off" aria-hidden="true"></i>
-          </b-btn>
         </template>
         <template #cell(viewLog)="item">
           <b-btn @click="log(item.item.id)" size="sm" variant="primary">

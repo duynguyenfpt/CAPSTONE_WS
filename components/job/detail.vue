@@ -366,7 +366,7 @@ export default {
       try {
         this.loading = true
         const res = await getJobDetail(this.id)
-        if (res.code === '200') {
+        if (res.code === '200' && res.data.length !== 0) {
           this.detail = res.data
           this.detail.forEach((item) => {
             item.server = item.serverDomain + ' - ' + item.serverHost
@@ -499,6 +499,7 @@ export default {
           }
         }
       } catch (e) {
+        console.log(e)
         this.$notify({ type: 'error', text: 'Error occurred!' })
       } finally {
         this.loading = false

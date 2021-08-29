@@ -39,7 +39,6 @@ export default {
     series.tooltip.label.minWidth = 40
     series.tooltip.label.minHeight = 40
     series.tooltip.label.textAlign = 'middle'
-    series.tooltip.label.textValign = 'middle'
 
     // Make bullets grow on hover
     const bullet = series.bullets.push(new am4charts.CircleBullet())

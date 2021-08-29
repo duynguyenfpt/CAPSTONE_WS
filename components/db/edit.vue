@@ -330,7 +330,7 @@ export default {
         } catch (e) {
           this.$notify({
             type: 'error',
-            text: 'Error occurred!'
+            text: 'Update database failed'
           })
           this.isVisible = false
         } finally {

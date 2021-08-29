@@ -32,7 +32,7 @@ export default {
     async show (id) {
       const data = {
         method: 'DELETE',
-        path: 'table_infor'
+        path: 'table'
       }
       const res = await checkPermission(data)
       if (!res.data.success) {

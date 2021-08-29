@@ -385,12 +385,12 @@ export default {
                 }
               } catch (e) {
                 isRunning = false
-                this.$notify({ type: 'success', text: 'Create ETL failed' })
+                this.$notify({ type: 'error', text: 'Create ETL failed' })
               }
               await this.sleep(2000)
             }
           } else {
-            this.$notify({ type: 'success', text: 'Create ETL failed' })
+            this.$notify({ type: 'error', text: 'Create ETL failed' })
             return
           }
         } catch (e) {

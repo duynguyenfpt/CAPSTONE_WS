@@ -33,8 +33,9 @@
       </b-row>
       <b-row class="pt-3">
         <b-col cols="6">
-          <b-button size="sm" variant="success" @click="onDownload" v-if="isExecuted">
-            <b-spinner variant="success" v-if="isDownload" small></b-spinner>
+          <b-button size="sm" variant="warning" @click="onDownload" v-if="isExecuted">
+            <i v-if="isDownload" class="fa fa-spin fa-spinner" />
+            <i v-else class="fa fa-download" />
             Download
           </b-button>
         </b-col>
@@ -148,7 +149,7 @@ export default {
       } else {
         try {
           this.isDownload = true
-          const res = await downloadData(this.eltID)
+          const res = await downloadData(this.idItem)
           const blob = new Blob([res], { type: 'text/plain;charset=utf-8' })
           const name = `${new Date().getTime()}.csv`
           saveAs(blob, name)

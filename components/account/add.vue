@@ -295,7 +295,7 @@ export default {
         this.isCopied = true
         const data = {
           method: 'GET',
-          path: 'list_account'
+          path: 'account'
         }
         const resPermission = await checkPermission(data)
         if (!resPermission.data.success) {

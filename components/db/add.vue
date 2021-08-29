@@ -377,7 +377,6 @@ export default {
           sid: this.sid
         }
         const res = await checkConnection(data)
-        this.isVisible = true
         if (res.code === '200' && res.data.success) {
           this.$notify({ type: 'success', text: 'Test connection succeeded.' })
         } else {

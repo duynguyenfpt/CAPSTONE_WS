@@ -105,12 +105,12 @@ export default {
     async show (id) {
       const dataGet = {
         method: 'GET',
-        path: 'table_infor'
+        path: 'table'
       }
       const resGet = await checkPermission(dataGet)
       const dataPut = {
         method: 'PUT',
-        path: 'table_infor'
+        path: 'table'
       }
       const resPut = await checkPermission(dataPut)
       if (!resGet.data.success || !resPut.data.success) {

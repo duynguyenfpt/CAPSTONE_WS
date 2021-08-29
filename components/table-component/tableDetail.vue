@@ -121,7 +121,7 @@ export default {
     async checkPermission () {
       const dataGet = {
         method: 'GET',
-        path: 'table_infor'
+        path: 'table'
       }
       const resGet = await checkPermission(dataGet)
       const dataGetSchema = {

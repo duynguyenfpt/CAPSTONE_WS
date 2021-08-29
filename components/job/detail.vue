@@ -146,11 +146,12 @@
           <b-col cols="6">
             <b-button
               size="sm"
-              variant="success"
+              variant="warning"
               @click="onDownload"
               v-if="isExecuted"
             >
-              <b-spinner variant="success" v-if="isDownload" small></b-spinner>
+              <i v-if="isDownload" class="fa fa-spin fa-spinner" />
+              <i v-else class="fa fa-download" />
               Download
             </b-button>
           </b-col>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal v-model="isVisibleShare" title="Share" hide-footer>
+    <b-modal no-close-on-backdrop v-model="isVisibleShare" title="Share" hide-footer>
       <div v-if="isLoading" class="text-center">
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
       </div>

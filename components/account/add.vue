@@ -4,7 +4,7 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-      <b-modal v-model="isVisible" title="Create Account" hide-footer size="lg">
+      <b-modal no-close-on-backdrop v-model="isVisible" title="Create Account" hide-footer size="lg">
         <b-form-group
           label="Username:"
           label-cols-sm="3"

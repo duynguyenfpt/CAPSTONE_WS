@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal v-model="isVisible" title="Confirm" hide-footer>
+    <b-modal no-close-on-backdrop v-model="isVisible" title="Confirm" hide-footer>
       <b-row>
         <b-col>
           <p>Do you want to delete this server?</p>

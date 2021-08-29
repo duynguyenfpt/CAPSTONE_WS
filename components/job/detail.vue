@@ -135,6 +135,7 @@
           <b-col v-else>
             <div class="text-center" v-if="isFailed">
               <h5 class="msg-fail">{{ msgErr }}</h5>
+              <p class="msg-fail">{{ contentErr }}</p>
             </div>
             <div class="text-center" v-else>
               <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -309,7 +310,8 @@ export default {
       isDownload: false,
       isFailed: false,
       msgErr: '',
-      query: null
+      query: null,
+      contentErr: ''
     }
   },
   methods: {
@@ -435,6 +437,7 @@ export default {
                         this.isExecuted = false
                         this.isFailed = true
                         this.msgErr = 'Query is failed'
+                        this.contentErr = res.data.content
                       } else {
                         this.isExecuted = false
                         this.msg = 'Query is executing'

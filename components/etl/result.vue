@@ -1,6 +1,6 @@
 <template>
 <div>
-  <b-modal v-model="isVisibleResult" title="Sample Data" hide-footer size="lg">
+  <b-modal no-close-on-backdrop v-model="isVisibleResult" title="Sample Data" hide-footer size="lg">
     <div v-if="isLoading" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>

@@ -86,7 +86,7 @@
       <db-edit ref="edit" @onUpdated="refreshData" />
     </section>
     <section name="detail">
-      <b-modal id="detail">
+      <b-modal no-close-on-backdrop id="detail">
         <DatabaseDetail />
       </b-modal>
     </section>

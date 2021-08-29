@@ -197,9 +197,13 @@ export default {
     async updateJob () {
       if (this.executedBy === null) {
         this.msg.executedBy = 'Please select executor'
+      } else {
+        this.msg.executedBy = ''
       }
       if (this.maxRetry === null) {
         this.msg.maxRetry = 'Invalid max retry'
+      } else {
+        this.msg.maxRetry = ''
       }
       if (this.msg.executedBy === '' && this.msg.maxRetry === '') {
         try {

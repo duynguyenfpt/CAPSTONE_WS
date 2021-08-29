@@ -158,11 +158,11 @@ export default {
           }))
           const resReq = await getAllRequestApproved()
           if (resReq.code === '200') {
-            resReq.data.forEach((item) => {
-              this.requests.push({
+            this.requests = resReq.data.map((item) => {
+              return {
                 value: item.id,
                 text: item.requestType + ' - ' + item.id
-              })
+              }
             })
             this.isVisible = true
             this.maxRetry = 10

@@ -61,7 +61,7 @@
 
 <script>
 import { getDetailRequest, updateRequest } from '@/service/request'
-import { getListAccount } from '@/service/account'
+import { getAccounts } from '@/service/account'
 import Vue from 'vue'
 import vSelect from 'vue-select'
 import { checkPermission } from '~/service/right'
@@ -104,7 +104,7 @@ export default {
           text: 'Error occurred! - Access Denied'
         })
       } else {
-        const accounts = await getListAccount(1, 100)
+        const accounts = await getAccounts(1, 100)
         if (accounts.code === '200') {
           this.opsAccount = accounts.data.map((acc) => {
             return { value: acc.username, text: acc.username }

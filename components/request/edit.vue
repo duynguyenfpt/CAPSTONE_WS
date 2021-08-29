@@ -88,11 +88,6 @@ export default {
   }),
   methods: {
     async show (id) {
-      const dataAcc = {
-        method: 'GET',
-        path: 'list_account'
-      }
-      const resAcc = await checkPermission(dataAcc)
       const dataReq = {
         method: 'GET',
         path: 'request'
@@ -103,7 +98,7 @@ export default {
         path: 'request'
       }
       const resReqPut = await checkPermission(dataReqPut)
-      if (!resAcc.data.success || !resReq.data.success || !resReqPut.data.success) {
+      if (!resReq.data.success || !resReqPut.data.success) {
         this.$notify({
           type: 'error',
           text: 'Error occurred! - Access Denied'

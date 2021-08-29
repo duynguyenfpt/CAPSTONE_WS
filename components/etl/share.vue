@@ -69,17 +69,12 @@ export default {
 
   methods: {
     async show (id) {
-      const dataAcc = {
-        method: 'GET',
-        path: 'list_account'
-      }
       const dataEtl = {
         method: 'POST',
         path: 'share'
       }
-      const resAcc = await checkPermission(dataAcc)
       const resEtl = await checkPermission(dataEtl)
-      if (!resAcc.data.success || !resEtl.data.success) {
+      if (!resEtl.data.success) {
         this.$notify({
           type: 'error',
           text: 'Error occurred! - Access Denied'

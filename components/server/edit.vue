@@ -7,10 +7,10 @@
       <div v-else>
         <b-row>
           <b-col>
-            <label class="form-label">Server Host</label>
+            <label class="form-label">Server Host <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="serverHost" />
             <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
-            <label class="form-label">Server Domain</label>
+            <label class="form-label">Server Domain <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="serverDomain" />
             <p class="msg-error" v-if="msg.domain">{{ msg.domain }}</p>
           </b-col>

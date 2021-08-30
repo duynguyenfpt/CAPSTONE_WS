@@ -7,13 +7,13 @@
       <div v-else>
         <b-row>
           <b-col>
-            <label class="form-label">Username</label>
+            <label class="form-label">Username <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="username" disabled />
             <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-            <label class="form-label">Email</label>
+            <label class="form-label">Email <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="email" />
             <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
-            <label class="form-label">Role</label>
+            <label class="form-label">Role <span class="msg-error">*</span></label>
             <b-form-select
               v-model="role"
               :options="roles"
@@ -21,7 +21,7 @@
               @change="chooseRole"
             ></b-form-select>
             <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
-            <label class="form-label">Phone</label>
+            <label class="form-label">Phone <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="phone" />
             <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
           </b-col>

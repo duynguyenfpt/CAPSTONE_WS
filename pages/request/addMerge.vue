@@ -19,7 +19,7 @@
       <b-col cols="12">
         <b-row class="my-1">
           <b-col sm="3">
-            <h5 for="input-small">Table name:</h5>
+            <h5 for="input-small">Table name <span class="msg-error">*</span></h5>
           </b-col>
           <b-col sm="9">
             <b-form-input

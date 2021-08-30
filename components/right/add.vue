@@ -7,7 +7,7 @@
       <div v-else>
         <b-row class="pt-2">
           <b-col cols="4">
-            <label class="form-lab">Path</label>
+            <label class="form-lab">Path <span class="msg-error">*</span></label>
           </b-col>
           <b-col>
             <b-form-input size="sm" v-model="path"></b-form-input>
@@ -16,7 +16,7 @@
         </b-row>
         <b-row class="pt-2">
           <b-col cols="4">
-            <label class="text-center">Method</label>
+            <label class="text-center">Method <span class="msg-error">*</span></label>
           </b-col>
           <b-col>
             <b-form-select
@@ -30,7 +30,7 @@
         </b-row>
         <b-row class="pt-2">
           <b-col cols="4">
-            <label class="form-lab">Description</label>
+            <label class="form-lab">Description <span class="msg-error">*</span></label>
           </b-col>
           <b-col>
             <b-form-input size="sm" v-model="description"></b-form-input>
@@ -47,7 +47,7 @@
                 variant="primary"
                 small
               ></b-spinner>
-              Add right</b-button
+              Create right</b-button
             >
             <b-button size="sm" variant="light" @click="onClose">
               Cancel

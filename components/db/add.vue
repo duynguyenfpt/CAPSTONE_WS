@@ -7,7 +7,7 @@
       <b-modal no-close-on-backdrop v-model="isVisible" title="Create Database" hide-footer>
         <b-row>
           <b-col>
-            <label class="form-label">Host</label>
+            <label class="form-label">Host <span class="msg-error">*</span></label>
             <v-select
               class="select-sm"
               :reduce="(text) => text.value"
@@ -23,29 +23,29 @@
             </p>
           </b-col>
           <b-col>
-            <label class="form-label">Port</label>
+            <label class="form-label">Port <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="port" />
             <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
           </b-col>
         </b-row>
         <b-row>
           <b-col>
-            <label class="form-label">Database</label>
+            <label class="form-label">Database <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="databaseName" />
             <p class="msg-error" v-if="msg.databaseName">
               {{ msg.databaseName }}
             </p>
-            <label class="form-label">Username</label>
+            <label class="form-label">Username <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="username" />
             <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-            <label class="form-label">Password</label>
+            <label class="form-label">Password <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="password" type="password" />
             <p class="msg-error" v-if="msg.password">{{ msg.password }}</p>
           </b-col>
         </b-row>
         <b-row>
           <b-col>
-            <label class="form-label">Database Type</label>
+            <label class="form-label">Database Type <span class="msg-error">*</span></label>
             <b-form-select
               v-model="databaseType"
               :options="dbTypes"
@@ -59,14 +59,14 @@
         </b-row>
         <b-row>
           <b-col>
-            <label class="form-label">Alias</label>
+            <label class="form-label">Alias <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="alias" />
             <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
           </b-col>
         </b-row>
         <b-row v-if="isOracle">
           <b-col>
-            <label class="form-label">SID</label>
+            <label class="form-label">SID <span class="msg-error">*</span></label>
             <b-input size="sm" v-model="sid" />
             <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
           </b-col>

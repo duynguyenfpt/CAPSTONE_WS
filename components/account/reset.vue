@@ -8,8 +8,8 @@
       </b-row>
       <b-row class="pt-3">
         <b-col class="text-right">
-          <b-button size="sm" variant="danger" @click="onReset">
-            <b-spinner v-if="isLoading" variant="danger" small></b-spinner
+          <b-button size="sm" variant="warning" @click="onReset">
+            <b-spinner v-if="isLoading" variant="warning" small></b-spinner
             >Reset</b-button
           >
           <b-button size="sm" variant="light" @click="onClose">

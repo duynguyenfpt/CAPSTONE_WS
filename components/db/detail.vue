@@ -12,7 +12,7 @@
         </b-col>
         <b-col class="text-right">
           <b-button @click="addTb(detail.id)" size="sm" variant="primary"
-            >Add Table</b-button
+            ><i class="fa fa-plus pr-1"></i>Create Table</b-button
           >
         </b-col>
       </b-row>

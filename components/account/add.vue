@@ -4,64 +4,79 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-      <b-modal no-close-on-backdrop v-model="isVisible" title="Create Account" hide-footer size="lg">
-        <b-form-group
-          label="Username:"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-input size="sm" v-model="username"></b-form-input>
-          <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Email:"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-input size="sm" v-model="email"></b-form-input>
-          <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Phone:"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-input size="sm" v-model="phone"></b-form-input>
-          <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Role:"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-select
-            v-model="role"
-            :options="roles"
-            size="sm"
-            @change="chooseRole"
-          ></b-form-select>
-          <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Right:"
-          label-cols-sm="3"
-          class="mb-0"
-          v-slot="{ ariaDescribedby }"
-          label-size="sm"
-        >
-          <b-form-radio-group
-            class="pt-2"
-            v-model="right"
-            :options="rights"
-            :aria-describedby="ariaDescribedby"
-            @change="showRight"
-            size="sm"
-          ></b-form-radio-group>
-        </b-form-group>
+      <b-modal
+        no-close-on-backdrop
+        v-model="isVisible"
+        title="Create Account"
+        hide-footer
+        size="lg"
+      >
+        <b-row class="pt-2">
+          <b-col cols="3">
+            <label class="form-lab"
+              >Username <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <b-form-input size="sm" v-model="username"></b-form-input>
+            <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="3">
+            <label class="form-lab"
+              >Email <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <b-form-input size="sm" v-model="email"></b-form-input>
+            <p class="msg-error" v-if="msg.email">{{ msg.email }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="3">
+            <label class="form-lab"
+              >Phone <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <b-form-input size="sm" v-model="phone"></b-form-input>
+            <p class="msg-error" v-if="msg.phone">{{ msg.phone }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="3">
+            <label class="form-lab"
+              >Role <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <b-form-select
+              v-model="role"
+              :options="roles"
+              size="sm"
+              @change="chooseRole"
+            ></b-form-select>
+            <p class="msg-error" v-if="msg.role">{{ msg.role }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="3">
+            <label class="form-lab"
+              >Right <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <b-form-radio-group
+              class="pt-2"
+              v-model="right"
+              :options="rights"
+              :aria-describedby="ariaDescribedby"
+              @change="showRight"
+              size="sm"
+            ></b-form-radio-group>
+          </b-col>
+        </b-row>
         <br />
         <b-form-group
           label-cols-sm="3"

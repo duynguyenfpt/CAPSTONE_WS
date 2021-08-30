@@ -25,14 +25,14 @@
           </v-select>
         </b-col>
         <b-col>
-          <label>Database Name</label>
+          <label>Database Name <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="dbName" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.db">{{ msg.db }}</p>
         </b-col>
       </b-row>
       <b-row>
         <b-col cols="3">
-          <label>Host</label>
+          <label>Host <span class="msg-error">*</span></label>
           <v-select
             class="select-sm"
             :reduce="(text) => text.value"
@@ -48,12 +48,12 @@
           <p class="msg-error" v-if="msg.host">{{ msg.host }}</p>
         </b-col>
         <b-col cols="3">
-          <label>Port</label>
+          <label>Port <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="port" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.port">{{ msg.port }}</p>
         </b-col>
         <b-col>
-          <label>Database Type</label>
+          <label>Database Type <span class="msg-error">*</span></label>
           <b-form-select
             v-model="dbType"
             :options="opsDbType"
@@ -67,12 +67,12 @@
       </b-row>
       <b-row>
         <b-col>
-          <label>Username</label>
+          <label>Username <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="username" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.username">{{ msg.username }}</p>
         </b-col>
         <b-col>
-          <label>Password</label>
+          <label>Password <span class="msg-error">*</span></label>
           <b-input
             size="sm"
             type="password"
@@ -84,24 +84,24 @@
       </b-row>
       <b-row>
         <b-col>
-          <label>Table Name</label>
+          <label>Table Name <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="table"></b-input>
           <p class="msg-error" v-if="msg.tb">{{ msg.tb }}</p>
         </b-col>
         <b-col>
-          <label>Alias</label>
+          <label>Alias <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="alias" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.alias">{{ msg.alias }}</p>
         </b-col>
       </b-row>
       <b-row>
         <b-col cols="6">
-          <label>Default Key</label>
+          <label>Default Key <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="defaultKey"></b-input>
           <p class="msg-error" v-if="msg.defaultKey">{{ msg.defaultKey }}</p>
         </b-col>
         <b-col cols="6" v-if="isOracle">
-          <label>SID</label>
+          <label>SID <span class="msg-error">*</span></label>
           <b-input size="sm" v-model="sid" :disabled="isChoseDb"></b-input>
           <p class="msg-error" v-if="msg.sid">{{ msg.sid }}</p>
         </b-col>

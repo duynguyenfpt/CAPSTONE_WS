@@ -33,9 +33,9 @@
 
           <template #cell(action)="item">
             <b-btn
-              :to="{ name: 'table-id', params: { id: item.item.id } }"
-              size="sm"
-              variant="success"
+            @click="detailTb(item.item.id)"
+            size="sm"
+            variant="success"
             >
               <i class="fa fa-eye" />
             </b-btn>
@@ -65,6 +65,9 @@
       </section>
       <section name="popup">
         <table-component-addTable ref="add" @onAdded="onReload" />
+      </section>
+      <section name="popup">
+        <table-component-detailTable ref="detail" />
       </section>
       <section name="popup">
         <table-component-deleteTable ref="delete" @onDeleted="onReload" />
@@ -259,6 +262,9 @@ export default {
     },
     addTb (id) {
       this.$refs.add.show(id)
+    },
+    detailTb (id) {
+      this.$refs.detail.show(id)
     },
     countRecord (index) {
       return (this.pagination.page - 1) * this.pagination.limit + index + 1

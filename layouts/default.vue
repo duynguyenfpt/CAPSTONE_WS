@@ -20,10 +20,6 @@
                 <i class="fa fa-plus" />
                 Add Table
               </b-nav-item>
-              <b-nav-item :to="{ name: 'table-changeHistory' }">
-                <i class="fa fa-circle" />
-                Change Log
-              </b-nav-item>
             </b-collapse>
           </b-nav-item>
           <b-nav-item v-b-toggle.server :to="{ name: 'server' }">
@@ -106,7 +102,7 @@
               <nuxt class="content" />
             </b-col>
           </b-row>
-          <notifications :duration="5000" />
+          <notifications :duration="3000" />
         </div>
       </b-col>
     </b-row>

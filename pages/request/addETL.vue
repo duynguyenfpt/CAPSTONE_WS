@@ -394,7 +394,7 @@ export default {
                 }
               } catch (e) {
                 isRunning = false
-                this.$notify({ type: 'error', text: 'Create ETL failed' })
+                this.$notify({ type: 'error', text: 'Error occurred!' })
               }
               await this.sleep(2000)
             }

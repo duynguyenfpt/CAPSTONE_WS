@@ -4,14 +4,20 @@
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
     <div v-else>
-      <b-modal no-close-on-backdrop v-model="isVisible" title="Create Job" hide-footer>
-        <b-form-group
-          label="Request"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <v-select
+      <b-modal
+        no-close-on-backdrop
+        v-model="isVisible"
+        title="Create Job"
+        hide-footer
+      >
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab"
+              >Request <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <v-select
             class="select-sm"
             :reduce="(text) => text.value"
             label="text"
@@ -22,60 +28,69 @@
             size="sm"
           ></v-select>
           <p class="msg-error" v-if="msg.request">{{ msg.request }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Executed By"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <v-select
-            class="select-sm"
-            :reduce="(text) => text.value"
-            label="text"
-            v-model="executedBy"
-            :options="executedBys"
-            size="sm"
-            @input="chooseExecutor"
-            placeholder="Please select an executor"
-          ></v-select>
-          <p class="msg-error" v-if="msg.executedBy">{{ msg.executedBy }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Job Schedule"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-input
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab"
+              >Executed By <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <v-select
+              class="select-sm"
+              :reduce="(text) => text.value"
+              label="text"
+              v-model="executedBy"
+              :options="executedBys"
+              size="sm"
+              @input="chooseExecutor"
+              placeholder="Please select an executor"
+            ></v-select>
+            <p class="msg-error" v-if="msg.executedBy">{{ msg.executedBy }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab"
+              >Job Schedule</label
+            >
+          </b-col>
+          <b-col>
+            <b-form-input
             size="sm"
             v-model="jobSchedule"
             :disabled="isSync"
           ></b-form-input>
-        </b-form-group>
-        <b-form-group
-          label="Max Retry"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-input size="sm" v-model="maxRetry"></b-form-input>
+          <p class="msg-error" v-if="msg.request">{{ msg.request }}</p>
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab"
+              >Max Retry <span class="msg-error">*</span></label
+            >
+          </b-col>
+          <b-col>
+            <b-form-input size="sm" v-model="maxRetry"></b-form-input>
           <p class="msg-error" v-if="msg.maxRetry">{{ msg.maxRetry }}</p>
-        </b-form-group>
-        <b-form-group
-          label="Is Active"
-          label-cols-sm="3"
-          label-align-sm="left"
-          label-size="sm"
-        >
-          <b-form-checkbox
+          </b-col>
+        </b-row>
+        <b-row class="pt-2">
+          <b-col cols="4">
+            <label class="form-lab"
+              >Is Active</label
+            >
+          </b-col>
+          <b-col>
+            <b-form-checkbox
             v-model="isActive"
             name="checkbox-1"
             value="true"
             unchecked-value="false"
-          >
-          </b-form-checkbox>
-        </b-form-group>
+          ></b-form-checkbox>
+          </b-col>
+        </b-row>
         <b-row class="pt-3">
           <b-col class="text-right">
             <b-button size="sm" variant="primary" @click="createJob">

@@ -15,7 +15,7 @@
         </b-row>
         <b-row class="pt-2">
           <b-col cols="4">
-            <label class="text-center">Table Name</label>
+            <label class="text-center">Table Name <span class="msg-error">*</span></label>
           </b-col>
           <b-col>
             <b-form-input
@@ -28,7 +28,7 @@
         </b-row>
         <b-row class="pt-2">
           <b-col cols="4">
-            <label class="text-center">Default Key</label>
+            <label class="text-center">Default Key <span class="msg-error">*</span></label>
           </b-col>
           <b-col>
             <b-form-input

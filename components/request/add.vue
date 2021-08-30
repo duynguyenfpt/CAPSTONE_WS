@@ -8,7 +8,7 @@
         <!-- Database -->
         <b-row class="pt-2" align-h="center">
           <b-col cols="4">
-            <label class="form-label">Database</label>
+            <label class="form-label">Database <span class="msg-error">*</span></label>
             <v-select
               :reduce="(text) => text.value"
               label="text"
@@ -21,7 +21,7 @@
             <p class="msg-error" v-if="msg.database">{{ msg.database }}</p>
           </b-col>
           <b-col cols="3">
-            <label class="form-label">Table</label>
+            <label class="form-label">Table <span class="msg-error">*</span></label>
             <v-select
               :reduce="(text) => text.value"
               label="text"
@@ -48,7 +48,7 @@
         <b-row class="pt-2" align-h="center">
 
           <b-col cols="4">
-            <label>Unique key</label>
+            <label>Unique key <span class="msg-error">*</span></label>
             <div>
               <el-select
                 class="w-100"
@@ -95,7 +95,7 @@
         </b-row>
         <b-row class="pt-2"  align-h="center" v-show="!request.isAll">
           <b-col sm="4">
-            <label for="example-datepicker">From date</label>
+            <label for="example-datepicker">From date <span class="msg-error">*</span></label>
             <b-form-datepicker
               id="date-from"
               :date-format-options="{
@@ -111,7 +111,7 @@
             <p class="msg-error" v-if="msg.fromDate">{{ msg.fromDate }}</p>
           </b-col>
           <b-col sm="4">
-            <label for="example-datepicker">To date</label>
+            <label for="example-datepicker">To date <span class="msg-error">*</span></label>
             <b-form-datepicker
               id="date-to"
               :date-format-options="{

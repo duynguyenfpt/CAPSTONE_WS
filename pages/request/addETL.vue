@@ -7,7 +7,11 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col sm="9" class="text-right">
+      <b-col sm="1"></b-col>
+      <b-col sm="4">
+        <h5>Query <span class="msg-error">*</span></h5>
+      </b-col>
+      <b-col sm="4" class="text-right">
         <b-button
           size="sm"
           v-b-toggle.sidebar-right

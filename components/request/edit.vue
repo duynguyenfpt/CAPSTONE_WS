@@ -13,7 +13,7 @@
         </b-row>
         <b-row>
           <b-col>
-            <label class="form-label">Approved By</label>
+            <label class="form-label">Approved By <span class="msg-error">*</span></label>
             <v-select
               placeholder="Please select an approver"
               class="select-sm"
@@ -29,7 +29,7 @@
         </b-row>
         <b-row>
           <b-col>
-            <label class="form-label">Status</label>
+            <label class="form-label">Status <span class="msg-error">*</span></label>
             <b-form-select
               v-model="request.status"
               :options="opsStatus"

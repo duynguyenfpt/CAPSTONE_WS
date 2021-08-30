@@ -62,6 +62,7 @@
           <b-btn
             size="sm"
             variant="warning"
+            v-b-tooltip="`Reset password`"
             @click="resetPassword(item.item.id)"
           >
             <i class="fas fa-exchange-alt"></i>

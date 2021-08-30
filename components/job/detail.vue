@@ -54,34 +54,10 @@
           <b-col class="text-right">
             <b-btn @click="onRefresh" size="sm" class="ml-2" variant="success">
               <i class="fa fa-sync pr-1" />
-              Refresh
+              Reload
             </b-btn>
           </b-col>
         </b-row>
-        <section name="action">
-          <b-row>
-            <b-col cols="6"></b-col>
-            <b-col cols="6" class="text-right">
-              <b-input-group>
-                <b-input
-                  size="sm"
-                  placeholder="Search"
-                  v-model="textSearch"
-                  @keyup.enter="searchDB(textSearch)"
-                />
-                <b-input-group-append>
-                  <b-btn
-                    size="sm"
-                    variant="primary"
-                    @click="searchDB(textSearch)"
-                  >
-                    <i class="fas fa-search" />
-                  </b-btn>
-                </b-input-group-append>
-              </b-input-group>
-            </b-col>
-          </b-row>
-        </section>
         <section name="view" class="pt-3">
           <b-table
             small

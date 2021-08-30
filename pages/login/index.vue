@@ -155,6 +155,7 @@ export default {
   float: left;
   width: 100%;
   padding: 107px 0;
+  min-height: 100vh;
 }
 .banner-sec {
   background: url(https://static.pexels.com/photos/33972/pexels-photo.jpg)

@@ -68,7 +68,7 @@
             <i class="fa fa-pen" />
           </b-btn>
         </template>
-        <template #cell(viewLog)="item">
+        <template #cell(viewNote)="item">
           <b-btn @click="log(item.item.id)" size="sm" variant="primary">
             View Note
           </b-btn>
@@ -148,7 +148,7 @@ const tableFields = [
     thClass: 'text-center'
   },
   {
-    key: 'viewLog'
+    key: 'viewNote'
   }
 ]
 

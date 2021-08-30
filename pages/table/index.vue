@@ -49,7 +49,7 @@
         </template>
         <template #cell(action)="item">
           <b-btn
-            :to="{ name: 'table-id', params: { id: item.item.id } }"
+            @click="detailTb(item.item.id)"
             size="sm"
             variant="success"
           >
@@ -77,6 +77,9 @@
         align="right"
         @input="searchTable"
       />
+    </section>
+    <section name="popup">
+      <table-component-detailTable ref="detail" />
     </section>
     <section name="popup">
       <table-component-deleteTable ref="delete" @onDeleted="onReload" />
@@ -212,6 +215,9 @@ export default {
     },
     editTb (id) {
       this.$refs.edit.show(id)
+    },
+    detailTb (id) {
+      this.$refs.detail.show(id)
     },
     onReload () {
       this.textSearch = null

@@ -283,12 +283,12 @@ export default {
               const initials = res.data.map((item) => {
                 return item.path + ' - ' + item.method
               })
-              states.forEach((right, index) => {
-                this.dataArr.push({
+              this.dataArr = states.map((right, index) => {
+                return {
                   label: right.name,
                   key: right.id,
                   initial: initials[index]
-                })
+                }
               })
             } else {
               this.$notify({

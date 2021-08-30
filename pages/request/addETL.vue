@@ -411,7 +411,7 @@ export default {
       if (!this.eltID) return
       const data = {
         method: 'GET',
-        path: 'dowload_csv'
+        path: 'download_csv'
       }
       const resPermission = await checkPermission(data)
       if (!resPermission.data.success) {

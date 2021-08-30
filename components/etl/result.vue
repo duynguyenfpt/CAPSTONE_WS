@@ -22,8 +22,9 @@
           </b-table>
         </b-col>
         <b-col v-else>
-          <div class="text-center" v-if="isFailed">
-            <h5 class="msg-fail">{{ msgErr }}</h5>
+          <div v-if="isFailed">
+            <h5 class="msg-fail text-center">{{ msgErr }}</h5>
+            <p class="msg-fail">{{ contentErr }}</p>
           </div>
           <div class="text-center" v-else>
             <b-spinner variant="primary" label="Text Centered"></b-spinner>
@@ -62,10 +63,11 @@ export default {
     resultFields: [],
     rows: [],
     isExecuted: false,
-    msg: '',
+    msg: null,
     isDownload: false,
     isFailed: false,
-    msgErr: ''
+    msgErr: null,
+    contentErr: null
   }),
   methods: {
     async show (id) {
@@ -119,6 +121,7 @@ export default {
                 this.isExecuted = false
                 this.isFailed = true
                 this.msgErr = 'Query is failed'
+                this.contentErr = res.data.content
               } else {
                 this.isExecuted = false
                 this.msg = 'Query is executing'

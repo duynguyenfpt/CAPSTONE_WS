@@ -111,7 +111,7 @@ export default {
       const resDb = await checkPermission(dataDb)
       const dataSer = {
         method: 'POST',
-        path: 'server_infor'
+        path: 'table'
       }
       const resSer = await checkPermission(dataSer)
       if (!resDb.data.success || !resSer.data.success) {

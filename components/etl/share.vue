@@ -37,6 +37,7 @@
                 variant="primary"
                 small
               ></b-spinner>
+              <i class="fas fa-share"></i>
               Share
             </b-button>
             <b-button size="sm" variant="light" @click="onClose">
@@ -102,11 +103,13 @@ export default {
       if (this.accounts !== []) {
         try {
           this.isVisibleShare = true
+          this.isLoadingShare = true
           const data = {
             requestId: this.idItem,
             accountIds: this.accounts
           }
           const res = await shareEtl(data)
+          this.isLoadingShare = false
           if (res.code === '201') {
             this.$notify({ type: 'success', text: 'Share ETL succeeded' })
           } else {

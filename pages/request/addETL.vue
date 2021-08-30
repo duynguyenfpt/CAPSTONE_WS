@@ -54,7 +54,9 @@
                   variant="primary"
                   size="sm"
                   @click="shareResult(item.id)"
-                  >Share</b-button
+                  >
+                  <i class="fas fa-share"></i>
+                  Share</b-button
                 >
               </div>
             </b-list-group-item>

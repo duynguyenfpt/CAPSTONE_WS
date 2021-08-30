@@ -354,7 +354,10 @@ export default {
                       this.isFailed = true
                       this.isExecuted = true
                       this.isSuccess = false
-                      throw new Error(result.data.content)
+                      this.msgErr = 'Query is failed'
+                      this.msgFailed = result.data.content
+                      isRunning = false
+                      break
                     case 'successed': {
                       const headers = [{ key: 'no', class: 'align-top' }]
                       const arr = result.data.content.split('\n')
@@ -381,6 +384,8 @@ export default {
                       isRunning = false
                       this.isDisplay = true
                       this.isSuccess = true
+                      this.isFailed = false
+                      break
                     }
                   }
                 } else {
